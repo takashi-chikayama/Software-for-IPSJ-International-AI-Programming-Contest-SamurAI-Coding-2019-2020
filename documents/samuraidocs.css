@@ -1,0 +1,29 @@
+h1 {
+    counter-reset: section;
+}
+h2 {
+    counter-reset: subsection;
+}
+h2:before {
+    counter-increment: section;
+    content: counter(section) ". ";
+}
+h3:before {
+    counter-increment: subsection;
+    content: counter(section) "." counter(subsection) " ";
+}
+ul, ol, dl {
+    padding-left: 30px;
+}
+th {
+    text-align: center;
+}
+table {
+    border-spacing: 30px 5px;
+}
+.figure {
+    float:right; margin:10px;
+}
+.inlineIcon {
+    height:18px;
+}

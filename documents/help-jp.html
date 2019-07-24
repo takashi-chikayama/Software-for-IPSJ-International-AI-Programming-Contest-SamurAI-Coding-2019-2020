@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="samuraidocs.css">
+    <style>
+      em {
+      font-style: normal;
+      color: blue;
+      }
+    </style>
+  </head>
+  <body>
+    <span style="float:left">
+      <a href="help.html" target="_blank">English</a>
+    </span>
+    <h1><center>SamurAI Dig Here ページの使い方</center></h1>
+    <center>
+      <p>
+	<em>SamurAI Dig Here</em> ページは
+	<em>SamurAI Dig Here</em> ゲームを
+	HTML ブラウザで試してみるためのページです．
+      </p>
+    </center>
+
+    <h2>画面</h2>
+    <p>
+      下図はページの表示画面例です.
+      <ul>
+	<li>
+	  上端にはゲームを制御するためのボタンやゲーム状態の情報があります.
+	</li>
+	<li>
+	  緑色の競技場が中央に表示されています.
+	</li>
+	<li>
+	  下端には両軍 (赤と黒) の特典を侍のアイコンとともに表示しています.
+	</li>
+      </ul>
+    </p>
+    <center>
+      <img src="screenShots/screen.png" width="75%">
+    </center>
+
+    <h2>競技場</h2>
+    <p>
+      競技場は格子状に並んだセルに分けられています.
+    </p>
+    <h3>エージェント</h3>
+    <p>
+      両軍にそれぞれ侍と犬, 合計4エージェントがあり,
+      初期状態では競技場の四隅に配置されています.
+      侍は各ステップでその位置の四近傍のセルのどれかに,
+      犬は八近傍セルのどれかに動けます.
+    </p>
+    <img src="screenShots/holes.png" width="18%" class="figure">
+    <h3>穴</h3>
+    <p>
+      初期状態では, 競技場のセルのいくつかに穴が空いています.
+      穴があるセルには行けません.
+      穴はランダムに配置されます.
+    </p>
+    <p>
+      侍は四近傍のどれかのセルに穴があるとき,
+      その穴を埋めることができます.
+      犬には穴埋めができません.
+    </p>
+    <img src="screenShots/hidden-gold.png" width="25%" class="figure">
+
+    <h3>埋蔵金</h3>
+    <p>
+      ランダムに選んだセルのいくつかには埋蔵金が隠されています.
+    </p>
+
+    <h3>ランダムな再設定</h3>
+    <p>
+      左上部にある再設定ボタン
+      <img src="../icons/reinit.png" class="inlineIcon">
+      をクリックすることで,
+      ゲームをランダムに再設定することができます.
+    </p>
+
+    <h2>自動プレイモード</h2>
+    <p>
+      プレイモードの初期状態は<em>自動</em>になっています.
+      自動モードではコンピュータが各ステップのエージェントの動作を選びます.
+    </p>
+    <img src="screenShots/control-buttons.png" width="40%" class="figure">
+    <p>
+      ゲームの進行は画面上部のいくつかのボタンを用いて行います.
+      ボタンとその昨日は以下のとおりです.
+      <ul>
+	<li>
+	  いちばん左の<em>再設定ボタン</em>
+	  <img src="../icons/reinit.png" class="inlineIcon">
+	  をクリックすると,
+	  ゲームをランダムに再設定します.
+	</li>
+	<li>
+	  次の<em>巻き戻しボタン</em>
+	  <img src="../icons/rewind.png" class="inlineIcon">
+	  は, 同じ設定の初期状態に戻します.
+	</li>
+	<li>
+	  <em>後戻りボタン</em>
+	  <img src="../icons/stepBackward.png" class="inlineIcon">
+	  をクリックすると, ひとつ前のステップの状態を表示します.
+	</li>
+	<li>
+	  <em>プレイボタン</em>
+	  <img src="../icons/play.png" class="inlineIcon">
+	  をクリックすると自動実行が始まります.
+	  このときボタンは
+	  <img src="../icons/stop.png" class="inlineIcon">
+	  のように姿を変えますが,
+	  実行はこれをクリックするか,
+	  埋蔵金がすべて掘り出されるか,
+	  ステップが最大ステップ数に達するかのいずれかまで継続します.
+	  実行速度は後述する<em>速度計ボタン</em>で調整できます.
+	</li>
+	<li>
+	  <em>ステップ実行ボタン</em>
+	  <img src="../icons/stepForward.png" class="inlineIcon">
+	  をクリックすると, 1ステップだけ実行が進みます.
+	</li>
+	<li>
+	  <em>早送りボタン</em>
+	  <img src="../icons/fastForward.png" class="inlineIcon">
+	  をクリックすると, <em>最も進行した状態</em>までゲームを進めます.
+	  まだゲームの終了まで進行させていなければ,
+	  ゲーム終了状態ではありません.
+	</li>
+	<li>
+	  <em>速度計ボタン</em>
+	  <img src="../icons/speedometer.png" class="inlineIcon">
+	  を用いて自動実行の速度を調整できます.
+	  ボタンの右にある数値は現在の実行速度を毎秒のステップ数 (spm)
+	  で表すものです.
+	  速度計ボタンをクリックすると, 速度は 4 spm だけ下がります.
+	  このときシフトキーを押していると, 逆に 4 spm だけ上がります.
+	  マウスカーソルが速度計ボタンの上にあるときにマウスホイールを動かすことによっても速度を調節できます.
+	  最高速度は 240 spm, 最低速度は 24 spm です.
+	</li>
+      </ul>
+    </p>
+    <h2>手動プレイモード</h2>
+    <p>
+      手動プレイモードでは片方の侍を手動で制御できます.
+    </p>
+    <h3>手動プレイの開始</h3>
+    <p>
+      右上部にある<em>手動プレイボタン</em>
+      <img src="../icons/manual.png" class="inlineIcon">
+      をクリックすると手動プレイモードになります.
+    </p>
+    <p>
+      最初のクリックで赤の侍が手動制御になり,
+      ボタンの色は赤
+      <img src="../icons/red-hand.png" class="inlineIcon">.
+      になります.
+      他のエージェント, つまり犬や青の侍はコンピュータが制御します.
+    </p>
+    <p>
+      もう一度クリックすると青の侍が手動制御になり,
+      ボタンの色は青
+      <img src="../icons/blue-hand.png" class="inlineIcon">.
+      になります.
+      赤の侍や犬の制御はコンピュータがすることになります.
+    </p>
+    <p>
+      さらにもう一度クリックすると, 自動プレイモードに戻り,
+      ボタンの色も元の色に戻ります.
+    </p>
+    <img src="screenShots/manual-play.png" width="20%" class="figure">
+    <h3>手動ステップ実行</h3>
+    <p>
+      手動実行では, 制御対象の侍の周囲のセルに可能な動きを示す矢印が表示されます.
+      穴があるセルの上の矢印は赤い輪郭を表示します.
+      矢印のあるセルをクリックすることで, 以下を指示します.
+      <ul>
+	<li>
+	  クリック時に<em>シフトキーを押し下げていれば, </em>
+	  そのセルに既に穴があるかないかによって,
+	  穴を埋めるか, 逆に穴を掘ることの指示になります.
+	  <ul>
+	    <li>
+	      既に穴があれば, その穴を埋めようとします.
+	    </li>
+	    <li>
+	      セルが平坦で埋蔵金があれば,
+	      埋蔵金が秘匿されているか既に公開されているかによらず,
+	      その埋蔵金を掘り出そうとします.
+	    </li>
+	    <li>
+	      セルが平坦で埋蔵金がなければ,
+	      単に穴を掘ろうとします.
+	    </li>
+	    他のエージェントが対象セルに移動してくれば,
+	    実際には穴は掘れません.
+	    両方の侍が同じセルに穴を掘ろうとした場合は,
+	    実際に穴は掘れて,
+	    もし埋蔵金があれば半分ずつ分けることになります.
+	  </ul>
+	</li>
+	<li>
+	  クリック時に<em>シフトキーを押し下げていなければ</em>
+	  侍はそのセルに移動しようとします.
+	  そのセルに穴がなく,
+	  他のエージェントが同じセルに移動しなければ移動できます.
+	</li>
+      </ul>
+      侍がいるセルをクリックすると, そのステップでは何もしないことになります.
+    </p>
+    <p>
+      侍の動作はキーボードのキーを押すことによっても支持できます.
+      キーとその意味は以下のとおりです.
+      <dl>
+	<dt><tt>h w &larr;</tt></dt>
+	<dd>左上 (&nwarr;) のセル</dd>
+	<dt><tt>j s &darr;</tt></dt>
+	<dd>左下 (&swarr;) のセル</dd>
+	<dt><tt>k n &uarr;</tt></dt>
+	<dd>右上 (&nearr;) のセル</dd>
+	<dt><tt>l e &rarr;</tt></dt>
+	<dd>右下 (&searr;) のセル</dd>
+	<dt><tt>.</tt> <em>スペース</em></dt>
+	<dd>何もしない</dd>
+      </dl>
+      クリックする場合と同様,
+      シフトキーを押し下げた状態での入力は,
+      新たな穴掘り, または既存の穴の穴埋めの指示になります.
+    </p>
+    <p>
+      手動ステップ実行をすると,
+      それより先のステップまで実行したことがあってもそれは捨てられ,
+      手動ステップ実行の結果状態が早送りボタンで表示する<em>最も進行した状態</em>になります.
+    </p>
+    <p>
+      手動プレイモードでも, ステップ実行ボタン
+      <img src="../icons/stepForward.png" class="inlineIcon">
+      での1ステップ自動実行, プレイボタン
+      <img src="../icons/play.png" class="inlineIcon">
+      での連続自動実行, 巻き戻しボタン
+      <img src="../icons/rewind.png" class="inlineIcon">
+      での状態初期化は可能です.
+      手動プレイモードはそのままになります.
+    </p>
+    <h2>ゲーム状態情報</h2>
+    <p>
+      ゲーム状態の情報も画面に表示されます.
+    </p>
+    <img src="screenShots/step-number.png" width="20%" class="figure">
+    <h3>ステップ番号</h3>
+    <p>
+      上部右の時計アイコンの横に現在のステップ番号と最大ステップ数を表示します.
+    </p>
+    <img src="screenShots/remaining.png" width="10%" class="figure">
+    <h3>埋蔵金残量</h3>
+    <p>
+      まだ掘り出されていない埋蔵金の総量
+      (秘匿されているものと公開されているものの合計)
+      が<em>埋蔵金ボタン</em>
+      <img src="gold.png" class="inlineIcon">.
+      の横に表示されています.
+      埋蔵金ボタンの上でマウスボタンで押し下げている間,
+      隠された埋蔵金の位置と量を表示できます.
+    <img src="screenShots/score.png" width="15%" class="figure">
+    <h3>得点</h3>
+    <p>
+      画面の下部に両軍の得点 (それまでに掘り出した埋蔵金のユニット数)
+      を表示します.
+    </p>
+  </body>
+</html>

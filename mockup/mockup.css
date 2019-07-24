@@ -1,0 +1,66 @@
+#buttons {
+    margin: 0px;
+    border: 1px solid #663;
+    height: 14px;
+    background: #AA6;
+}
+
+#buttons img {
+    margin: 0px;
+    padding: 1px;
+    height: 8px;
+}
+
+body {
+    margin: 0px;
+}
+
+svg {
+    width: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+
+.alignLeft {
+    position: absolute;
+    left: 0;
+}
+
+.alignRight {
+    position: absolute;
+    right: 0;
+}
+
+.overlaid {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0);
+    z-index: 1;
+}
+
+.infoBar {
+    position: absolute;
+    width: 100%;
+}
+
+.infoBar div {
+    margin: 2px;
+    display: inline;
+}
+
+.infoBar img {
+    margin: 2px;
+    vertical-align: bottom;
+}
+
+.hideOverflow {
+    overflow: hidden;
+}
+
+.arrow {
+    width: 80%;
+}

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async>
+    </script>
+    <style>
+      h1 { counter-reset: section; }
+      h2 { counter-reset: subsection; }
+      h2:before { counter-increment: section; content: counter(section) ". "; }
+      h3:before { counter-increment: subsection; content: counter(section) "." counter(subsection) " "; }
+      th { text-align: center; }
+      table { border-spacing: 30px 5px; }
+      img { padding: 1px; border: 1px solid black; box-shadow: 3px 3px gray; }
+    </style>
+    <title>Dig Here Samurai Data File Formats</title>
+  </head>
+  <body>
+    <h1>「ここ掘れサムライ」で用いるデータファイルの形式</h1>
+    <h2>ファイルの種類</h2>
+    <p>
+      「ここ掘れサムライ」ゲームシステムが用いるデータファイルには以下のものがある.
+      いずれも JSON 形式である.
+      <dl>
+	<dt>場の記述</dt>
+	<dd>
+	  ゲームで用いる場を記述する形式.
+	  フィールドのサイズや埋蔵金の位置と穴の初期位置を記述する.
+	</dd>
+	<dt>ゲームログ</dt>
+	<dd>
+	  1ゲームの経過と結果を記録するもの.
+	  通常 official が書き出したものを viewer で読み込んで表示するのに用いる.
+	</dd>
+      </dl>
+    </p>
+    <h2>場の記述</h2>
+    <p>
+      場の記述ファイルは以下の形式である.
+      <dl>
+	<dt>"filetype:"</dt>
+	<dd><tt>"Dig Here Samurai 2019 Game Field"</tt></dd>
+	<dt>"size:"</dt>
+	<dd>場の縦幅のセル数</dd>
+	<dt>"holes:"</dt>
+	<dd>\([h_{1x}, h_{1y}, h_{2x}, h_{2y}, \ldots, h_{mx}, h_{my}]\)</dd>
+	<dt>"golds:"</dt>
+	<dd>\([g_{1x}, g_{1y}, g_{2x}, g_{2y}, \ldots, g_{nx}, g_{ny}]\)</dd>
+      </dl>
+      ここで \(m, n\) は場中の穴と埋蔵金の数,
+      \((h_{ix}, h_{iy})\) (\(i = 1, \ldots, m\)) は \(i\) 番目の穴のあるセルの座標,
+      \((g_{jx}, h_{jy})\) (\(j = 1, \ldots, m\)) は \(j\) 番目の埋蔵金のあるセルの座標である.
+    </p>
+    <h2>ゲームログ</h2>
+    <p>記述予定</p>
+  </body>
+</html>

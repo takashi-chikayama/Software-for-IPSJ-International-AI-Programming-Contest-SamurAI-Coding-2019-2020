@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="samuraidocs.css" >
+  </head>
+  <body>
+    <span style="float:left">
+      <a href="help-jp.html" target="_blank">日本語</a>
+    </span>
+    <h1><center>How to Play with the SamurAI Dig Here Page</center></h1>
+    <center>
+      <p>
+	The <em>SamurAI Dig Here</em> page is a tool to experience the game
+	of <em>SamurAI Dig Here</em> game on HTML browsers.
+      </p>
+    </center>
+
+    <h2>Display</h2>
+    <p>
+      The figure below shows a sample display image of the page.
+      <ul>
+	<li>
+	  Buttons to control the game and some game state information
+	  are displayed on the top.
+	</li>
+	<li>
+	  The green game field is displayed in the center.
+	</li>
+	<li>
+	  On the bottom, scores of both sides (red and blue) are displayed
+	  with icons of samurai.
+	</li>
+      </ul>
+    </p>
+    <center>
+      <img src="screenShots/screen.png" width="75%">
+    </center>
+
+    <h2>Game Field</h2>
+    <p>
+      The game field is divided into grid-aligned cells.
+    </p>
+    <h3>Agents</h3>
+    <p>
+      Four agents, one samurai and one dog for each side,
+      are initially located on the four corners of the game field.
+      Samurai can move to one of the <em>four</em> neighboring cells in
+      one game step, while dogs can move to one of <em>eight</em>
+      neighboring cells.
+    </p>
+    <img src="screenShots/holes.png" width="18%" class="figure">
+    <h3>Holes</h3>
+    <p>
+      Initially, some of the cells in the game field are with a hole,
+      to which game agents cannot step into.
+      Holes are placed at random.
+    </p>
+    <p>
+      Samurai can plug the hole in one of its four neighboring cells
+      in stead of moving there, while dogs cannot.
+    </p>
+    <img src="screenShots/hidden-gold.png" width="25%" class="figure">
+
+    <h3>Embedded Gold</h3>
+    <p>
+      Some randomly chosen cells have some amount of hidden embedded
+      gold, which are hidden.
+    </p>
+
+    <h3>Random Reconfiguration</h3>
+    <p>
+      You can choose another randomly constructed field configuration
+      by clicking the reinitialize button
+      <img src="../icons/reinit.png" class="inlineIcon">
+      on the upper left corner.
+    </p>
+
+    <h2>Automatic Play Mode</h2>
+    <p>
+      The initial play mode is <em>automatic.</em>
+      In the automatic mode, the computer chooses the moves of the agents
+      in each step.
+    </p>
+    <img src="screenShots/control-buttons.png" width="40%" class="figure">
+    <p>
+      The game progresses controlled using some of the buttons on the top.
+      Buttons and their functions are as described below.
+      <ul>
+	<li>
+	  Clicking the left-most <em>reinitialize button</em>
+	  <img src="../icons/reinit.png" class="inlineIcon">
+	  will intialize the game with different random configuration.
+	</li>
+	<li>
+	  Clicking the <em>rewind button</em>
+	  <img src="../icons/rewind.png" class="inlineIcon">
+	  that comes next
+	  will initialize the game with the same configuration.
+	</li>
+	<li>
+	  Clicking the <em>step backward button</em>
+	  <img src="../icons/stepBackward.png" class="inlineIcon">
+	  will show the game state of one step before the current.
+	</li>
+	<li>
+	  Clicking the <em>play button</em>
+	  <img src="../icons/play.png" class="inlineIcon">
+	  starts automatic play.
+	  The button changes its form to
+	  <img src="../icons/stop.png" class="inlineIcon">
+	  and the play will continue until this button is clicked,
+	  all the embedded gold is dug out, or
+	  the maximum number of steps is played.
+	  The play speed can be adjusted using the <em>speedometer button</em>
+	  explained below.
+	</li>
+	<li>
+	  Cliking the <em>step forward button</em>
+	  <img src="../icons/stepForward.png" class="inlineIcon">
+	  plays a single step of automatic play.
+	</li>
+	<li>
+	  Clicking the <em>fast forward button</em>
+	  <img src="../icons/fastForward.png" class="inlineIcon">
+	  will show the game state with the largest step number ever reached.
+	  Note that this may not necessarily the final state of the game,
+	  as that state may not have reached yet.
+	</li>
+	<li>
+	  The <em>speedometer button</em>
+	  <img src="../icons/speedometer.png" class="inlineIcon">
+	  can be used to adjust the speed of automatic play.
+	  The number displayed on its right indicates
+	  the current play speed in steps per minute (spm, in short).
+	  Clicking the speedometer will decrease the play speed by 4 spm.
+	  If a shift key is pressed, it will increase by 4 spm.
+	  Alternatively, moving a mouse wheel while the mouse cursor
+	  is on the speedometer.
+	  The maximum play speed is 240 spm and the minimum is 24.
+	</li>
+      </ul>
+    </p>
+    <h2>Manual Play Mode</h2>
+    <p>
+      In the manual play mode, one of the two samurai can be
+      controlled manually.
+    </p>
+    <h3>Starting the Manual Play</h3>
+    <p>
+      Clicking the <em>manual play button</em>
+      <img src="../icons/manual.png" class="inlineIcon">
+      on the top right changes the play mode to manual.
+    </p>
+    <p>
+      The first click on the button makes the red samurai controlled
+      manually.  The button changes its color to red
+      <img src="../icons/red-hand.png" class="inlineIcon">.
+      All the other agents, dogs and the blue samurai, are
+      still controlled by the computer.
+    </p>
+    <p>
+      Another click makes the blue samurai under manually control,
+      and changes the button color to blue
+      <img src="../icons/blue-hand.png" class="inlineIcon">.
+      The computer will start controlling the red samurai,
+      as well as dogs.
+    </p>
+    <p>
+      Still another click will revert the play mode to automatic,
+      reverting the button color to the original.
+    </p>
+    <img src="screenShots/manual-play.png" width="20%" class="figure">
+    <h3>Manual Stepping</h3>
+    <p>
+      When the play mode is manual, arrow symbols are displayed
+      on cells around the manually controlled agent,
+      showing possible plays.
+      Arrows on cells with a hole outlined red.
+      Clicking the cells marked with arrows tells the following.
+      <ul>
+	<li>
+	  If a shift key is pressed when the cell is clicked,
+	  the tried action is either plugging a hole or digging a new one,
+	  depending on whether a hole is already there.
+	  <ul>
+	    <li>
+	      If the cell has a hole, the hole will be plugged up.
+	    </li>
+	    <li>
+	      If the cell is flat and has some embedded gold,
+	      whether or not it is already revealed,
+	      the samurai tries to dig it out.
+	    </li>
+	    <li>
+	      If the cell is flat and does not have any gold,
+	      simply a new hole is dug out in the cell.
+	    </li>
+	    Digging will not be successful
+	    if some other agent successfully moves on to that same cell.
+	    When both samurai try to dig on the same cell,
+	    digging will be successful, and gold embedded, if any,
+	    will be halved and shared by two sides.
+	  </ul>
+	</li>
+	<li>
+	  If shift keys are <em>not</em> pressed when the cell is clicked,
+	  the samurai tries to move onto that cell.
+	  The action will be successful if the cell does not have a
+	  hole and no other agents try to move to the same cell.
+	</li>
+      </ul>
+      When the cell where the samurai stands is clicked,
+      no actions are taken for that step.
+    </p>
+    <p>
+      Actions of the samurai can also be told by key presses.
+      The keys and their meaning are as follows.
+      <table>
+	<tr>
+	  <th><tt>h w &larr;</tt></th>
+	  <td>Specifies the upper left cell (&nwarr;)</td>
+	</tr>
+	<tr>
+	  <th><tt>j s &darr;</tt></th>
+	  <td>Specifies the lower left cell (&swarr;)</td>
+	</tr>
+	<tr>
+	  <th><tt>k n &uarr;</tt></th>
+	  <td>Specifies the upper right cell (&nearr;)</td>
+	</tr>
+	<tr>
+	  <th><tt>l e &rarr;</tt></th>
+	  <td>Specifies the lowerright cell (&searr;)</td>
+	</tr>
+	<tr>
+	  <th><tt>.</tt> <em>space</em></th>
+	  <td>Specifies to pause without any actions</td>
+	</tr>
+      </table>
+      As with clicking on the screen.
+      holding shift keys down tells digging a new hole or
+      plugging an already existing hole.
+    </p>
+    <p>
+      Automatic step play by the step forward button
+      <img src="../icons/stepForward.png" class="inlineIcon">,
+      automatic repetitive play by the play button
+      <img src="../icons/play.png" class="inlineIcon">,
+      and game initialization by the rewind button
+      <img src="../icons/rewind.png" class="inlineIcon">
+      are also possible in the manual play mode.
+      When the play stops, the play mode is kept to be manual.
+    </p>
+    <h2>Game State Information</h2>
+    <p>
+      Information on the game state is also displayed on the screen.
+    </p>
+    <img src="screenShots/step-number.png" width="20%" class="figure">
+    <h3>Step Number</h3>
+    <p>
+      The current step number and the maximum number of steps
+      are displayed on the top row to the right of the clock icon.
+    </p>
+    <img src="screenShots/remaining.png" width="10%" class="figure">
+    <h3>Gold Remaining</h3>
+    <p>
+      The total units of gold not dug out yet, either hidden or made apparent,
+      is displayed on the top to the left of the <em>gold button</em>
+      <img src="gold.png" class="inlineIcon">.
+      Positions and amounts of hidden gold can be displayed
+      by pressing down the gold button.
+    </p>
+    <img src="screenShots/score.png" width="15%" class="figure">
+    <h3>Scores</h3>
+    <p>
+      Scores (number of units of gold so far obtained) of both teams
+      are displayed on the bottom.
+    </p>
+  </body>
+</html>
