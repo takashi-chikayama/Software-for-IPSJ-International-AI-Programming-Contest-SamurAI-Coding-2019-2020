@@ -9,42 +9,52 @@
   <body>
     <svg id="battle field">
     </svg>
-      <div id="topBar" class="infoBar">
-	<div class="alignLeft">
-	  <img id="reinitialize" src="../icons/reinit.png">
-	  <img id="rewind" src="../icons/rewind.png">
-	  <img id="stepBackward" src="../icons/stepBackward.png">
-	  <img id="playStop" src="../icons/play.png">
-	  <img id="stepForward" src="../icons/stepForward.png">
-	  <img id="fastForward" src="../icons/fastForward.png">
-	  <img id="speedometer" src="../icons/speedometer.png">
-	  <span id="stepsPerMin">60</span>
-	</div>
-	<div class="alignRight">
-	  <span id="remainingLabel" style="align:right"></span>
-	  <img id="goldImage" src="../icons/coins-icon.png"
-	       style="align:right"
-	       onmousedown="showHidden()"
-	       onmouseout="hideHidden()"
-	       onmouseup="hideHidden()">
-	  <img id="clock" src="../icons/clock.png">
-	  <span id="currentStepLabel"></span>
-	  <img id="manual" src="../icons/manual.png">
-	  <a href="../documents/help.html" target="_blank">
-	    <img id="help" src="../icons/help.png">
-	  </a>
-	</div>
+    <div id="topBar" class="infoBar">
+      <div class="alignLeft">
+	<img id="reinitialize" src="../icons/reinit.png"
+	     title="reinitialize">
+	<img id="rewind" src="../icons/rewind.png"
+	     title="rewind">
+	<img id="stepBackward" src="../icons/stepBackward.png"
+	     title="step backward">
+	<img id="playStop" src="../icons/play.png"
+	     title="play/stop">
+	<img id="stepForward" src="../icons/stepForward.png"
+	     title="step forward">
+	<img id="fastForward" src="../icons/fastForward.png"
+	     title="fast forward">
+	<img id="speedometer" src="../icons/speedometer.png"
+	     title="change play tempo">
+	<span id="stepsPerMin">60</span>
+	<img id="load" src="../icons/load.png">
+	<img id="save" src="../icons/save.png">
+	<img id="remove" src="../icons/remove.png">
+	<img id="import" src="../icons/import.png">
+	<img id="export" src="../icons/export.png">
       </div>
-      <div id="bottomBar" class="infoBar">
-	<div class="alignLeft hideOverflow">
-	  <img id="samuraiFigure0" src="../icons/samurai-figure-0.png">
-	  <span id="scoreLabel0"></span>
-	</div>
-	<div class="alignRight hideOverflow">
-	  <span id="scoreLabel1"></span>
-	  <img id="samuraiFigure1" src="../icons/samurai-figure-1.png">
-	</div>
+      <div class="alignRight">
+	<img id="edit" src="../icons/pencil.png">
+	<span id="remainingLabel" style="align:right"></span>
+	<img id="goldImage" src="../icons/coins-icon.png"
+	     style="align:right">
+	<img id="clock" src="../icons/clock.png">
+	<span id="currentStepLabel"></span>
+	<img id="manual" src="../icons/manual.png">
+	<a href="../documents/help.html" target="_blank">
+	  <img id="help" src="../icons/help.png">
+	</a>
       </div>
+    </div>
+    <div id="bottomBar" class="infoBar">
+      <div class="alignLeft hideOverflow">
+	<img id="samuraiFigure0" src="../icons/samurai-figure-0.png">
+	<span id="scoreLabel0"></span>
+      </div>
+      <div class="alignRight hideOverflow">
+	<span id="scoreLabel1"></span>
+	<img id="samuraiFigure1" src="../icons/samurai-figure-1.png">
+      </div>
+    </div>
     <script>
       initialize();
     </script>

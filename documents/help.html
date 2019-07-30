@@ -8,8 +8,12 @@
     <span style="float:left">
       <a href="help-jp.html" target="_blank">日本語</a>
     </span>
-    <h1><center>How to Play with the SamurAI Dig Here Page</center></h1>
+    <h1>How to Play with the SamurAI Dig Here Page</h1>
     <center>
+      <p>
+	IPSJ Programming Contest Committee<br>
+	2019/07/30
+      </p>
       <p>
 	The <em>SamurAI Dig Here</em> page is a tool to experience the game
 	of <em>SamurAI Dig Here</em> game on HTML browsers.
@@ -49,12 +53,11 @@
       one game step, while dogs can move to one of <em>eight</em>
       neighboring cells.
     </p>
-    <img src="screenShots/holes.png" width="18%" class="figure">
+    <img src="screenShots/holes.png" width="15%" class="figure">
     <h3>Holes</h3>
     <p>
       Initially, some of the cells in the game field are with a hole,
-      to which game agents cannot step into.
-      Holes are placed at random.
+      which game agents cannot step into.
     </p>
     <p>
       Samurai can plug the hole in one of its four neighboring cells
@@ -82,7 +85,7 @@
       In the automatic mode, the computer chooses the moves of the agents
       in each step.
     </p>
-    <img src="screenShots/control-buttons.png" width="40%" class="figure">
+    <img src="screenShots/control-buttons.png" width="30%" class="figure">
     <p>
       The game progresses controlled using some of the buttons on the top.
       Buttons and their functions are as described below.
@@ -170,7 +173,7 @@
       Still another click will revert the play mode to automatic,
       reverting the button color to the original.
     </p>
-    <img src="screenShots/manual-play.png" width="20%" class="figure">
+    <img src="screenShots/manual-play.png" width="15%" class="figure">
     <h3>Manual Stepping</h3>
     <p>
       When the play mode is manual, arrow symbols are displayed
@@ -256,18 +259,18 @@
     <p>
       Information on the game state is also displayed on the screen.
     </p>
-    <img src="screenShots/step-number.png" width="20%" class="figure">
+    <img src="screenShots/step-number.png" width="15%" class="figure">
     <h3>Step Number</h3>
     <p>
       The current step number and the maximum number of steps
       are displayed on the top row to the right of the clock icon.
     </p>
-    <img src="screenShots/remaining.png" width="10%" class="figure">
+    <img src="screenShots/remaining.png" width="8%" class="figure">
     <h3>Gold Remaining</h3>
     <p>
       The total units of gold not dug out yet, either hidden or made apparent,
       is displayed on the top to the left of the <em>gold button</em>
-      <img src="gold.png" class="inlineIcon">.
+      <img src="../icons/coins-icon.png" class="inlineIcon">.
       Positions and amounts of hidden gold can be displayed
       by pressing down the gold button.
     </p>
@@ -277,5 +280,110 @@
       Scores (number of units of gold so far obtained) of both teams
       are displayed on the bottom.
     </p>
+    <h2>Edit Mode</h2>
+    <p>
+      <em>Edit mode</em> is enabled by clicking the <em>edit button</em>
+      <img src="../icons/pencil.png" class="inlineIcon">
+      on top of the screen.
+      The edit mode enables editing, saving, and loading the
+      configuration of the game field.
+    </p>
+    <p>
+      The game is brought back to its initial state,
+      and the following changes are made on the screen.
+      <nl>
+	<li>The bottons on top are replaced by those for editing</li>
+	<li>Hidden embedded golds are made apparent</li>
+	<li>The background color will change</li>
+      </nl>
+    </p>
+    <center>
+      <img src="screenShots/edit-mode.png" width="75%">
+    </center>
+    <p>
+      <img src="screenShots/cell-highlight.png" width="25%" class="figure">
+      In the edit mode, the border of the cell with the mouse pointer
+      becomes white, and 
+      the following editing are available on the cell.
+    </p>
+    <h3>Moving the Agents</h3>
+    <p>
+      Pressing the mouse button on a cell with an agent on it, and
+      dragging the mouse moves the agent another cell.  When the mouse
+      button is released on a cell with embedded gold or a hole, the
+      agent moves to the cell the mouse cursor was previously on.
+    </p>
+    <h3>Setting Embedded Gold</h3>
+    <p>
+      The amount of embedded gold in a cell can be inreased or
+      decreased by clicking the mouse button on the cell.
+      With a mouse click <em>without</em> pressing a shift key
+      <em>decreases</em> the amount by 2.
+      When the amount becomes 0, the cell loses embedded gold.
+      With a mouse click <em>with</em> pressing a shift key
+      <em>increases</em> the amount by 2.
+      With a mouse click on a cell <em>with</em> pressing a
+      shift key on a cell without any gold,
+      the cell is given with embedded gold of amount 2.
+      When a control key is pressed on a click,
+      the amount of increase/decrease is multiplied by ten.
+    </p>
+    <h3>Setting Holes</h3>
+    <p>
+      With a mouse click on a cell without an agent nor any embedded gold,
+      a new hole is dug out on the cell, if none is there.
+      If the cell already has a hole, it is plugged up.
+    </p>
+    <h3>Saving and Loading the Configuration</h3>
+    <p>
+      The current configuration can be saved to the storage of the browser
+      and loaded afterwards.
+      This storage is kept in the browser, and will not be lost
+      when the page is reloaded and/or the browser is restarted,
+      but cannot be accessed from other browsing applications
+      on the same system.
+    </p>
+    <img src="screenShots/save.png" width="30%" class="figure">
+    <p>
+      Clicking the <em>save button</em>
+      <img src="../icons/save.png" class="inlineIcon">
+      on the screen top, a dialog window to enter a configuration name
+      pops up.
+      When a name is entered, the current configuration is saved
+      with that name.
+    </p>
+    <img src="screenShots/load.png" width="18%" class="figure">
+    <p>
+      Clicking the <em>load button</em>
+      <img src="../icons/load.png" class="inlineIcon">
+      on the screen top, a list of names of saved configurations appears.
+      Choosing one of them will load the configuration with that name.
+    </p>
+    <p>
+      Clicking the <em>remove button</em>
+      <img src="../icons/remove.png" class="inlineIcon">
+      on the screen top, a list of names of saved configurations appears.
+      Choosing one of them will remove the configuration with that name
+      from the storage.
+    </p>
+    <h3>Importing and Exporting Configurations</h3>
+    <p>
+      Clicking the <em>import button</em>
+      <img src="../icons/import.png" class="inlineIcon">
+      or the <em>export button</em>
+      <img src="../icons/export.png" class="inlineIcon">
+      on the screen top is planned to have functionalities
+      of reading in and writing out configurations
+      from and to a file,
+      <em>which yet to be implemented.</em>
+    </p>
+    <h3>Exiting from the Edit Mode</h3>
+    <p>
+      The <em>edit mode button</em>
+      <img src="../icons/pencil-writing.png" class="inlineIcon">
+      on the screen top will end the edit mode.
+      The game is reset to the initial state of the edited configuration.
+    </p>
+
   </body>
 </html>

@@ -14,8 +14,12 @@
     <span style="float:left">
       <a href="help.html" target="_blank">English</a>
     </span>
-    <h1><center>SamurAI Dig Here ページの使い方</center></h1>
+    <h1>SamurAI Dig Here ページの使い方</h1>
     <center>
+      <p>
+	情報処理学会プログラムコンテスト委員会<br>
+	2019/07/30
+      </p>
       <p>
 	<em>SamurAI Dig Here</em> ページは
 	<em>SamurAI Dig Here</em> ゲームを
@@ -53,12 +57,11 @@
       侍は各ステップでその位置の四近傍のセルのどれかに,
       犬は八近傍セルのどれかに動けます.
     </p>
-    <img src="screenShots/holes.png" width="18%" class="figure">
+    <img src="screenShots/holes.png" width="15%" class="figure">
     <h3>穴</h3>
     <p>
       初期状態では, 競技場のセルのいくつかに穴が空いています.
-      穴があるセルには行けません.
-      穴はランダムに配置されます.
+      侍も犬も穴があるセルには行けません.
     </p>
     <p>
       侍は四近傍のどれかのセルに穴があるとき,
@@ -77,7 +80,7 @@
       左上部にある再設定ボタン
       <img src="../icons/reinit.png" class="inlineIcon">
       をクリックすることで,
-      ゲームをランダムに再設定することができます.
+      競技場をランダムに再設定することができます.
     </p>
 
     <h2>自動プレイモード</h2>
@@ -85,7 +88,7 @@
       プレイモードの初期状態は<em>自動</em>になっています.
       自動モードではコンピュータが各ステップのエージェントの動作を選びます.
     </p>
-    <img src="screenShots/control-buttons.png" width="40%" class="figure">
+    <img src="screenShots/control-buttons.png" width="30%" class="figure">
     <p>
       ゲームの進行は画面上部のいくつかのボタンを用いて行います.
       ボタンとその昨日は以下のとおりです.
@@ -171,7 +174,7 @@
       さらにもう一度クリックすると, 自動プレイモードに戻り,
       ボタンの色も元の色に戻ります.
     </p>
-    <img src="screenShots/manual-play.png" width="20%" class="figure">
+    <img src="screenShots/manual-play.png" width="15%" class="figure">
     <h3>手動ステップ実行</h3>
     <p>
       手動実行では, 制御対象の侍の周囲のセルに可能な動きを示す矢印が表示されます.
@@ -249,18 +252,18 @@
     <p>
       ゲーム状態の情報も画面に表示されます.
     </p>
-    <img src="screenShots/step-number.png" width="20%" class="figure">
+    <img src="screenShots/step-number.png" width="15%" class="figure">
     <h3>ステップ番号</h3>
     <p>
       上部右の時計アイコンの横に現在のステップ番号と最大ステップ数を表示します.
     </p>
-    <img src="screenShots/remaining.png" width="10%" class="figure">
+    <img src="screenShots/remaining.png" width="8%" class="figure">
     <h3>埋蔵金残量</h3>
     <p>
       まだ掘り出されていない埋蔵金の総量
       (秘匿されているものと公開されているものの合計)
       が<em>埋蔵金ボタン</em>
-      <img src="gold.png" class="inlineIcon">.
+      <img src="../icons/coins-icon.png" class="inlineIcon">.
       の横に表示されています.
       埋蔵金ボタンの上でマウスボタンで押し下げている間,
       隠された埋蔵金の位置と量を表示できます.
@@ -269,6 +272,102 @@
     <p>
       画面の下部に両軍の得点 (それまでに掘り出した埋蔵金のユニット数)
       を表示します.
+    </p>
+    <h2>編集モード</h2>
+    <p>
+      画面上部の<em>編集ボタン</em>
+      <img src="../icons/pencil.png" class="inlineIcon">
+      を押すと編集モードに入ります.
+      編集モードでは競技場設定の編集, 保存や,
+      保存済みの設定の読み出しができます.
+    </p>
+    <p>
+      編集モードに入ると, ゲームは初期状態に戻され,
+      画面には以下の変化が生じます.
+      <nl>
+	<li>上部のボタン群が編集用のものになる</li>
+	<li>秘匿埋蔵金が見えるようになる</li>
+	<li>背景の色が変わる</li>
+      </nl>
+    </p>
+    <center>
+      <img src="screenShots/edit-mode.png" width="75%">
+    </center>
+    <p>
+      <img src="screenShots/cell-highlight.png" width="25%" class="figure">
+      編集モードではマウスポインタがあるセルの外周が白く表示され,
+      そのセルに対しての設定をマウス操作で編集できます.
+    </p>
+    <h3>エージェントの移動</h3>
+    <p>
+      エージェントがあるセルでマウスボタンを押し下げて別のセルにドラッグすると,
+      エージェントを移動できます.
+      ただし埋蔵金があるセルや穴のあるセルでマウスボタンを離しても,
+      そこには移動せず, 直前にマウスカーソルがあったセルに移動します.
+    </p>
+    <h3>埋蔵金の設定</h3>
+    <p>
+      埋蔵金のあるセル上でマウスボタンをクリックすると, 埋蔵量を増減できます.
+      シフトキーを押さずにクリックすれば埋蔵量は2だけ減ります.
+      埋蔵量が0になったセルは埋蔵金のないセルになります.
+      シフトキーを押しながらクリックすれば埋蔵量は2だけ増えます.
+      埋蔵金のない平坦なセル上でマウスボタンをクリックすると,
+      そのセルは埋蔵量2の埋蔵金があるセルになります.
+      クリック時にコントロールキーを押せば,
+      埋蔵金の増減量は10倍になります.
+    </p>
+    <h3>穴の設定</h3>
+    <p>
+      エージェントも埋蔵金もないセルの上でマウスボタンを押し下げると,
+      そのセルに穴がなければ新たに穴を作り,
+      穴があれば穴はなくなります.
+    </p>
+    <h3>設定の保存と読み出し</h3>
+    <p>
+      現在の設定をブラウザの記憶領域に保存し,
+      後で読み出すことができます.
+      この記憶領域はブラウザ内部に保存するもので,
+      ページを読み込み直したりブラウザを立ち上げ直してもなくなりませんが,
+      同じコンピュータ上でも他のブラウザからは読み出せません.
+    </p>
+    <img src="screenShots/save.png" width="30%" class="figure">
+    <p>
+      画面上部の<em>設定保存ボタン</em>
+      <img src="../icons/save.png" class="inlineIcon">
+      をクリックすると, 保存する設定名の入力画面を表示します.
+      ここで名称を入力すれば編集中の設定がその名前で保存されます.
+    </p>
+    <img src="screenShots/load.png" width="18%" class="figure">
+    <p>
+      画面上部の<em>設定読み出しボタン</em>
+      <img src="../icons/load.png" class="inlineIcon">
+      をクリックすると, 保存済みの設定の一覧を表示します.
+      この中から読み出したい設定の名前を選ぶと,
+      その設定が読み出されます.
+    </p>
+    <p>
+      画面上部の<em>設定削除ボタン</em>
+      <img src="../icons/remove.png" class="inlineIcon">
+      をクリックすると, 保存済みの設定の一覧を表示します.
+      この中から削除したい設定の名前を選ぶと,
+      その設定は削除されます.
+    </p>
+    <h3>設定の外部ファイル入出力</h3>
+    <p>
+      画面上部の<em>ファイル入力ボタン</em>
+      <img src="../icons/import.png" class="inlineIcon">
+      や<em>ファイル出力ボタン</em>
+      <img src="../icons/export.png" class="inlineIcon">
+      をクリックすれば,
+      設定をファイルに書き出したり読み込んだりする予定ですが,
+      <em>この機能は未実装です.</em>
+    </p>
+    <h3>編集モードの終了</h3>
+    <p>
+      画面上部の<em>編集モードボタン</em>
+      <img src="../icons/pencil-writing.png" class="inlineIcon">
+      をクリックすれば編集モードは終了します.
+      ゲームは編集結果の設定の初期状態になります.
     </p>
   </body>
 </html>

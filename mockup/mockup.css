@@ -1,14 +1,5 @@
-#buttons {
-    margin: 0px;
-    border: 1px solid #663;
-    height: 14px;
-    background: #AA6;
-}
-
-#buttons img {
-    margin: 0px;
-    padding: 1px;
-    height: 8px;
+body {
+    user-select: none;
 }
 
 body {
@@ -63,4 +54,36 @@ svg {
 
 .arrow {
     width: 80%;
+}
+
+.menuPopup {
+    padding: 5px;
+    font-style: italic;
+    font-family: roman;
+    background: rgb(220,255,255);
+}
+
+.menuTable {
+    margin-left: 20px;
+}
+
+.menuItem {
+    margin: 10px;
+    padding: 2px 5px 2px 5px;
+    font-style: normal;
+    font-family: monospace;
+    text-align: center;
+    // border: 1px solid black;
+    background: rgb(255, 255, 220);
+    box-shadow: 2px 2px gray;
+}
+
+.cancelItem {
+    font-style: italic;
+    font-family: serif;
+    color: red;
+}
+
+.menuItem:hover {
+    background: rgb(255, 200, 200);
 }

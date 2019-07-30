@@ -1,5 +1,6 @@
 h1 {
     counter-reset: section;
+    text-align: center;
 }
 h2 {
     counter-reset: subsection;
