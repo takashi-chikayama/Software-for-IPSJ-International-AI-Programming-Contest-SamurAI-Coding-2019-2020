@@ -14,8 +14,8 @@ let goldProb = 0.06;
 let goldKnownProb = 0.1;
 let maxGold2 = 10;
 
-let maxSteps = 100;
-let playUntil = maxSteps;
+let maxSteps;
+let playUntil;
 let playTempo = 60;
 let stepInterval = playTempo*1000/60;
 let frameRate = 20;
@@ -460,7 +460,7 @@ function repositionAgent(a, init) {
 
 function randomConfig() {
   const config = {
-    size: 10, agents: [], holes: [], golds: []
+    size: 10, steps: 100, agents: [], holes: [], golds: []
   };
   for (let na = 0; na != 4; ) {
     const x = Math.floor(config.size*random.gen());
@@ -729,7 +729,10 @@ class GameState {
       const image = a.attributes.image;
       const isDog = a.attributes.seq >= 2;
       if (init) {
-	image.setAttribute('width', (isDog ? 0.8 : 1.7)*cellWidth);
+	const w = (isDog ? 0.8 : 1.7)*cellWidth;
+	const h = w * (isDog ? 154/122: 273/301);
+	image.setAttribute('width', w);
+	image.setAttribute('height', h);
       }
       const team = a.attributes.seq%2;
       if (a.attributes.seq >= 2) {
@@ -960,6 +963,7 @@ function resizeField() {
 function redrawField(config) {
   stopAutoPlay();
   fieldSize = config.size;
+  maxSteps = config.steps;
   setSizes();
   // Prepare cells
   cells = [];
@@ -989,12 +993,14 @@ function redrawField(config) {
   loadButton.onclick = loadConfiguration;
   saveButton.onclick = saveConfiguration;
   removeButton.onclick = removeConfiguration;
+  clockButton.onclick = setStep;
+  clockButton.onwheel = setStep;
 
   hideWhileEdit = [
     rewindButton, stepBackwardButton, playStopButton,
     stepForwardButton, fastForwardButton, speedometerButton,
-    clockButton, reinitializeButton, goldImageButton,
-    manualButton, currentStepLabel, stepsPerMin
+    reinitializeButton, goldImageButton,
+    manualButton, stepsPerMin
   ];
   showWhileEdit = [
     loadButton, saveButton, removeButton, importButton, exportButton
@@ -1352,6 +1358,19 @@ class DiamondDownListener {
     if (agent != null) {
       const moveHandler =
 	    new AgentMove(agent, ev.pageX, ev.pageY);
+      if (ev.shiftKey) {
+	// Rotate the agent if a shift key is pressed
+	const role = agent.attributes.seq;
+	let delta = role < 2 ? 2 : 1;
+	if (ev.ctrlKey) delta = -delta;
+	const dir = (agent.direction + delta + 8) % 8;
+	agent.direction = dir;
+	const team = role % 2;
+	agent.attributes.image.setAttribute(
+	  'href',
+	  role < 2 ? samuraiStanding[dir+8*team] :
+	    dogSitting[dir+8*team]);
+      }
       field.addEventListener('mousemove', moveHandler);
       field.addEventListener(
 	'mouseup', new EndAgentMove(agent, moveHandler));
@@ -1448,6 +1467,26 @@ class EndAgentMove {
     const agent = this.moveHandler.agent;
     agent.at = this.moveHandler.nowAt;
     repositionAgent(agent, true);
+  }
+}
+
+function setStep(ev) {
+  let delta;
+  if (ev.type == "click") {
+    delta = (ev.shiftKey ? 1 : -1);
+  } else {
+    delta = ev.deltaY > 0 ? -1 : 1;
+  }
+  if (ev.ctrlKey) delta *= 10;
+  if (editMode) {
+    maxSteps = Math.max(10, maxSteps+delta);
+    currentStepLabel.innerHTML = currentStep + "/" + maxSteps;
+  } else {
+    const newStep = currentStep + delta;
+    if (0 <= newStep && newStep < stepRecords.length) {
+      currentStep = newStep;
+      stepRecords[currentStep].redraw(true);
+    }
   }
 }
 

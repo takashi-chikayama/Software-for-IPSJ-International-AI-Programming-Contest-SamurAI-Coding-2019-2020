@@ -93,7 +93,7 @@
 	<li>
 	  Clicking the left-most <em>reinitialize button</em>
 	  <img src="../icons/reinit.png" class="inlineIcon">
-	  will intialize the game with different random configuration.
+	  will initialize the game with different random configuration.
 	</li>
 	<li>
 	  Clicking the <em>rewind button</em>
@@ -115,11 +115,12 @@
 	  and the play will continue until this button is clicked,
 	  all the embedded gold is dug out, or
 	  the maximum number of steps is played.
-	  The play speed can be adjusted using the <em>speedometer button</em>
+	  The play speed can be adjusted using the
+	  <em>speedometer button</em>
 	  explained below.
 	</li>
 	<li>
-	  Cliking the <em>step forward button</em>
+	  Clicking the <em>step forward button</em>
 	  <img src="../icons/stepForward.png" class="inlineIcon">
 	  plays a single step of automatic play.
 	</li>
@@ -141,6 +142,20 @@
 	  Alternatively, moving a mouse wheel while the mouse cursor
 	  is on the speedometer.
 	  The maximum play speed is 240 spm and the minimum is 24.
+	</li>
+	<li>
+	  The state of the game displayed can be advanced or
+	  rewound by mouse oepration on the <em>clock icon</em>
+	  <img src="../icons/clock.png" class="inlineIcon">
+	  displayed on the top right of the screen.
+	  Clicking the icon advances the displayed state with one step
+	  if a shift key is pressed; rewound otherwise.
+	  Rotating the wheel up or down also advances or rewinds
+	  the game state.
+	  When a control key is pressed,
+	  10 steps are advanced or rewound at a time.
+	  Neither going before the initial state nor
+	  beyond the last step ever reached in the game is possible.
 	</li>
       </ul>
     </p>
@@ -234,7 +249,7 @@
 	</tr>
 	<tr>
 	  <th><tt>l e &rarr;</tt></th>
-	  <td>Specifies the lowerright cell (&searr;)</td>
+	  <td>Specifies the lower right cell (&searr;)</td>
 	</tr>
 	<tr>
 	  <th><tt>.</tt> <em>space</em></th>
@@ -292,7 +307,7 @@
       The game is brought back to its initial state,
       and the following changes are made on the screen.
       <nl>
-	<li>The bottons on top are replaced by those for editing</li>
+	<li>The buttons on top are replaced by those for editing</li>
 	<li>Hidden embedded golds are made apparent</li>
 	<li>The background color will change</li>
       </nl>
@@ -306,16 +321,24 @@
       becomes white, and 
       the following editing are available on the cell.
     </p>
-    <h3>Moving the Agents</h3>
+    <h3>Setting the Agents</h3>
     <p>
-      Pressing the mouse button on a cell with an agent on it, and
+      Pressing a mouse button on a cell with an agent on it, and
       dragging the mouse moves the agent another cell.  When the mouse
       button is released on a cell with embedded gold or a hole, the
       agent moves to the cell the mouse cursor was previously on.
     </p>
+    <p>
+      If a shift key is pressed when the mouse mouse button is pressed,
+      the agent rotates clockwise.
+      This also takes place when the mouse is not dragged, that is,
+      when the cell with an agent is simply clicked with a shift key pressed.
+      Note that, although this changes the appearance of the agent
+      in the initial state, it has no influence on the game play.
+    </p>
     <h3>Setting Embedded Gold</h3>
     <p>
-      The amount of embedded gold in a cell can be inreased or
+      The amount of embedded gold in a cell can be increased or
       decreased by clicking the mouse button on the cell.
       With a mouse click <em>without</em> pressing a shift key
       <em>decreases</em> the amount by 2.
@@ -333,6 +356,21 @@
       With a mouse click on a cell without an agent nor any embedded gold,
       a new hole is dug out on the cell, if none is there.
       If the cell already has a hole, it is plugged up.
+    </p>
+    <h3>Setting the Maximum Number of Steps</h3>
+    <p>
+      The maximum number of steps of the game can be
+      incremented or decremented by
+      a mouse click or mouse wheel rotation on the <em>clock icon</em>
+      <img src="../icons/clock.png" class="inlineIcon">
+      while in the edit mode.
+      Clicking the icon while pressing a shift key
+      increments the maximum number of steps and
+      decrements otherwise.
+      Rotating the wheel up or down increments or decrements it
+      respectively.
+      When a control key is pressed, the change amount is multiplied by 10.
+      It cannot be set to be less than 10.
     </p>
     <h3>Saving and Loading the Configuration</h3>
     <p>
