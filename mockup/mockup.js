@@ -5,6 +5,8 @@ let groundLayer;
 let agentLayer;
 let diamondLayer;
 let fieldSize;
+const maxFieldSize = 20;
+const minFieldSize = 6;
 let fieldWidth, fieldHeight, topMargin;
 let cellWidth, cellHeight, halfWidth, halfHeight;
 let cells;
@@ -24,13 +26,13 @@ let midStep = Math.floor((numSubsteps+1)/2);
 let currentStep;
 let substep = 0;
 
-let showingHidden = false;
-
-let goldShown = [];
+let goldShown;
 
 let backgroundColor = "rgb(120,80,40)";
 let editingBackgroundColor = "rgb(120,120,120)";
 let lawnColor = "rgb(40,160,40)";
+let leftFenceColor = "rgb(160,160,160)";
+let rightFenceColor = "rgb(200,200,200)";
 let scoreColor = "rgb(255,255,0)";
 let clockColor = "rgb(0,255,255)";
 let scores = [];
@@ -379,6 +381,7 @@ for (let k = 0; k != 8; k++) {
     "../icons/samurai-digging-" + k + ".png";
   samuraiDug[2*k] = "../icons/samurai-dug-" + k + ".png";
 }
+
 for (let k = 0; k != 16; k++) {
   dogSitting[k] = "../icons/dog-poses" + twoDigits[k] + ".png";
   dogBarking[k] = "../icons/dog-barking" + twoDigits[k] + ".png";
@@ -460,7 +463,9 @@ function repositionAgent(a, init) {
 
 function randomConfig() {
   const config = {
-    size: 10, steps: 100, agents: [], holes: [], golds: []
+    size: fieldSize || 10,
+    steps: maxSteps || 100,
+    agents: [], holes: [], golds: []
   };
   for (let na = 0; na != 4; ) {
     const x = Math.floor(config.size*random.gen());
@@ -728,14 +733,8 @@ class GameState {
     this.agents.forEach(a => {
       const image = a.attributes.image;
       const isDog = a.attributes.seq >= 2;
-      if (init) {
-	const w = (isDog ? 0.8 : 1.7)*cellWidth;
-	const h = w * (isDog ? 154/122: 273/301);
-	image.setAttribute('width', w);
-	image.setAttribute('height', h);
-      }
       const team = a.attributes.seq%2;
-      if (a.attributes.seq >= 2) {
+      if (isDog) {
 	if (substep == 0) {
 	  image.setAttribute('href',	
 			     dogSitting[8*team + a.direction])
@@ -778,6 +777,12 @@ class GameState {
 	    new Audio(plugSoundFile).play();
 	  }
 	}
+      }
+      if (init) {
+	const w = (isDog ? 0.8 : 1.7)*cellWidth;
+	image.setAttribute('width', w);
+	const h = w * (isDog ? 154/122: 273/301);
+	image.setAttribute('height', h);
       }
       repositionAgent(a, init);
     });
@@ -870,13 +875,84 @@ let showWhileEdit;
 
 const topBarButtons = [
   "rewind", "stepBackward", "playStop", "stepForward", "fastForward",
-  "speedometer", "clock", "reinitialize", "goldImage", "manual",
-  "edit", "help", "load", "save", "remove", "import", "export"];
+  "speedometer", "clock", "reinit", "goldImage", "manual",
+  "edit", "help", "load", "save", "remove", "import", "export",
+  "expand", "shrink"
+];
 const infoLabels = ["stepsPerMin", "currentStepLabel", "remainingLabel"];
+
+function drawFence() {
+  const fence = createSVG('g');
+  function leftTransform(elem, x, y) {
+    elem.setAttribute('transform',
+		      "translate("+x+","+
+		      (((fieldSize-2)*cellHeight)/2+topMargin - 0.5*x + y)+
+		      ") skewY(-26.5651)");
+  }
+  function rightTransform(elem, x, y) {
+    elem.setAttribute(
+      'transform',
+      "translate("+(fieldWidth/2+x)+","+
+	(0.5*x + y)+
+	") skewY(26.5651)");
+  }
+  const leftFence = createSVG('rect');
+  leftFence.setAttribute('width', fieldSize*cellWidth/2);
+  leftFence.setAttribute('height', 0.9*cellHeight);
+  leftFence.style.fill = leftFenceColor;
+  leftFence.style.stroke = "white";
+  leftTransform(leftFence, 0, 0);
+  fence.appendChild(leftFence);
+  const logoSizes = { platinum: 2.8, gold: 2.3, silver: 1.6, bronze: 1.0 };
+  const leftLogos = [...sponsorLogos];
+  const rightLogos = [];
+  let logoSizeTotal = 0;
+  sponsorLogos.forEach(logo => logoSizeTotal += logoSizes[logo.category]);
+  let rightTotal = 0;
+  while (rightTotal < logoSizeTotal/2) {
+    const k = Math.floor(random.gen()*leftLogos.length);
+    const logo = leftLogos[k];
+    rightTotal += logoSizes[logo.category];
+    rightLogos.push(leftLogos[k]);
+    leftLogos.splice(k, 1);
+  }
+  const leftTotal = logoSizeTotal - rightTotal;
+  let   pos = 0.1*fieldWidth/2/leftTotal;
+  leftLogos.forEach(logo => {
+    const logoWidth = logoSizes[logo.category]*fieldWidth/2/leftTotal;
+    const image = createSVG('image');
+    image.setAttribute('href', "../logos/"+logo.source);
+    image.setAttribute('width', 0.8*logoWidth);
+    image.setAttribute('height', 0.8*cellHeight);
+    leftTransform(image, pos, 0.1*cellHeight);
+    pos += logoWidth;
+    fence.appendChild(image);
+  });
+  const rightFence = createSVG('rect');
+  rightFence.setAttribute('width', fieldSize*cellWidth/2);
+  rightFence.setAttribute('height', 0.9*cellHeight);
+  rightFence.style.fill = rightFenceColor;
+  rightFence.style.stroke = "white";
+  rightTransform(rightFence, 0, 0);
+  fence.appendChild(rightFence);
+  pos = 0.1*fieldWidth/2/rightTotal;;
+  rightLogos.forEach(logo => {
+    const logoWidth = logoSizes[logo.category]*fieldWidth/2/rightTotal;
+    const image = createSVG('image');
+    image.setAttribute('href', "../logos/"+logo.source);
+    image.setAttribute('width', 0.8*logoWidth);
+    image.setAttribute('height', 0.8*cellHeight);
+    rightTransform(image, pos, 0.1*cellHeight);
+    pos += logoWidth;
+    fence.appendChild(image);
+  });
+  return fence;
+}
 
 function resizeField() {
   // Remove everything in the field
   while (field.hasChildNodes()) field.removeChild(field.firstChild);
+  goldShown = [];
   diamondLayer = createSVG('g');
   for (let x = 0; x != fieldSize; x++) {
     for (let y = 0; y != fieldSize; y++) {
@@ -886,7 +962,7 @@ function resizeField() {
   }
   field.setAttribute('width', fieldWidth+"px");
   field.setAttribute('height', fieldHeight+"px");
-  const buttonSize = Math.max(10, fieldWidth/25) + "px";
+  const buttonSize = Math.max(8, fieldWidth/30) + "px";
   topBarButtons.forEach(id => {
     const button = document.getElementById(id);
     button.style.height = buttonSize;
@@ -913,6 +989,7 @@ function resizeField() {
       0 + ',' + (fieldSize*halfHeight+topMargin));
   lawn.setAttribute('style', "fill:"+lawnColor);
   background.appendChild(lawn);
+  background.appendChild(drawFence());
   // Lawn grid
   const gridColor = backgroundColor;
   const grid = createSVG('g');
@@ -987,23 +1064,27 @@ function redrawField(config) {
   goldImageButton.onmouseout = hideHiddenGold;
   goldImageButton.onmouseup = hideHiddenGold;
   manualButton.onclick = toggleManualPlay;
-  reinitializeButton.onclick = reinitialize;
+  reinitButton.onclick = reinitialize;
 
   editButton.onclick = toggleEditMode;
   loadButton.onclick = loadConfiguration;
   saveButton.onclick = saveConfiguration;
   removeButton.onclick = removeConfiguration;
+  expandButton.onclick = expandField;
+  shrinkButton.onclick = shrinkField;
   clockButton.onclick = setStep;
   clockButton.onwheel = setStep;
+  helpButton.onclick = openHelp;
 
   hideWhileEdit = [
     rewindButton, stepBackwardButton, playStopButton,
     stepForwardButton, fastForwardButton, speedometerButton,
-    reinitializeButton, goldImageButton,
+    reinitButton, goldImageButton,
     manualButton, stepsPerMin
   ];
   showWhileEdit = [
-    loadButton, saveButton, removeButton, importButton, exportButton
+    loadButton, saveButton, removeButton, importButton, exportButton,
+    expandButton, shrinkButton
   ];
   showWhileEdit.forEach(b => b.style.display = 'none');
 
@@ -1064,7 +1145,7 @@ let random;
 function reinitialize() {
   // Change the random number generator seed
   randomSeed = Math.floor(100000000*random.gen());
-  initialize();
+  initialize(null);
 }
 
 function rewind() {
@@ -1091,15 +1172,17 @@ function setSizes() {
   fieldHeight = fieldWidth/2 + topMargin;
 }
 
-function initialize() {
-  // Initialize random numbeer generator
-  random = new Random();
+function initialize(config) {
+  if (config == null) {
+    // Initialize random numbeer generator
+    random = new Random();
+    config = randomConfig();
+  }
   // Prepare the field
   field = document.getElementById("battle field");
   background = undefined;
   groundLayer = undefined;
   // Initialize a game
-  config = randomConfig();
   redrawField(config);
   stepRecords = [new GameState(null, null, config)];
   currentStep = 0;
@@ -1579,6 +1662,25 @@ function removeConfiguration(ev) {
 	     store, (i, s, menu) => new ConfigRemover(i, s, menu));
 }
 
+function currentConfig() {
+  const rec = stepRecords[currentStep];
+  const agents = [];
+  rec.agents.forEach(a => agents.push({x: a.at.x, y: a.at.y}));
+  const holes = [];
+  rec.holes.forEach(h => holes.push({x: h.x, y: h.y}));
+  const golds = [];
+  rec.hiddenGolds.forEach(g => {
+    golds.push({x: g.at.x, y: g.at.y, amount: g.amount})});
+  return {
+    filetype: "SamurAI Dig Here Field",
+    size: fieldSize,
+    steps: maxSteps,
+    agents: agents,
+    holes: holes,
+    golds: golds
+  };
+}
+
 function saveConfiguration(ev) {
   if (localStorage == undefined) {
     alert("Local storage not available on this browser");
@@ -1588,28 +1690,57 @@ function saveConfiguration(ev) {
   const stored =
 	configInJSON == undefined ? {} :
 	JSON.parse(configInJSON);
-  const rec = stepRecords[currentStep];
-  const agents = [];
-  rec.agents.forEach(a => agents.push({x: a.at.x, y: a.at.y}));
-  const holes = [];
-  rec.holes.forEach(h => holes.push({x: h.x, y: h.y}));
-  const golds = [];
-  rec.hiddenGolds.forEach(g => {
-    golds.push({x: g.at.x, y: g.at.y, amount: g.amount})});
   var configurationName = prompt(
     "Save under configuration name?",
     (previousConfigurationName || ""));
   if (configurationName == null) return;
-  const config = {
-    name: configurationName,
-    filetype: "SamurAI Dig Here Field",
-    size: fieldSize,
-    steps: maxSteps,
-    agents: agents,
-    holes: holes,
-    golds: golds
-  };
+  const config = currentConfig();
+  config.name = configurationName,
   previousConfiguraionName = configurationName;
   stored[configurationName] = config;
   localStorage.setItem(LocalStorageKey, JSON.stringify(stored));
+}
+
+function expandField(ev) {
+  if (fieldSize == maxFieldSize) return;
+  const config = currentConfig();
+  config.size += 1;
+  editMode = false;
+  initialize(config);
+  toggleEditMode();
+}
+
+function shrinkField(ev) {
+  if (fieldSize == minFieldSize) return;
+  const config = currentConfig();
+  config.size -= 1;
+  config.holes = config.holes.filter(
+    h => h.x != config.size && h.y != config.size);
+  config.golds = config.golds.filter(
+    g => g.x != config.size && g.y != config.size);
+  config.agents.forEach(a => {
+    if (a.x == config.size) a.x -= 1;
+    if (a.y == config.size) a.y -= 1;
+    while (config.agents.some(a2 => a != a2 && a.x == a2.x && a.y == a2.y)) {
+      if (a.x != 0) {
+	a.x -= 1;
+      } else {
+	a.x = config.size - 1
+	a.y = (a.y + 1) % config.size;
+      }
+    }
+    config.golds = config.golds.filter(g => g.x != a.x || g.y != a.y);
+    config.holes = config.holes.filter(h => h.x != a.x || h.y != a.y);
+  });
+  editMode = false;
+  initialize(config);
+  toggleEditMode();
+}
+
+function openHelp(ev) {
+  const url =
+	"../documents/" +
+	( navigator.language.startsWith("ja") ?
+	  "help-jp.html" : "help.html" );
+  window.open(url, "_blank");
 }
