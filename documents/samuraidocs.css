@@ -22,9 +22,25 @@ th {
 table {
     border-spacing: 30px 5px;
 }
+table.bordered {
+    border-collapse:collapse;
+    margin: 5px;
+}
+table.bordered th {
+    padding: 5px 10px 5px 10px;
+}
+table.bordered td {
+    border: 1px solid black;
+    width: 50px;
+    text-align: center;
+}
 .figure {
     float:right; margin:10px;
 }
 .inlineIcon {
     height:18px;
+}
+
+pre {
+    margin-left: 20px;
 }

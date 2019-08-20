@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="samuraidocs.css" >
+    <title>SamurAI Dig Here Game Rules</title>
+  </head>
+  <body>
+    <span style="float:left">
+      <a href="rules-jp.html" target="_blank">日本語</a>
+    </span>
+    <h1>SamurAI Dig Here Game Rules</h1>
+    <center>
+      <p>
+	IPSJ Programming Contest Committee<br>
+	Draft as of 2019/08/20
+      </p>
+      <p>
+	This document gives the rules of the <em>SamurAI Dig Here</em> game,
+	played in the programming contest <em>SamurAI Coding 2019-20</em>
+	organized by Information Processing Society of Japan.
+      </p>
+      <p>
+	The rules described here are tentative and subject to change.
+      </p>
+    </center>
+
+    <h2>Game Overview</h2>
+    <p>
+      The game is a zero-sum game with imperfect information,
+      played by two teams each with two player agents controlled by
+      programs provided by the contestants.
+      The objective of the game is to dig out as much treasure buried in
+      the game field as possible.
+    </p>
+
+    <img src="screenShots/small-field.png" width="50%" class="figure">
+    <h3>Game Field</h3>
+    <p>
+      The game field has a square shape, divided into small squares
+      called <em>cells</em> aligned in a square lattice.  The size of
+      the game field, that is, the number of cells in one side of the
+      field may differ from one game to another.  The minimum size is
+      six.
+    </p>
+
+    <h3>Game Agents</h3>
+    <p>
+      Both teams have two agents each, one <em>samurai</em> and
+      one <em>dog.</em>
+    </p>
+    <p>
+      Game agents are controlled by programs provided by the contestants.
+      Two separate processes, one for controlling the samurai and one for
+      the dog of a team are run, and they share only those information
+      provided by the game management system.
+      No other communication is possible.
+    </p>
+    <p>
+      When the game starts, agents are positioned in some distinct cells
+      in the field.  More than one agents cannot be in the same cell at
+      a time throughout a game.
+    </p>
+    <p>
+      In one step of a game, samurai agents can move to one of
+      the <em>four</em> neighboring cells, that is, those cells that
+      share a edge with the cell the samurai is in.  Dog agents can move
+      to one of the <em>eight</em> neighboring cells, that is, those
+      cell that share one or two corners with the cell the dog is in.
+      They can also stay in the cell they are in.
+    </p>
+    <p>
+      When two or more agents are instructed to move to the same cell,
+      none of the agents can make their moves.
+      All such agents are kept in their original positions.
+    </p>
+
+    <h3>Holes</h3>
+    <p>
+      Some of the cells in the field may have a <em>hole</em> in them,
+      preventing game agents to step into.
+      A samurai agents can, however, instead of making a move,
+      plug a hole in one of the four neighboring cells.
+      Samurai can also dig new holes in the four neighboring cells.
+      Digging a new hole is not possible if another agent is in the cell.
+      Moreover, digging will not be successful either if another agent
+      moves to the cell in the same step.
+    </p>
+    <h3>Buried Treasures</h3>
+    <p>
+      Some of the cells in the field may have <em>buried treasure</em> in them.
+      Digging a new hole in a cell with buried treasure digs it out.
+      If samurai of both teams dig a hole in the same cell in the same step,
+      the treasure dug out is halved and shared by the two teams.
+      The amounts of buried treasure are always an even number.
+    </p>
+    <p>
+      A dog in one of the eight neighboring cells of the cell with
+      buried treasure can sense the position as well as its amount, but
+      they are <em>not</em> informed to the rest of agents.
+      Dogs bark when they step into a cell with buried treasure,
+      making the treasure position and its amount known to <em>all</em>
+      the other agents.
+      Not only the colleague samurai but also the opponent samurai
+      and the opponent dog hear the bark.
+    </p>
+    <h3>Game Steps</h3>
+    <p>
+      A game is played in a step-wise manner.
+      When a game step starts, all the agent makes a <em>play
+	plan</em> of the step simultaneously.
+      The play plans are checked their validity and also
+      collated to detect conflicts between them,
+      resulting a set of <em>actions</em> agents can take.
+      The actions are then carried out and the field state is updated.
+    </p>
+    <p>
+      Game steps are repeated until the predefined maximum number of
+      steps are played or all the buried treasures has been excavated.
+    </p>
+
+    <h2>Player Programs</h2>
+    <h3>Player Processes</h3>
+    <p>
+      The contestant should provide one <em>player program</em> each for
+      controlling two agents, a samurai and a dog, belonging to the
+      team.
+    </p>
+    <p>
+      The player programs are started on start of a game by the <em>game
+	management system</em> as separate processes.  The player
+      processes have no direct communication paths between them; the
+      only communication possible is with the game management system.
+    </p>
+
+    <h3>Input and Output</h3>
+    <p>
+      At the start of each of the game step,
+      the game management system sends information on the game state
+      to those player processes.
+      The player processes should receive the information respond with
+      a play plan for the corresponding agent.
+    </p>
+    <p>
+      The game state information sent from the game manager can be read
+      from the standard input of the player processes.
+      The play plan in its response should sent to the standard output.
+    </p>
+
+    <h3>Play Plans and Actions</h3>
+    <p>
+      The <em>play plans</em> are the plans of agents' plays sent by the
+      player programs, and the <em>actions</em> are the plays actually
+      taken by the agent decided by the game management system after
+      avoiding any collisions.
+    </p>
+    <p>
+      For example, if two agents' play plans tell to move to the same
+      cell, their plans conflict each other, and thus the game
+      management system makes both of the agent to stay at the same
+      position.
+      If a samurai plans to dig a new hole in a cell and another agent
+      plans to move to the same cell, the move has the precedence and
+      the digging will be unsuccessful.
+      If, however, two other agents plan to move to the cell in which
+      a dig is planned, the moves conflict each other and are
+      cancelled, and the dig will be effective.
+    </p>
+    <p>
+      Play plans and actions are represented as an integer <var>m</var>
+      (-1 &leq; <var>m</var> &leq; 23), meaning the following.
+      <div class="figure">
+	<table class="bordered">
+	  <tr>
+	    <th></th>
+	    <th><var>x</var>&minus;1</th>
+	    <th><var>x</var></th>
+	    <th><var>x</var>&plus;1</th>
+	  </tr>
+	  <tr>
+	    <th><var>y</var>&minus;1</th>
+	    <td>3</td><td>4</td><td>5</td>
+	  </tr>
+	  <tr>
+	    <th><var>y</var></th>
+	    <td>2</td><td></td><td>6</td>
+	  </tr>
+	  <tr>
+	    <th><var>y</var>&plus;1</th>
+	    <td>1</td><td>0</td><td>7</td>
+	  </tr>
+	</table>
+	<center>
+	  <caption>Designated Cells</caption>
+	</center>
+      </div>
+      <dl>
+	<dt>&minus;1</dt>
+	<dd>Stay in the cell the agent is located without any move.</dd>
+	<dt>0, &hellip;, 7</dt>
+	<dd>Move to one of the neighboring cells.</dd>
+	<dt>8, &hellip;, 15</dt>
+	<dd>Dig a new hole in one of the neighboring cells.</dd>
+	<dt>16, &hellip;, 23</dt>
+	<dd>Plug the hole in one of the neighboring cells.</dd>
+      </dl>
+      The coordinates of the target cell, that is the agent moves to or
+      the cell to dig or plug a hole, is indicated by <var>d</var>
+      &equals; <var>m</var> modulo 8.
+      The neighboring cells designated by <var>d</var> are
+      shown in the table to the right.
+    </p>
+    <p>
+      Digging or plugging a hole by dogs is invalid.
+      For samurai, move, digging, and plugging is valid only for
+      four neighboring cells, and thus <var>d</var> should be even.
+      Invalid play plans are treated the same as &minus;1.
+    </p>
+
+    <h3>Game State Information</h3>
+    <p>
+      The game state information sent from the game management system to
+      the player processes at the beginning of each step contains the
+      following in this order.
+      <ul>
+	<li>
+	  Field size, that is, the number of cells in one side of the
+	  field (integer).
+	</li>
+	<li>
+	  Current game step number (integer).
+	  The step number starts with 0.
+	</li>
+	<li>Maximum number of game steps (integer).</li>
+	<li>
+	  List of positions of cells with a hole.
+	</li>
+	<li>
+	  List of buried treasures already known to all the agents.
+	</li>
+	<li>
+	  List of buried treasures sensed by the agent controlled by the
+	  player process receiving the information, but not made open to
+	  the rest.  Note that, for a samurai, this list is always empty.
+	</li>
+	<li>
+	  List of positions of the four agents.  First comes the
+	  position of the samurai of the team the controlled agent
+	  belongs to, next comes that of the opponent samurai,
+	  then comes that of the friedly dog, and finally comes that of
+	  the opponent dog.
+	</li>
+	<li>
+	  List of play plans indicated by the four agents in the
+	  previous step.  The order of agents is the same as the
+	  list of their positions described above.
+	  For the first step of a game, all will be &minus;1.
+	</li>
+	<li>
+	  List of actions taken by the four agents in the previous step.
+	  The order of agents is the same again.
+	</li>
+	<li>
+	  Scores, that are, the total amount of treasure already dug out
+	  by the previous step (two integers).  The score of the friend
+	  team comes first, follows by that of the opponent team.
+	</li>
+	<li>
+	  The total amount of treasure not excavated yet (an integer).
+	</li>
+	<li>
+	  <a href="#timeLimit">Think time</a> left (an integer in milliseconds).
+	</li>
+      </ul>
+    </p>
+    <p>
+      All the lists of items start with the number of items in the list
+      (an integer).
+      For an empty list, it is 0.
+      Descriptions of items in the list follows it, if any.
+      Each item may consist of one or more integers.
+    </p>
+    <p>
+      Positions of cells are represented by two integers,
+      meaning the x- and y-coordinates of the cell.
+      The coordinate values are non-negative integers less than the field size.
+    </p>
+    <p>
+      Buried treasures are represented by three integers.
+      The first two of them are the coordinates of the cell the treasure
+      is buried in, and the third is the amount of the treasure,
+      which is a even positive integer.
+    </p>
+    <p>
+      As described above, all the items in the game state information
+      are integers.  They are separated by either a space or a newline.
+      A newline follows the last item.
+    </p>
+
+    <h3>Play Plans</h3>
+    <p>
+      In response to the game state information received,
+      the player program should send a play plan
+      for the correspondent agent.
+      The play plan is an integer in the range &minus;1, &hellip; 23,
+      with the meaning described above.
+      A newline should follow the play plan.
+    </p>
+
+    <h3 id="timeLimit">Think Time Limit</h3>
+    <p>
+      A limit is set on the total the think time of player processes.
+      The think time is the period of time between when the game
+      state information is sent to the player pcoesses and when its
+      response, a play plan, is received by the game management system.
+      Note that it is wallclock time rather than CPU time.
+      Think times of each step are accumulated and the limit is set on
+      the total.
+    </p>
+    <p>
+      The think time limit is set for each of the player processes;
+      think times of the samurai and the dog of the same team are
+      accumulated independently.
+    </p>
+    <p>
+      When this time limit is exceeded, the player process is assumed to
+      respond with &minus;1 (stay in the same position) for all the
+      remaining steps.
+    </p>
+    <p>
+      The value of the think time limit is given for each game.
+    </p>
+
+    <h2>Match</h2>
+    <p>
+      One match between two teams consists of two games with the
+      same initial configuration except that the initial positions of
+      the agents are swapped between two teams.
+      The result of the match is judged by the total amounts of
+      treasure dug out in two games.
+    </p>
+  </body>
+</html>

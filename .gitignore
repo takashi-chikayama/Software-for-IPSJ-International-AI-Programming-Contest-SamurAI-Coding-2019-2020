@@ -1,0 +1,4 @@
+# SVG files are not needed in the git repository
+svg/
+# Game overview document is not required
+documents/game-overview-jp.html

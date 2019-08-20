@@ -5,6 +5,7 @@
     <title>SamurAI Dig Here Viewer</title>
     <script src="sponsorLogos.js"></script>
     <script src="mockup.js"></script>
+    <script src="players.js"></script>
     <link rel="stylesheet" href="mockup.css" >
   </head>
   <body>
@@ -12,7 +13,6 @@
     </svg>
     <div id="topBar" class="infoBar">
       <div class="alignLeft">
-	<img id="reinit" src="../icons/reinit.png" title="reinitialize">
 	<img id="rewind" src="../icons/rewind.png" title="first step">
 	<img id="stepBackward" src="../icons/stepBackward.png" title="step back">
 	<img id="playStop" src="../icons/play.png" title="play/stop">
@@ -21,16 +21,22 @@
 	<img id="speedometer" src="../icons/speedometer.png"
 	     title="change play tempo">
 	<span id="stepsPerMin">60</span>
+	<img id="randomize" src="../icons/randomize.png" title="randomize">
+	<img id="clearLog" src="../icons/clearLog.png" title="clear log">
 	<img id="load" src="../icons/load.png" title="load">
 	<img id="save" src="../icons/save.png" title="save">
 	<img id="remove" src="../icons/remove.png" title="remove">
 	<img id="import" src="../icons/import.png" title="import">
+	<input type="file" style="display:none"
+	       id="importForm"
+	       accept=".dighere"
+	       onchange="importFile(event)">
 	<img id="export" src="../icons/export.png" title="export">
 	<img id="expand" src="../icons/expand.png" title="expand">
-	<img id="shrink" src="../icons/shrink.png" title="shrink">
       </div>
       <div class="alignRight">
-	<img id="edit" src="../icons/pencil.png">
+	<img id="edit" src="../icons/edit.png">
+	<img id="exitEdit" src="../icons/exitEdit.png">
 	<span id="remainingLabel" style="align:right"></span>
 	<img id="goldImage" src="../icons/coins-icon.png"
 	     style="align:right">
@@ -50,8 +56,19 @@
 	<img id="samuraiFigure1" src="../icons/samurai-figure-1.png">
       </div>
     </div>
+    <div id="promptBox" class="promptBox overlaid">
+      <span id="promptMessage"></span>
+      <input id="promptInput" type="text" style="font-size: 20px;">
+      <button id="promptDoItButton"></button>
+      <button
+	id="promptDismissButton"
+	onclick=
+	"document.getElementById('promptBox').style.display='none';">
+	Dismiss
+      </button>
+    </div>
     <script>
-      initialize();
+      start();
     </script>
   </body>
 </html>

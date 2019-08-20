@@ -1,8 +1,11 @@
 let field;
 let background;
 let backgroundDirt;
-let groundLayer;
+let holeLayer;
+let knownGoldLayer;
+let hiddenGoldLayer;
 let agentLayer;
+let arrowsLayer;
 let diamondLayer;
 let fieldSize;
 const maxFieldSize = 20;
@@ -10,32 +13,40 @@ const minFieldSize = 6;
 let fieldWidth, fieldHeight, topMargin;
 let cellWidth, cellHeight, halfWidth, halfHeight;
 let cells;
+const topMarginRatio = 0.04;
 
 let holeProb = 0.07;
 let goldProb = 0.06;
-let goldKnownProb = 0.1;
 let maxGold2 = 10;
 
 let maxSteps;
 let playUntil;
 let playTempo = 60;
-let stepInterval = playTempo*1000/60;
-let frameRate = 20;
-let numSubsteps = frameRate*stepInterval/1000;
-let midStep = Math.floor((numSubsteps+1)/2);
+let frameRate = 30;
+let stepInterval;
+let numSubsteps;
+let midStep;
+let substepInterval;
 let currentStep;
 let substep = 0;
-
-let goldShown;
 
 let backgroundColor = "rgb(120,80,40)";
 let editingBackgroundColor = "rgb(120,120,120)";
 let lawnColor = "rgb(40,160,40)";
-let leftFenceColor = "rgb(160,160,160)";
-let rightFenceColor = "rgb(200,200,200)";
+let leftFenceColor = "rgb(180,180,180)";
+let rightFenceColor = "rgb(210,210,210)";
 let scoreColor = "rgb(255,255,0)";
-let clockColor = "rgb(0,255,255)";
+let clockColor = "rgb(255,255,0)";
+let endGameClockColor = "rgb(255,100,100)";
+let lastRecordClockColor = "rgb(100,255,255)";
+let speedColor = "rgb(100,255,255)";
 let scores = [];
+
+const logoSizes = { platinum: 2.8, gold: 2.3, silver: 1.6, bronze: 1.0 };
+let leftLogos;
+let rightLogos;
+let leftLogoWidth;
+let rightLogoWidth;
 
 const barkSoundFile = '../sounds/bark.mp3';
 const tickSoundFile = '../sounds/tick-mono.mp3';
@@ -64,225 +75,6 @@ class AgentAttributes {
     this.seq = seq;
     this.player = player;
     this.image = createSVG('image');
-  }
-}
-
-// Distance for a samurai
-function distance(from, to, holes) {
-  let next0 = [from];
-  let next1 = [];
-  let next2 = [];
-  const reached = [from];
-  for (let dist = holes.includes(from) ? 1 : 0;
-       ;
-       dist++) {
-    for (let i = 0; i != next0.length; i++) {
-      const p = next0[i];
-      if (p == to) return dist;
-      for (let dir = 0; dir != 8; dir++) {
-	const adj = p.neighbors[dir];
-	if (adj == to) return dist;
-	if (adj != null && !reached.includes(adj)) {
-	  reached.push(adj);
-	  if (holes.includes(adj)) {
-	    next2.push(adj);
-	  } else {
-	    next1.push(adj);
-	  }
-	}
-      }
-    }
-    next0 = next1;
-    next1 = next2;
-    next2 = [];
-  }
-}
-
-// Agent actions
-//   Actions planned and possibly taken are one of the following
-//     -1: No action; stay in the same cell
-//     0..7: Move to an adjacent cell
-//     8..15: Dig a hole in an adjacent cell
-//     16..23: Plug up the hole in an adjacen cell
-//   Direction of the adjacent cell is action modulo 8.
-
-// player: Plans an action for each step
-//   plan(gameState): Function to plan an action
-//   seq: Role of the player
-
-class Player {
-  constructor(role) {
-    this.role = role;
-  };
-  plan(gameInfo) {
-    return -1;
-  }
-}
-
-class GreedySamurai extends Player {
-  plan(gameInfo) {
-    const agent = gameInfo.agents[this.role];
-    const holes = gameInfo.holes;
-    function makeDistMap(pos, initDir, dist, map) {
-      for (let dir = 0; dir != 8; dir += 2) {
-	const adj = pos.neighbors[dir];
-	if (adj != null &&
-	    map[adj.x][adj.y].dist > dist) {
-	  map[adj.x][adj.y] = { dir: initDir, dist: dist }
-	  makeDistMap(adj, initDir,
-		      dist + (holes.includes(adj) ? 2 : 1),
-		      map);
-	}
-      }
-    }
-    function planSamuraiMove(pos, dogPos) {
-      const distMap = [];
-      for (let x = 0; x != fieldSize; x++) {
-	distMap[x] = [];
-	for (let y = 0; y != fieldSize; y++) {
-	  distMap[x][y] = { dir: -1, dist: Infinity };
-	}
-      }
-      distMap[pos.x][pos.y] = { dir: -1, dist: 0 };
-      for (let dir = 0; dir != 8; dir += 2) {
-	const adj = pos.neighbors[dir];
-	if (adj != null && gameInfo.agents.every(a => a.at != adj)) {
-	  makeDistMap(adj, dir,
-		      (holes.includes(adj) ? 2 : 1), distMap);
-	}
-      }
-      let bestMove = -1;
-      let closest = Infinity;
-      gameInfo.knownGolds.forEach(
-	g => {
-	  const entry = distMap[g.at.x][g.at.y];
-	  if (entry.dist < closest) {
-	    bestMove = entry.dir;
-	    if (holes.includes(pos.neighbors[bestMove])) {
-	      bestMove += 16;
-	    }
-	    closest = entry.dist;
-	  }
-	});
-      if (bestMove < 0) {
-	// No known gold
-	// Try to approach the dog so for it may find some gold
-	let dogDist = Infinity;
-	for (let dir = 0; dir != 8; dir += 2) {
-	  const adj = pos.neighbors[dir];
-	  if (adj != null && !gameInfo.agents.some(a => a.at == adj)) {
-	    const adjDist = distance(adj, dogPos, holes);
-	    if (2 < adjDist && adjDist < dogDist) {
-	      bestMove = dir;
-	      dogDist = adjDist;
-	      if (holes.includes(adj)) bestMove += 16;
-	    }
-	  }
-	}
-      }
-      if (agent.planned == agent.action || agent.planned != bestMove) {
-	return bestMove;
-      } else {
-	return -1;
-      }
-    }
-    const pos = agent.at;
-    // Samurai will try to dig an adjacent known gold cell
-    for (let dir = 0; dir != 8; dir += 2) {
-      const adj = pos.neighbors[dir];
-      if (adj != null &&
-	  gameInfo.knownGolds.some(g => g.at == adj)) {
-	return dir + 8;
-      }
-    }
-    // Try to reach the nearest known gold
-    let bestMove = planSamuraiMove(pos, gameInfo.agents[this.role+2].at);
-    if (bestMove == -1) {
-      // No gold known,
-      // can't approach known golds (surrounded by other agents?), or
-      // the planned move is the same as that of the previous step that failed,
-      // choose a random move
-      let moveCand = [];
-      for (let dir = 0; dir != 8; dir += 2) {
-	const adj = pos.neighbors[dir];
-	if (adj != null && !gameInfo.agents.some(a => a.at == adj)) {
-	  moveCand.push(dir);
-	}
-      }
-      if (moveCand != []) {
-	bestMove = moveCand[Math.floor(moveCand.length*random.gen())];
-      }
-    }
-    return bestMove;
-  }
-}
-
-class SnoopyDog extends Player {
-  constructor(role) {
-    super(role);
-    this.known = [];
-    for (let x = 0; x != fieldSize; x++) {
-      this.known[x] = [];
-      for (let y = 0; y != fieldSize; y++) {
-	this.known[x][y] = false;
-      }
-    }
-  }
-  plan(gameInfo) {
-    //// Plan for a dog ////
-    const agent = gameInfo.agents[this.role];
-    const pos = agent.at;
-    pos.neighbors.forEach(
-      adj => {
-	if (adj != null) this.known[adj.x][adj.y] = true;
-      });
-    const holes = gameInfo.holes;
-    let barkCand = [];
-    let moveCand = [];
-    for (let dir = 0; dir != 8; dir++) {
-      const adj = pos.neighbors[dir];
-      if (adj != null &&
-	  !holes.includes(adj) &&
-	  !gameInfo.agents.some(a => a.at == adj)) {
-	if (gameInfo.hiddenGolds.some(g => g.at == adj)) {
-	  barkCand.push(dir);
-	} else {
-	  moveCand.push(dir);
-	}
-      }
-    }
-    // When an adjacent cell has some hidden gold
-    // and the friend samurai is closer to that cell
-    // than the the enemy samurai,
-    // move to that cell and bark.
-    for (let b = 0; b != barkCand.length; b++) {
-      const dir = barkCand[b];
-      const gpos = pos.neighbors[dir];
-      if (distance(gpos, gameInfo.agents[this.role-2].at, holes) <
-	  distance(gpos, gameInfo.agents[(this.role+1)%2].at, holes)) {
-	return dir;
-      }
-    }
-    // Otherwise, try to gather as much information as possible
-    if (moveCand.length != 0) {
-      let bestMove = -1;
-      let bestInfo = 0;
-      let infoObtained = 0;
-      moveCand.forEach(
-	m => {
-	  let info = 0;
-	  pos.neighbors[m].neighbors.forEach(
-	    n => { if (n != null && !this.known[n.x][n.y]) info++; });
-	  if (info > bestInfo) bestMove = m;
-	});
-      if (bestMove >= 0 &&
-	  (agent.planned == agent.action || agent.planned != bestMove)) {
-	return bestMove;
-      }
-      return moveCand[Math.floor(moveCand.length*random.gen())];
-    } else {
-      return -1;
-    }
   }
 }
 
@@ -324,10 +116,20 @@ class Cell {
     this.diamond = createSVG('polygon');
     this.isCorner =
       (x == 0 || x == fieldSize-1) && (y == 0 || y == fieldSize-1)
+    this.gold = 0;
   }
   resize() {
     this.cx = (fieldSize+this.x-this.y)*cellWidth/2;
     this.cy = (this.x+this.y+1)*halfHeight + topMargin;
+    this.top = this.cy-cellHeight/2+1;
+    this.bottom = this.cy+cellHeight/2-1;
+    this.left = this.cx-cellWidth/2+1;
+    this.right = this.cx+cellWidth/2-1
+    this.corners = 
+      this.left+","+this.cy+" "+
+      this.cx+","+this.top+" "+
+      this.right+","+this.cy+" "+
+      this.cx+","+this.bottom;
     const hole = this.holeImage;
     hole.setAttribute('x', this.cx-0.3*cellWidth);
     hole.setAttribute('y', this.cy-0.5*cellHeight);
@@ -335,14 +137,9 @@ class Cell {
     hole.setAttribute('height', 0.5*cellWidth);
     hole.setAttribute('href', holeImage);
     const diamond = this.diamond;
-    diamond.setAttribute(
-      'points',
-      (this.cx-cellWidth/2+1) + "," + (this.cy) + " " +
-	(this.cx) + "," + (this.cy-cellHeight/2+1) + " " +
-	(this.cx+cellWidth/2-1) + "," + (this.cy) + " " +
-	(this.cx) + "," + (this.cy+cellHeight/2-1));
+    diamond.setAttribute('points', this.corners);
     diamond.style.fill = "rgba(1,1,1,0)";
-    diamond.style.strokeWidth = "2px";
+    diamond.style.strokeWidth = Math.max(2, cellWidth/20)+"px";
     diamond.style.stroke = "none";
     diamondLayer.appendChild(diamond);
   }
@@ -354,8 +151,8 @@ class Cell {
       let nx = this.x + directions[d][0];
       let ny = this.y + directions[d][1];
       this.neighbors[d] =
-	0 <= nx && nx < fieldSize && 0 <= ny && ny < fieldSize ?
-	cells[nx][ny] : null;
+        0 <= nx && nx < fieldSize && 0 <= ny && ny < fieldSize ?
+        cells[nx][ny] : null;
     }
   }
 }
@@ -372,7 +169,7 @@ const samuraiDug = [];
 const dogSitting = [];
 const dogBarking = [];
 const holeImage = "../icons/hole.png";
-const goldImage = "../icons/gold";
+const goldImageFile = "../icons/gold";
 
 for (let k = 0; k != 8; k++) {
   samuraiStanding[2*k] =
@@ -402,36 +199,28 @@ const arrowDigImages = [
 ];
 
 let manualAgent = -1;
-let targetsShown = [];
 
-function toggleManualPlay(ev, reset) {
+function toggleManualPlay(ev) {
   stopAutoPlay();
-  manualAgent = reset ? -1 : (manualAgent+2)%3 - 1;
-  setManualPlay(manualAgent);
-}
-
-function setManualPlay(manualAgent) {
-  const manualIcons = ["manual", "red-hand", "blue-hand"];
-  manualButton.src = "../icons/" + manualIcons[manualAgent+1] + ".png";
+  setManualPlay((manualAgent+2)%3 - 1);
   stepRecords[currentStep].redraw(true);
 }
 
-function drawGoldImage(cell, group) {
-  group.setAttribute(
-    "transform",
-    "translate(" + cell.cx + "," + cell.cy + ")" +
-      "scale(" + (0.9*cellWidth) + ")");
-  groundLayer.appendChild(group);
+function setManualPlay(agent) {
+  manualAgent = agent;
+  const manualIcons = ["manual", "red-hand", "blue-hand"];
+  manualButton.src = "../icons/" + manualIcons[manualAgent+1] + ".png";
 }
 
-function makeGoldImage(cell, amount) {
+function makeGoldImage(cell) {
+  const amount = cell.gold;
   const gold = createSVG('image');
   gold.setAttribute('x', -0.3);
   gold.setAttribute('y', -0.35);
   gold.setAttribute('width', 0.6);
   gold.setAttribute('height', 0.6);
   const figIndex = Math.min(10, Math.max(10*Math.abs(amount)/maxGold2/2, 5));
-  gold.setAttribute('href', goldImage + twoDigits[figIndex] + ".png");
+  gold.setAttribute('href', goldImageFile + twoDigits[figIndex] + ".png");
   const amnt = createSVG('text');
   amnt.setAttribute('x', 0);
   amnt.setAttribute('y', 0);
@@ -440,13 +229,17 @@ function makeGoldImage(cell, amount) {
   amnt.setAttribute('font-weight', 'bold');
   amnt.setAttribute('style', 'text-shadow:1px 1px black');
   amnt.setAttribute('text-anchor', 'middle');
-  amnt.setAttribute('fill', scoreColor);
+  amnt.style.fill = scoreColor;
   amnt.innerHTML = Math.abs(amount);
   amnt.style.pointerEvents = "none";
   const group = createSVG('g');
   group.appendChild(gold);
   group.appendChild(amnt);
-  return group;
+  group.setAttribute(
+    "transform",
+    "translate(" + cell.cx + "," + cell.cy + ")" +
+      "scale(" + (0.9*cellWidth) + ")");
+  cell.goldImage = group;
 }
 
 function repositionAgent(a, init) {
@@ -470,8 +263,10 @@ function randomConfig() {
   for (let na = 0; na != 4; ) {
     const x = Math.floor(config.size*random.gen());
     const y = Math.floor(config.size*random.gen());
+    let d = Math.floor(8*random.gen());
+    if (na < 2) d = d & 6;
     if (config.agents.every(a => a.x != x || a.y != y)) {
-      config.agents.push({x: x, y: y});
+      config.agents.push({x: x, y: y, direction: d});
       na++;
     }
   }
@@ -480,7 +275,7 @@ function randomConfig() {
     const x = Math.floor(config.size*random.gen());
     const y = Math.floor(config.size*random.gen());
     if (config.agents.every(a => a.x != x || a.y != y) &&
-	config.holes.every(h => h.x != x || h.y != y)) {
+        config.holes.every(h => h.x != x || h.y != y)) {
       config.holes.push({x: x, y: y});
       nh++;
     }
@@ -490,8 +285,8 @@ function randomConfig() {
     const x = Math.floor(config.size*random.gen());
     const y = Math.floor(config.size*random.gen());
     if (config.agents.every(a => a.x != x || a.y != y) &&
-	config.holes.every(h => h.x != x || h.y != y) &&
-	config.golds.every(h => h.x != x || h.y != y)) {
+        config.holes.every(h => h.x != x || h.y != y) &&
+        config.golds.every(h => h.x != x || h.y != y)) {
       const amount = 2*Math.floor(maxGold2*random.gen()+1);
       config.golds.push({x: x, y: y, amount: amount});
       ng++;
@@ -500,26 +295,9 @@ function randomConfig() {
   return config;
 }
 
-function drawOrRemoveGolds(golds) {
-  golds.forEach(g => {
-    if (!goldShown.includes(g)) {
-      drawGoldImage(g.at, g.image);
-      goldShown.push(g);
-    }
-  });
-  const goldToRemove = [];
-  goldShown.forEach(g => {
-    if (!golds.includes(g)) {
-      groundLayer.removeChild(g.image);
-      goldToRemove.push(g);
-    }
-  });
-  goldToRemove.forEach(g => goldShown.splice(goldShown.indexOf(g), 1));
-}
-
 // Game State Record for Each Game Step
 //   stepNumber: Step sequence number (start from 0)
-//   agents: Array of agent states (see below for agent records)
+//   agents: Array of agent states
 //   golds: Array of the amounts of gold already dug out (2 elems)
 //   goldRemaining: Amount of gold not dug out yet
 //   knownGolds: Array of info on *known* embedded golds
@@ -546,40 +324,39 @@ class GameState {
       this.knownGolds = [];
       this.hiddenGolds = [];
       config.golds.forEach(g => {
-	const cell = cells[g.x][g.y];
-	this.hiddenGolds.push({
-	  at: cell, amount: g.amount,
-	  image: makeGoldImage(cell, g.amount)
-	});
-	this.goldRemaining += g.amount;
+        const cell = cells[g.x][g.y];
+	cell.gold = g.amount;
+        this.hiddenGolds.push(cell);
+        this.goldRemaining += g.amount;
       });
       this.golds = [0, 0];
       this.dogsBark = [false, false];
       // Initialize agents
-      const agentPlayers = [
-	new GreedySamurai(0), new GreedySamurai(1),
-	new SnoopyDog(2), new SnoopyDog(3)
-      ];
       this.agents = [];
       for (let a = 0; a != 4; a++) {
-	const pos = config.agents[a];
-	this.agents.push(
-	  new AgentState(
-	    new AgentAttributes(a, agentPlayers[a]),
-	    cells[pos.x][pos.y],
-	    2*Math.floor(4*random.gen())));
+        const agentPlayers = [
+          new GreedySamurai(fieldSize, maxSteps),
+          new GreedySamurai(fieldSize, maxSteps),
+          new SnoopyDog(fieldSize, maxSteps),
+          new SnoopyDog(fieldSize, maxSteps)
+        ];
+        const agent = config.agents[a];
+        this.agents.push(
+          new AgentState(
+            new AgentAttributes(a, agentPlayers[a]),
+            cells[agent.x][agent.y], agent.direction));
       }
       remainingLabel.innerHTML = this.goldRemaining;
     } else {
       this.stepNumber = prevGameState.stepNumber + 1;
       function invalidAction(role, plan, targetPos, prev) {
-	return (
-	  plan < -1 || plan >= 24 || // Invalid plan value
-	  targetPos === null || // or trying to go beyond an edge
-	  (role < 2 && plan%2 != 0) || // or diagonal move/dig/plug by samurai
-	  (role >= 2 && plan >= 8) ||  // or dig by a dog
-	  prev.agents.some(b => (b.at == targetPos)) // or someone is there
-	);
+        return (
+          plan < -1 || plan >= 24 || // Invalid plan value
+          targetPos === null || // or trying to go beyond an edge
+          (role < 2 && plan%2 != 0) || // or diagonal move/dig/plug by samurai
+          (role >= 2 && plan >= 8) ||  // or dig by a dog
+          prev.agents.some(b => (b.at == targetPos)) // or someone is there
+        );
       }
       // Copy cells, gold and hole info from the previous state
       this.goldRemaining = prevGameState.goldRemaining;
@@ -597,137 +374,180 @@ class GameState {
       // Decide plans of agents
       this.agents = [];
       for (let a = 0; a != 4; a++) {
-	const agent = prevGameState.agents[a];
-	const newAgent =	// Default is to stay still
-	  new AgentState(agent.attributes, agent.at, agent.direction);
-	this.agents[a] = newAgent;
-	const plan =
-	      (a == manualAgent && commandPlay !== undefined) ?
-	      commandPlay :
-	      agent.attributes.player.plan(prevGameState);
-	const targetPos = agent.at.neighbors[plan%8];
-	plannedPositions[a] = agent.at;
-	newAgent.planned = plan;
-	newAgent.action = -1;
-	if (plan >= 0) {
-	  newAgent.direction = plan % 8;
-	  if (!invalidAction(a, plan, targetPos, prevGameState)) {
-	    if (plan < 8 && !prevGameState.holes.includes(targetPos)) {
-	      plannedPositions[a] = targetPos;
-	      newAgent.action = plan;
-	    } else if (plan < 16) {
-	      if (!this.holes.includes(targetPos)) {
-		plannedDig[a] = targetPos;
-		newAgent.action = plan;
-	      }
-	    } else if (this.holes.includes(targetPos)) {
-	      plannedPlug[a] = targetPos;
-	      newAgent.action = plan;
-	    }
-	  }
-	}
+        const agent = prevGameState.agents[a];
+        const newAgent =        // Default is to stay still
+          new AgentState(agent.attributes, agent.at, agent.direction);
+        this.agents[a] = newAgent;
+        const agentArgs =
+              a % 2 == 0 ?
+              [ prevGameState.agents[0], prevGameState.agents[1],
+                prevGameState.agents[2], prevGameState.agents[3] ] :
+              [ prevGameState.agents[1], prevGameState.agents[0],
+                prevGameState.agents[3], prevGameState.agents[2] ];
+        const teamOrder = a % 2 == 0 ? [0, 1] : [1, 0];
+        const detectedGolds = [];
+        if (a >= 2) {
+          prevGameState.hiddenGolds.forEach(c => {
+            if (agent.at.neighbors.includes(c)) {
+              detectedGolds.push(c);
+            }
+          });
+        }
+        const plan =
+	      Array.isArray(commandPlay) ? commandPlay[a] :
+              (a == manualAgent && commandPlay !== undefined) ?
+              commandPlay :
+              agent.attributes.player.plan(
+                currentStep, prevGameState.holes,
+                prevGameState.knownGolds, detectedGolds,
+                [ agentArgs[0].at, agentArgs[1].at,
+		  agentArgs[2].at, agentArgs[3].at ],
+                [ agentArgs[0].planned, agentArgs[1].planned,
+                  agentArgs[2].planned, agentArgs[3].planned ],
+                [ agentArgs[0].action, agentArgs[1].action,
+                  agentArgs[2].action, agentArgs[3].action ],
+                [ scores[teamOrder[0]], scores[teamOrder[1]] ],
+                prevGameState.goldRemaining
+              );
+        const targetPos = agent.at.neighbors[plan%8];
+        plannedPositions[a] = agent.at;
+        newAgent.planned = plan;
+        newAgent.action = -1;
+        if (plan >= 0) {
+          newAgent.direction = plan % 8;
+          if (!invalidAction(a, plan, targetPos, prevGameState)) {
+            if (plan < 8 && !prevGameState.holes.includes(targetPos)) {
+              plannedPositions[a] = targetPos;
+              newAgent.action = plan;
+            } else if (plan < 16) {
+              if (!this.holes.includes(targetPos)) {
+                plannedDig[a] = targetPos;
+                newAgent.action = plan;
+              }
+            } else if (this.holes.includes(targetPos)) {
+              plannedPlug[a] = targetPos;
+              newAgent.action = plan;
+            }
+          } else {
+            console.log("INVALID ACTION BY AGENT "+a);
+            console.log("Planned action is: ", plan);
+          }
+        }
       }
       // Process movements
       for (let role = 0; role != 4; role++) {
-	let conflict = false;
-	for (let b = 0; b != 4; b++) {
-	  if (role != b && plannedPositions[role] == plannedPositions[b]) {
-	    conflict = true;
-	    break;
-	  }
-	}
-	if (!conflict) {
-	  let pos = plannedPositions[role];
-	  this.agents[role].at = pos;
-	  // Dogs make embedded gold known to everyone
-	  if (role >= 2) {
-	    this.hiddenGolds.forEach(
-	      g => {
-		if (g.at == pos) {
-		  this.hiddenGolds = this.hiddenGolds.filter(h => h != g);
-		  this.knownGolds.push(g);
-		  this.dogsBark[role-2] = true;
-		}
-	      });
-	  }
-	} else {
-	  this.agents[role].action = -1;
-	}
+        let conflict = false;
+        for (let b = 0; b != 4; b++) {
+          if (role != b && plannedPositions[role] == plannedPositions[b]) {
+            conflict = true;
+            break;
+          }
+        }
+        if (!conflict) {
+          let pos = plannedPositions[role];
+          this.agents[role].at = pos;
+          // Dogs make embedded gold known to everyone
+          if (role >= 2) {
+            this.hiddenGolds.forEach(g => {
+              if (g == pos) {
+                this.hiddenGolds = this.hiddenGolds.filter(h => h != g);
+                this.knownGolds.push(g);
+                this.dogsBark[role-2] = true;
+              }
+            });
+          }
+        } else {
+          this.agents[role].action = -1;
+        }
       }
       // Process digging
       for (let a = 0; a != 2; a++) {
-	const dug = plannedDig[a];
-	const digTogether = (dug == plannedDig[1-a]);
-	if (dug != null) {
-	  if (this.agents.some(b => b.at == dug)) {
-	    // Position to be dug out is occupied by another agent
-	    this.agents[a].action = -1;
-	    continue;
-	  }
-	  let grec = null;
-	  this.hiddenGolds.forEach(g => { if (g.at == dug) grec = g; });
-	  this.knownGolds.forEach(g => { if (g.at == dug) grec = g; });
-	  if (grec != null) {
-	    let goldAmount = grec.amount;
-	    if (goldAmount != 0) {
-	      this.goldRemaining -= goldAmount;
-	      if (digTogether) {
-		this.golds[0] += goldAmount/2;
-		this.golds[1] += goldAmount/2;
-		this.agents[0].obtained = goldAmount/2;
-		this.agents[1].obtained = goldAmount/2;
-	      } else {
-		this.golds[a] += goldAmount;
-		this.agents[a].obtained = goldAmount/2;
-	      }
-	      this.hiddenGolds = this.hiddenGolds.filter(c => c != grec);
-	      this.knownGolds = this.knownGolds.filter(c => c != grec);
-	    }
-	    this.dug.push(grec);
-	  }
-	  this.holes.push(dug);
-	}	  
-	if (digTogether) break;
+        const dug = plannedDig[a];
+        const digTogether = (dug == plannedDig[1-a]);
+        if (dug != null) {
+          if (this.agents.some(b => b.at == dug)) {
+            // Position to be dug out is occupied by another agent
+            this.agents[a].action = -1;
+            continue;
+          }
+          if (dug.gold != 0) {
+            this.goldRemaining -= dug.gold;
+            if (digTogether) {
+              this.golds[0] += dug.gold/2;
+              this.golds[1] += dug.gold/2;
+              this.agents[0].obtained = dug.gold/2;
+              this.agents[1].obtained = dug.gold/2;
+            } else {
+              this.golds[a] += dug.gold;
+              this.agents[a].obtained = dug.gold;
+            }
+            this.hiddenGolds = this.hiddenGolds.filter(c => c != dug);
+            this.knownGolds = this.knownGolds.filter(c => c != dug);
+            this.dug.push(dug);
+          }
+          this.holes.push(dug);
+        }         
+        if (digTogether) break;
       }
       // Process plugging
       for (let a = 0; a != 2; a++) {
-	const plugged = plannedPlug[a];
-	if (plugged != null) {
-	  this.holes.splice(this.holes.indexOf(plugged), 1);
-	  this.plugged.push(plugged);
-	}
+        const plugged = plannedPlug[a];
+        if (plugged != null) {
+          this.holes.splice(this.holes.indexOf(plugged), 1);
+          this.plugged.push(plugged);
+        }
       }
     }
   }
   redraw(init) {
     if (init || substep == midStep) {
       // Remove manual play targets, if any
-      disableTargets();
+      while (arrowsLayer.hasChildNodes()) {
+	arrowsLayer.removeChild(arrowsLayer.firstChild);
+      }
       // Draw or remove holes
       for (let x = 0; x != fieldSize; x++) {
-	for (let y = 0; y != fieldSize; y++) {
-	  const cell = cells[x][y];
-	  if (this.holes.includes(cell)) {
-	    groundLayer.appendChild(cell.holeImage);
-	  } else if (cell.holeImage.parentNode == groundLayer) {
-	    groundLayer.removeChild(cell.holeImage);
-	  }
-	}
+        for (let y = 0; y != fieldSize; y++) {
+          const cell = cells[x][y];
+          if (this.holes.includes(cell)) {
+            holeLayer.appendChild(cell.holeImage);
+          } else if (cell.holeImage.parentNode == holeLayer) {
+            holeLayer.removeChild(cell.holeImage);
+          }
+        }
       }
       for (let x = 0; x != fieldSize; x++) {
-	for (let y = 0; y != fieldSize; y++) {
-	  cells[x][y].setNeighbors();
-	}
+        for (let y = 0; y != fieldSize; y++) {
+          cells[x][y].setNeighbors();
+        }
       }
       // Draw or remove golds
-      drawOrRemoveGolds(this.knownGolds);
-      if (editMode) drawOrRemoveGolds(this.hiddenGolds);
+      while (hiddenGoldLayer.hasChildNodes()) {
+        hiddenGoldLayer.removeChild(hiddenGoldLayer.firstChild)
+      }
+      this.hiddenGolds.forEach(g => {
+	makeGoldImage(g);
+        hiddenGoldLayer.appendChild(g.goldImage);
+      });
+      while (knownGoldLayer.hasChildNodes()) {
+        knownGoldLayer.removeChild(knownGoldLayer.firstChild);
+      }
+      this.knownGolds.forEach(g => {
+	makeGoldImage(g);
+        knownGoldLayer.appendChild(g.goldImage);
+      });
       // Update scores 
       for (let t = 0; t != 2; t++) {
-	scores[t].innerHTML = this.golds[t];
+        scores[t].innerHTML = this.golds[t];
       }
       remainingLabel.innerHTML = this.goldRemaining;
-      currentStepLabel.innerHTML = this.stepNumber + "/" + maxSteps;
+      currentStepLabel.style.color =
+        this.stepNumber == maxSteps || this.goldRemaining == 0 ?
+        endGameClockColor :
+        this.stepNumber == stepRecords.length - 1 ?
+        lastRecordClockColor :
+        clockColor;
+      currentStepLabel.innerHTML = currentStep + "/" + maxSteps;
     }
     // Draw agents
     this.agents.forEach(a => {
@@ -735,117 +555,128 @@ class GameState {
       const isDog = a.attributes.seq >= 2;
       const team = a.attributes.seq%2;
       if (isDog) {
-	if (substep == 0) {
-	  image.setAttribute('href',	
-			     dogSitting[8*team + a.direction])
-	}
-	if (this.dogsBark[team]) {
-	  if (init || substep == midStep) {
-	    let c = a.at;
-	    image.setAttribute('href',
-    			       dogBarking[8*team + a.direction]);
-	  }
-	  if (substep == midStep) {
-	    new Audio(barkSoundFile).play();
-	  }
-	}
+        if (substep == 0) {
+          image.setAttribute('href', dogSitting[8*team + a.direction])
+        }
+        if (this.dogsBark[team]) {
+          if (init || substep == midStep) {
+            image.setAttribute('href', dogBarking[8*team + a.direction]);
+          }
+          if (substep == midStep) {
+            new Audio(barkSoundFile).play();
+          }
+        }
       } else {
-	if (init) {
-	  if (a.action < 8) {
-	    image.setAttribute('href', samuraiStanding[8*team + a.direction]);
-	  } else {
-	    image.setAttribute('href', samuraiDug[8*team + a.direction]);
-	  }
-	} else if (substep == 0) {
-	  if (a.planned < 8) {
-	    image.setAttribute('href', samuraiStanding[8*team + a.direction]);
-	  } else {
-	    image.setAttribute('href', samuraiDigging[8*team + a.direction]);
-	  }
-	} else if (substep == midStep) {
-	  if (a.action >= 8) {
-	    image.setAttribute('href', samuraiDug[8*team + a.direction]);
-	  } else if (a.planned >= 8) {
-	    image.setAttribute('href', samuraiStanding[8*team + a.direction]);
-	  }
-	}
-	if (substep == midStep) {
-	  if (8 <= a.action && a.action < 16) {
-	    new Audio(scoopSoundFile).play();
-	    if (a.obtained != 0) new Audio(goldSoundFile).play();
-	  } else if (16 <= a.action) {
-	    new Audio(plugSoundFile).play();
-	  }
-	}
+        if (init) {
+          if (a.action < 8) {
+            image.setAttribute('href', samuraiStanding[8*team + a.direction]);
+          } else {
+            image.setAttribute('href', samuraiDug[8*team + a.direction]);
+          }
+        } else if (substep == 0) {
+          if (a.planned < 8) {
+            image.setAttribute('href', samuraiStanding[8*team + a.direction]);
+          } else {
+            image.setAttribute('href', samuraiDigging[8*team + a.direction]);
+          }
+        } else if (substep == midStep) {
+          if (a.action >= 8) {
+            image.setAttribute('href', samuraiDug[8*team + a.direction]);
+          } else if (a.planned >= 8) {
+            image.setAttribute('href', samuraiStanding[8*team + a.direction]);
+          }
+        }
+        if (substep == midStep) {
+          if (8 <= a.action && a.action < 16) {
+            new Audio(scoopSoundFile).play();
+            if (a.obtained != 0) new Audio(goldSoundFile).play();
+          } else if (16 <= a.action) {
+            new Audio(plugSoundFile).play();
+          }
+        }
       }
       if (init) {
-	const w = (isDog ? 0.8 : 1.7)*cellWidth;
-	image.setAttribute('width', w);
-	const h = w * (isDog ? 154/122: 273/301);
-	image.setAttribute('height', h);
+        const w = (isDog ? 0.8 : 1.7)*cellWidth;
+        image.setAttribute('width', w);
+        const h = w * (isDog ? 154/122: 273/301);
+        image.setAttribute('height', h);
       }
       repositionAgent(a, init);
     });
     let agts = Array.from(this.agents);
     agts.sort((a1, a2) => (a1.at.x+a1.at.y
-			  ) - (a2.at.x+a2.at.y));
+                          ) - (a2.at.x+a2.at.y));
     agts.forEach(a => agentLayer.appendChild(a.attributes.image));
-    // Remove arrows and remove mouse handlers for cells
     if (manualAgent >= 0 && (init || substep == midStep)) {
       // Draw arrows and show diamonds on candidate positions
       class MouseEnterHandler {
-	constructor(diamond) { this.diamond = diamond; }
-	handleEvent(ev) {
-	  this.diamond.style.stroke = "rgb(200,0,0)";
-	}
-      };
+        constructor(diamond) { this.diamond = diamond; }
+        handleEvent(ev) {
+          this.diamond.style.stroke = "rgb(200,0,0)";
+        }
+      }
       class MouseLeaveHandler {
-	constructor(diamond) { this.diamond = diamond; }
-	handleEvent(ev) {
-	  this.diamond.style.stroke = "none";
-	}
-      };
+        constructor(diamond) { this.diamond = diamond; }
+        handleEvent(ev) {
+          this.diamond.style.stroke = "none";
+        }
+      }
       class MouseClickHandler {
-	constructor(diamond, direction) {
-	  this.diamond = diamond;
-	  this.direction = direction;
-	}
-	handleEvent(ev) {
-	  actionCommand(ev, 2*this.direction);
-	}
+        constructor(diamond, direction) {
+          this.diamond = diamond;
+          this.direction = direction;
+        }
+        handleEvent(ev) {
+          actionCommand(ev, 2*this.direction);
+        }
       }
       const apos = this.agents[manualAgent].at;
       // Show arrow images
-      for (let dir = -1; dir != 4; dir++) {
-	const pos = dir < 0 ? apos : apos.neighbors[2*dir];
-	if (pos == apos ||
-	    (pos != null && this.agents.every(a => a.at != pos))) {
-	  let arrow = null;
-	  if (pos != apos) {
-	    arrow = createSVG('image');
-	    arrow.setAttribute('href',
-			       (this.holes.includes(pos) ?
-				arrowDigImages: arrowImages)[dir]);
-	    arrow.setAttribute('width', 0.4*cellWidth);
-	    arrow.setAttribute('height', 0.4*cellHeight);
-	    arrow.setAttribute('x', pos.cx-0.2*cellWidth);
-	    arrow.setAttribute('y', pos.cy-0.2*cellHeight);
-	    arrow.setAttribute('opacity', 0.7);
-	    diamondLayer.appendChild(arrow);
-	  }
-	  const diamond = pos.diamond;
-	  const enterHandler = new MouseEnterHandler(diamond);
-	  diamond.addEventListener('mouseenter', enterHandler);
-	  const leaveHandler = new MouseLeaveHandler(diamond);
-	  diamond.addEventListener('mouseleave', leaveHandler);
-	  const clickHandler = new MouseClickHandler(diamond, dir);
-	  diamond.addEventListener('click', clickHandler);
-	  targetsShown.push({
-	    diamond: diamond, arrow: arrow,
-	    enter: enterHandler, leave: leaveHandler, click: clickHandler
-	  });
+      for (let dir = 0; dir != 4; dir++) {
+        const pos = apos.neighbors[2*dir];
+        if (pos != null && this.agents.every(a => a.at != pos)) {
+          const arrow = createSVG('image');
+          arrow.setAttribute('href',
+                             (this.holes.includes(pos) ?
+                              arrowDigImages: arrowImages)[dir]);
+          arrow.setAttribute('width', 0.4*cellWidth);
+          arrow.setAttribute('height', 0.4*cellHeight);
+          arrow.setAttribute('x', pos.cx-0.2*cellWidth);
+          arrow.setAttribute('y', pos.cy-0.2*cellHeight);
+          arrow.setAttribute('opacity', 0.7);
+          arrowsLayer.appendChild(arrow);
+        }
+      }
+      // Make mouse sensitive ellipses for move instruction
+      function makeMoveDiamond(pos, dir) {
+	// Somehow, diamonds won't work!
+        // const moveDiamond = createSVG('polyon');
+	// moveDiamond.setAttribute('points', pos.corners);
+	// moveDiamond.style.fill = "rgba(1,1,1,0)";
+	// moveDiamond.style.strokeWidth = "5px";
+	// moveDiamond.style.stroke = "none";
+	const moveDiamond = createSVG('ellipse');
+	moveDiamond.setAttribute('cx', pos.cx);
+	moveDiamond.setAttribute('cy', pos.cy);
+	moveDiamond.setAttribute('rx', 0.3*cellWidth);
+	moveDiamond.setAttribute('ry', 0.3*cellHeight);
+	moveDiamond.style.fill = 'rgba(1,1,1,0)';
+	moveDiamond.style.strokeWidth = Math.max(2, cellWidth/20)+"px";
+	arrowsLayer.appendChild(moveDiamond);
+        const enterHandler = new MouseEnterHandler(moveDiamond);
+        moveDiamond.addEventListener('mouseenter', enterHandler);
+        const leaveHandler = new MouseLeaveHandler(moveDiamond);
+        moveDiamond.addEventListener('mouseleave', leaveHandler);
+        const clickHandler = new MouseClickHandler(moveDiamond, dir);
+        moveDiamond.addEventListener('click', clickHandler);
+      }
+      for (let dir = 0; dir != 4; dir++) {
+        const pos = apos.neighbors[2*dir];
+        if (pos != null && this.agents.every(a => a.at != pos)) {
+          makeMoveDiamond(pos, dir);
 	}
       }
+      makeMoveDiamond(apos, -1);
     }
   }
 }
@@ -855,10 +686,18 @@ let stepRecords = [];
 function speedChange(delta) {
   playTempo = Math.min(240, Math.max(24, playTempo+delta));
   stepsPerMin.innerHTML = playTempo;
-  playUntil = 0;
+}
+
+function setPlaySpeed() {
+  stepInterval = 60*1000/playTempo;
+  numSubsteps = Math.floor(frameRate*stepInterval/1000);
+  substepInterval = stepInterval/numSubsteps;
+  midStep = Math.floor((numSubsteps+1)/2);
+  bgm.playbackRate = Math.sqrt(playTempo/60);
 }
 
 function speedWheel(ev) {
+  ev.preventDefault();
   let delta = ev.deltaY > 0 ? -4 : 4;
   if (ev.ctrlKey) delta *= 10;
   speedChange(delta);
@@ -875,75 +714,86 @@ let showWhileEdit;
 
 const topBarButtons = [
   "rewind", "stepBackward", "playStop", "stepForward", "fastForward",
-  "speedometer", "clock", "reinit", "goldImage", "manual",
-  "edit", "help", "load", "save", "remove", "import", "export",
-  "expand", "shrink"
+  "speedometer", "clock", "goldImage", "manual", "edit", "help",
+  "randomize", "clearLog", "load", "save", "remove", "import", "export",
+  "expand", "exitEdit"
 ];
 const infoLabels = ["stepsPerMin", "currentStepLabel", "remainingLabel"];
+
+function prepareLogos() {
+  leftLogos = [...sponsorLogos];
+  rightLogos = [];
+  let logoWidthSum = 0;
+  sponsorLogos.forEach(logo => logoWidthSum += logoSizes[logo.category]);
+  rightLogoWidth = 0;
+  while (rightLogoWidth < logoWidthSum/2) {
+    const k = Math.floor(random.gen()*leftLogos.length);
+    const logo = leftLogos[k];
+    const size = logoSizes[logo.category];
+    if (rightLogoWidth+size/2 > logoWidthSum/2) break;
+    rightLogoWidth += size;
+    rightLogos.push(leftLogos[k]);
+    leftLogos.splice(k, 1);
+  }
+  leftLogoWidth = logoWidthSum - rightLogoWidth;
+}
 
 function drawFence() {
   const fence = createSVG('g');
   function leftTransform(elem, x, y) {
     elem.setAttribute('transform',
-		      "translate("+x+","+
-		      (((fieldSize-2)*cellHeight)/2+topMargin - 0.5*x + y)+
-		      ") skewY(-26.5651)");
+                      "translate("+x+","+ (0.5*(fieldWidth/2-x) + y)+") " +
+                      "skewY(-26.5651)");
   }
   function rightTransform(elem, x, y) {
     elem.setAttribute(
       'transform',
-      "translate("+(fieldWidth/2+x)+","+
-	(0.5*x + y)+
-	") skewY(26.5651)");
+      "translate("+(fieldWidth/2+x)+","+ (0.5*x + y)+
+        ") skewY(26.5651)");
   }
+  const fenceHeight = 0.9*topMargin;
   const leftFence = createSVG('rect');
-  leftFence.setAttribute('width', fieldSize*cellWidth/2);
-  leftFence.setAttribute('height', 0.9*cellHeight);
+  leftFence.setAttribute('width', fieldSize*cellWidth/2-3);
+  leftFence.setAttribute('height', fenceHeight);
   leftFence.style.fill = leftFenceColor;
   leftFence.style.stroke = "white";
-  leftTransform(leftFence, 0, 0);
+  leftTransform(leftFence, 3, 0);
   fence.appendChild(leftFence);
-  const logoSizes = { platinum: 2.8, gold: 2.3, silver: 1.6, bronze: 1.0 };
-  const leftLogos = [...sponsorLogos];
-  const rightLogos = [];
-  let logoSizeTotal = 0;
-  sponsorLogos.forEach(logo => logoSizeTotal += logoSizes[logo.category]);
-  let rightTotal = 0;
-  while (rightTotal < logoSizeTotal/2) {
-    const k = Math.floor(random.gen()*leftLogos.length);
-    const logo = leftLogos[k];
-    rightTotal += logoSizes[logo.category];
-    rightLogos.push(leftLogos[k]);
-    leftLogos.splice(k, 1);
-  }
-  const leftTotal = logoSizeTotal - rightTotal;
-  let   pos = 0.1*fieldWidth/2/leftTotal;
+
+  const logoWidthCoef = 0.9/Math.max(leftLogoWidth, rightLogoWidth);
+  const leftGap =
+        fieldWidth/2*(1-logoWidthCoef*leftLogoWidth)/(leftLogos.length+1);
+  let pos = leftGap;
   leftLogos.forEach(logo => {
-    const logoWidth = logoSizes[logo.category]*fieldWidth/2/leftTotal;
+    const logoWidth = logoWidthCoef*logoSizes[logo.category]*fieldWidth/2;
     const image = createSVG('image');
     image.setAttribute('href', "../logos/"+logo.source);
-    image.setAttribute('width', 0.8*logoWidth);
-    image.setAttribute('height', 0.8*cellHeight);
-    leftTransform(image, pos, 0.1*cellHeight);
-    pos += logoWidth;
+    image.setAttribute('width', logoWidth);
+    image.setAttribute('height', 0.9*fenceHeight);
+    leftTransform(image, pos, 0.1*fenceHeight);
+    pos += logoWidth + leftGap;
     fence.appendChild(image);
   });
+
   const rightFence = createSVG('rect');
-  rightFence.setAttribute('width', fieldSize*cellWidth/2);
-  rightFence.setAttribute('height', 0.9*cellHeight);
+  rightFence.setAttribute('width', fieldSize*cellWidth/2-3);
+  rightFence.setAttribute('height', fenceHeight);
   rightFence.style.fill = rightFenceColor;
   rightFence.style.stroke = "white";
   rightTransform(rightFence, 0, 0);
   fence.appendChild(rightFence);
-  pos = 0.1*fieldWidth/2/rightTotal;;
+
+  const rightGap =
+        fieldWidth/2*(1-logoWidthCoef*rightLogoWidth)/(rightLogos.length+1);
+  pos = rightGap;
   rightLogos.forEach(logo => {
-    const logoWidth = logoSizes[logo.category]*fieldWidth/2/rightTotal;
+    const logoWidth = logoWidthCoef*logoSizes[logo.category]*fieldWidth/2;
     const image = createSVG('image');
     image.setAttribute('href', "../logos/"+logo.source);
-    image.setAttribute('width', 0.8*logoWidth);
-    image.setAttribute('height', 0.8*cellHeight);
-    rightTransform(image, pos, 0.1*cellHeight);
-    pos += logoWidth;
+    image.setAttribute('width', logoWidth);
+    image.setAttribute('height', 0.9*fenceHeight);
+    rightTransform(image, pos, 0.1*fenceHeight);
+    pos += logoWidth + rightGap;
     fence.appendChild(image);
   });
   return fence;
@@ -952,12 +802,19 @@ function drawFence() {
 function resizeField() {
   // Remove everything in the field
   while (field.hasChildNodes()) field.removeChild(field.firstChild);
-  goldShown = [];
+  arrowsLayer = createSVG('g');
   diamondLayer = createSVG('g');
   for (let x = 0; x != fieldSize; x++) {
     for (let y = 0; y != fieldSize; y++) {
-      cells[x][y].resize();
-      diamondLayer.appendChild(cells[x][y].diamond);
+      const cell = cells[x][y];
+      cell.resize();
+      const diamond = cell.diamond;
+      const downListener = new DiamondDownListener(cell);
+      const enterListener = new DiamondEnterListener(diamond);
+      const leaveListener = new DiamondLeaveListener(diamond);
+      diamond.addEventListener('mouseenter', enterListener);
+      diamond.addEventListener('mouseleave', leaveListener);
+      diamond.addEventListener('mousedown', downListener);
     }
   }
   field.setAttribute('width', fieldWidth+"px");
@@ -987,11 +844,12 @@ function resizeField() {
       fieldWidth + ',' + (fieldSize*halfHeight + topMargin) + ' ' +
       fieldWidth/2 + ',' + (fieldSize*cellHeight+topMargin) + ' ' +
       0 + ',' + (fieldSize*halfHeight+topMargin));
-  lawn.setAttribute('style', "fill:"+lawnColor);
+  lawn.style.fill = lawnColor;
   background.appendChild(lawn);
   background.appendChild(drawFence());
   // Lawn grid
   const gridColor = backgroundColor;
+  const gridStrokeWidth = Math.max(1, cellHeight/30);
   const grid = createSVG('g');
   for (let k = 0; k != fieldSize+1; k++) {
     let downLine = createSVG('line');
@@ -999,30 +857,36 @@ function resizeField() {
     downLine.setAttribute('x2', (k+fieldSize)*halfWidth);
     downLine.setAttribute('y1', (fieldSize-k)*halfHeight+topMargin);
     downLine.setAttribute('y2', (2*fieldSize-k)*halfHeight+topMargin);
-    downLine.setAttribute('style', "stroke-width:1;stroke:"+gridColor);
+    downLine.setAttribute('style',
+			  "stroke-width:"+gridStrokeWidth+";stroke:"+gridColor);
     grid.appendChild(downLine);
     let upLine = createSVG('line');
     upLine.setAttribute('x1', k*halfWidth);
     upLine.setAttribute('x2', (k+fieldSize)*halfWidth);
     upLine.setAttribute('y1', (fieldSize+k)*halfHeight+topMargin);
     upLine.setAttribute('y2', k*halfHeight+topMargin);
-    upLine.setAttribute('style', "stroke-width:1;stroke:"+gridColor);
+    upLine.setAttribute('style',
+			"stroke-width:"+gridStrokeWidth+";stroke:"+gridColor);
     grid.appendChild(upLine);
   }
   background.appendChild(grid);
   field.insertBefore(background, field.firstChild);
-  groundLayer = createSVG('g');
-  field.appendChild(groundLayer);
-  // Redraw apparent golds
-  goldShown.forEach(g => drawGoldImage(g.at, g.image));
+  holeLayer = createSVG('g');
+  field.appendChild(holeLayer);
+  // Redraw golds
+  hiddenGoldLayer = createSVG('g');
+  hiddenGoldLayer.style.display = "none";
+  field.appendChild(hiddenGoldLayer);
+  knownGoldLayer = createSVG('g');
+  field.appendChild(knownGoldLayer);
   agentLayer = createSVG('g');
   field.appendChild(agentLayer);
   // Resize agent icons and score labels
   for (let t = 0; t != 2; t++) {
     const samurai = document.getElementById("samuraiFigure" + t);
-    samurai.height = 3*cellHeight;
+    samurai.height = 0.25*fieldHeight;
     samurai.style.position = "relative";
-    samurai.style.top = cellHeight + "px";
+    samurai.style.top = 0.05*fieldHeight + "px";
     const score = document.getElementById("scoreLabel" + t);
     score.style.fontSize = fontSize;
     score.style.fontFamily = 'roman';
@@ -1033,7 +897,9 @@ function resizeField() {
   }
   document.getElementById("topBar").style.top = "0px";
   document.getElementById("bottomBar").style.top =
-    fieldHeight - 3.3*cellHeight + "px";
+    0.72*fieldHeight + "px";
+  field.appendChild(arrowsLayer);
+  diamondLayer.style.display = 'none';
   field.appendChild(diamondLayer);
 }
 
@@ -1064,14 +930,17 @@ function redrawField(config) {
   goldImageButton.onmouseout = hideHiddenGold;
   goldImageButton.onmouseup = hideHiddenGold;
   manualButton.onclick = toggleManualPlay;
-  reinitButton.onclick = reinitialize;
+  randomizeButton.onclick = randomize;
+  clearLogButton.onclick = clearPlayLog;
 
-  editButton.onclick = toggleEditMode;
-  loadButton.onclick = loadConfiguration;
-  saveButton.onclick = saveConfiguration;
-  removeButton.onclick = removeConfiguration;
-  expandButton.onclick = expandField;
-  shrinkButton.onclick = shrinkField;
+  editButton.onclick = enterEditMode;
+  exitEditButton.onclick = exitEditMode;
+  loadButton.onclick = loadGameLog;
+  saveButton.onclick = saveGameLog;
+  importButton.onclick = importGameLog;
+  exportButton.onclick = exportGameLog;
+  removeButton.onclick = removeGameLog;
+  expandButton.onclick = expandOrShrink;
   clockButton.onclick = setStep;
   clockButton.onwheel = setStep;
   helpButton.onclick = openHelp;
@@ -1079,15 +948,21 @@ function redrawField(config) {
   hideWhileEdit = [
     rewindButton, stepBackwardButton, playStopButton,
     stepForwardButton, fastForwardButton, speedometerButton,
-    reinitButton, goldImageButton,
+    editButton, goldImageButton,
     manualButton, stepsPerMin
   ];
   showWhileEdit = [
+    randomizeButton, clearLogButton,
     loadButton, saveButton, removeButton, importButton, exportButton,
-    expandButton, shrinkButton
+    expandButton, exitEditButton
   ];
-  showWhileEdit.forEach(b => b.style.display = 'none');
-
+  if (editMode) {
+    showWhileEdit.forEach(b => b.style.display = 'inline');
+    hideWhileEdit.forEach(b => b.style.display = 'none');
+  } else {
+    showWhileEdit.forEach(b => b.style.display = 'none');
+    hideWhileEdit.forEach(b => b.style.display = 'inline');
+  } 
   // Configure labels
   infoLabels.forEach(
     name => {
@@ -1098,9 +973,7 @@ function redrawField(config) {
       label.style.textShadow = "1px 1px black"
     });
   remainingLabel.style.color = scoreColor;
-  currentStepLabel.style.color = clockColor;
-  stepsPerMin.style.color = clockColor;
-
+  stepsPerMin.style.color = speedColor;
   speedometer.onwheel = speedWheel;
   stepsPerMin.onwheel = speedWheel;
   speedometer.onclick = speedControl;
@@ -1110,17 +983,11 @@ function redrawField(config) {
 }
 
 function showHiddenGold() {
-  stepRecords[currentStep].hiddenGolds.forEach(
-    hidden => drawGoldImage(hidden.at, hidden.image));
+  hiddenGoldLayer.style.display = 'block';
 }
 
 function hideHiddenGold() {
-  stepRecords[currentStep].hiddenGolds.forEach(
-    hidden => {
-      if (hidden.image.parentNode == groundLayer) {
-	groundLayer.removeChild(hidden.image);
-      }
-    });
+  hiddenGoldLayer.style.display = 'none';
 }
 
 let randomSeed = 123456789;
@@ -1142,10 +1009,15 @@ class Random {
 
 let random;
 
-function reinitialize() {
+function randomize() {
   // Change the random number generator seed
   randomSeed = Math.floor(100000000*random.gen());
-  initialize(null);
+  initialize(randomConfig());
+}
+
+function clearPlayLog() {
+  currentStep = 0;
+  stepRecords = [];
 }
 
 function rewind() {
@@ -1168,31 +1040,37 @@ function setSizes() {
   cellHeight = cellWidth/2;
   halfWidth = cellWidth/2;
   halfHeight = cellHeight/2;
-  topMargin = cellHeight;
+  topMargin = topMarginRatio * fieldWidth;
   fieldHeight = fieldWidth/2 + topMargin;
 }
 
+function start() {
+  random = new Random();
+  initialize(randomConfig());
+}
+
 function initialize(config) {
-  if (config == null) {
-    // Initialize random numbeer generator
-    random = new Random();
-    config = randomConfig();
-  }
   // Prepare the field
   field = document.getElementById("battle field");
-  background = undefined;
-  groundLayer = undefined;
+  // Prepare sponsor logos
+  prepareLogos();
   // Initialize a game
   redrawField(config);
   stepRecords = [new GameState(null, null, config)];
   currentStep = 0;
   stepRecords[0].redraw(true);
+  if (editMode) {
+    hiddenGoldLayer.style.display = 'block';
+    diamondLayer.style.display = 'block';
+  }
   window.onresize = () => {
     setSizes();
-    resizeField(null);
+    resizeField();
     stepRecords[currentStep].redraw(true);
   }    
   window.onkeydown = keyDown;
+  // Make the field mouse wheel insensitive
+  field.onwheel = ev => ev.preventDefault();
 }
 
 function substepPosition(a, init) {
@@ -1233,19 +1111,22 @@ function substepForward() {
   if (substep == numSubsteps) {
     substep = 0;
     const finished =
-	  stepRecords[currentStep].goldRemaining == 0 ||
-	  stepRecords[currentStep].stepNumber == maxSteps;
+          stepRecords[currentStep].goldRemaining == 0 ||
+          stepRecords[currentStep].stepNumber == maxSteps;
     if (finished) new Audio(gongSoundFile).play();
     if (finished || stepRecords[currentStep].stepNumber >= playUntil) {
       stopAutoPlay();
+      return;
     } else {
       new Audio(tickSoundFile).play();
       if (stepRecords.length == currentStep + 1) {
-	stepRecords[currentStep+1] = new GameState(stepRecords[currentStep]);
+        stepRecords[currentStep+1] = new GameState(stepRecords[currentStep]);
       }
       currentStep += 1;
     }
+    setPlaySpeed();
   }
+  playTimer = setTimeout(substepForward, substepInterval);
 }
 
 let playTimer = undefined;
@@ -1257,48 +1138,31 @@ function stepBackward() {
   stepRecords[currentStep].redraw(true);
 }
 
-function stepForward(rep, commandPlay) {
+function stepForward(repeat, commandPlay) {
   if (playTimer == undefined) {
     if (commandPlay != undefined ||
-	stepRecords.length <= currentStep+1) {
+        stepRecords.length <= currentStep+1) {
       stepRecords = stepRecords.slice(0, currentStep+1);
       stepRecords[currentStep+1] =
-	new GameState(stepRecords[currentStep], commandPlay);
+        new GameState(stepRecords[currentStep], commandPlay);
     }
     currentStep += 1;
     substep = 0;
-    stepInterval = 60*1000/playTempo;
-    numSubsteps = Math.max(2, Math.floor(frameRate*stepInterval/1000));
-    midStep = Math.floor((numSubsteps+1)/2);
-    playUntil = rep ? maxSteps : stepRecords[currentStep].stepNumber;
-    playTimer = setInterval(substepForward, stepInterval/numSubsteps);
+    playUntil = repeat ? maxSteps : stepRecords[currentStep].stepNumber;
+    setPlaySpeed();
+    playTimer = setTimeout(substepForward, substepInterval);
   }
-}
-
-function disableTargets() {
-  targetsShown.forEach(target => {
-    const diamond = target.diamond;
-    diamond.removeEventListener('mouseenter', target.enter);
-    diamond.removeEventListener('mouseleave', target.leave);
-    diamond.removeEventListener('click', target.click);
-    diamond.style.stroke = 'none';
-    if (target.arrow != null) field.removeChild(target.arrow);
-  });
-  targetsShown = [];
 }
 
 function actionCommand(ev, plan) {
   const target =
-	stepRecords[currentStep].agents[manualAgent].at.neighbors[plan];
+        stepRecords[currentStep].agents[manualAgent].at.neighbors[plan];
   if (ev.shiftKey) {
-    plan +=
-      stepRecords[currentStep].knownGolds.some(g => g.at == target) ? 8 :
-      stepRecords[currentStep].holes.includes(target) ? 16 : 0;
+    plan += stepRecords[currentStep].holes.includes(target) ? 16 : 8;
   }
   if (plan < 8 && stepRecords[currentStep].holes.includes(target)) {
     new Audio(beepSoundFile).play();
   } else {
-    disableTargets();
     stepForward(false, plan);
   }
 }
@@ -1307,30 +1171,30 @@ function keyDown(ev) {
   let plan;
   if (manualAgent >= 0) {
     switch (ev.code) {
-    case "KeyJ": case "KeyS": case "ArrowDown":
-      plan = 0; break;
     case "KeyH": case "KeyW": case "ArrowLeft":
-      plan = 2; break;
-    case "KeyK": case "KeyN": case "ArrowUp":
-      plan = 4; break;
-    case "KeyL": case "KeyE": case "ArrowRight":
+      plan = 0; break;
+    case "KeyJ": case "KeyS": case "ArrowDown":
       plan = 6; break;
+    case "KeyK": case "KeyN": case "ArrowUp":
+      plan = 2; break;
+    case "KeyL": case "KeyE": case "ArrowRight":
+      plan = 4; break;
     case "Space": case "Period":
       plan = -1; break;
     }
     if (plan !== undefined) {
       if (plan >= 0) {
-	const target = stepRecords[currentStep].agents[manualAgent].at.neighbors[plan];
-	if (target == null ||
-	    stepRecords[currentStep].agents.some(a => a.at == target)) {
-	  return;
-	}
-	if (ev.shiftKey) {
-	  plan += stepRecords[currentStep].holes.includes(target) ? 16 : 8;
-	}
+        const target = stepRecords[currentStep].agents[manualAgent].at.
+	      neighbors[plan];
+        if (target == null ||
+            stepRecords[currentStep].agents.some(a => a.at == target)) {
+          return;
+        }
       }
       actionCommand(ev, plan);
     }
+  } else if (ev.code == "Space") {
+    stepForward(false);
   }
 }
 
@@ -1338,7 +1202,7 @@ function startStopPlay() {
   if (playTimer != undefined) {
     playUntil = 0;
   } else if (stepRecords[currentStep].goldRemaining != 0 &&
-	     stepRecords[currentStep].stepNumber != maxSteps) {
+             stepRecords[currentStep].stepNumber != maxSteps) {
     if (stepRecords[currentStep].stepNumber == 0) bgm.currentTime = 0;
     bgm.play();
     playUntil = maxSteps;
@@ -1361,55 +1225,32 @@ function stopAutoPlay() {
 ///////////////////////////
 
 let editMode = false;
-let agentMoveStartHandlers = [];
 let diamondListeners;
 
-function toggleEditMode() {
-  if (!editMode) {
-    editMode = true;
-    toggleManualPlay(null, true);
-    currentStep = 0;
-    stepRecords = stepRecords.slice(0, 1);
-    hideWhileEdit.forEach(b => b.style.display = "none");
-    showWhileEdit.forEach(b => b.style.display = "inline");
-    diamondListeners = [];
-    for (let x = 0; x != fieldSize; x++) {
-      diamondListeners.push([]);
-      for (let y = 0; y != fieldSize; y++) {
-	const cell = cells[x][y];
-	const diamond = cell.diamond;
-	const downListener = new DiamondDownListener(cell);
-	const enterListener = new DiamondEnterListener(diamond);
-	const leaveListener = new DiamondLeaveListener(diamond);
-	diamond.addEventListener('mouseenter', enterListener);
-	diamond.addEventListener('mouseleave', leaveListener);
-	diamond.addEventListener('mousedown', downListener);
-	diamondListeners[x].push({
-	  enter: enterListener, leave: leaveListener, down: downListener});
-      }
-    }
-    editButton.setAttribute('src', "../icons/pencil-writing.png");
-    backgroundDirt.setAttribute('style', "fill:"+editingBackgroundColor);
-    stepRecords[currentStep].redraw(true);
-  } else {
-    for (let x = 0; x != fieldSize; x++) {
-      for (let y = 0; y != fieldSize; y++) {
-	const listeners = diamondListeners[x][y];
-	cells[x][y].diamond.removeEventListener(
-	  'mousedown', listeners.down);
-	cells[x][y].diamond.removeEventListener(
-	  'mouseenter', listeners.enter);
-	cells[x][y].diamond.removeEventListener(
-	  'mouseleave', listeners.leave);
-      }
-    }
-    editButton.setAttribute('src', "../icons/pencil.png");
-    hideWhileEdit.forEach(b => b.style.display = "inline");
-    showWhileEdit.forEach(b => b.style.display = "none");
-    editMode = false;
-    backgroundDirt.setAttribute('style', "fill:"+backgroundColor);
-    stepRecords[currentStep].redraw(true);
-  }
+function purgePlays() {
+  stepRecords.splice(1);
+  currentStep = 0;
+}
+
+function enterEditMode() {
+  editMode = true;
+  setManualPlay(-1);
+  hideWhileEdit.forEach(b => b.style.display = "none");
+  showWhileEdit.forEach(b => b.style.display = "inline");
+  backgroundDirt.style.fill = editingBackgroundColor;
+  stepRecords[0].redraw(true);
+  diamondLayer.style.display = 'block';
+  showHiddenGold();
+}
+
+function exitEditMode() {
+  hideWhileEdit.forEach(b => b.style.display = "inline");
+  showWhileEdit.forEach(b => b.style.display = "none");
+  backgroundDirt.setAttribute('style', "fill:"+backgroundColor);
+  stepRecords[currentStep].redraw(true);
+  hideHiddenGold();
+  diamondLayer.style.display = 'none';
+  editMode = false;
 }
 
 class DiamondEnterListener {
@@ -1419,7 +1260,7 @@ class DiamondEnterListener {
   handleEvent(ev) {
     this.image.style.stroke = 'rgb(200,200,200)';
   }
-};
+}
 
 class DiamondLeaveListener {
   constructor(image) {
@@ -1428,7 +1269,7 @@ class DiamondLeaveListener {
   handleEvent(ev) {
     this.image.style.stroke = 'none';
   }
-};
+}
 
 class DiamondDownListener {
   constructor(cell) {
@@ -1440,62 +1281,50 @@ class DiamondDownListener {
     rec.agents.forEach(a => { if (a.at == this.cell) agent = a; });
     if (agent != null) {
       const moveHandler =
-	    new AgentMove(agent, ev.pageX, ev.pageY);
+            new AgentMove(agent, ev.pageX, ev.pageY);
       if (ev.shiftKey) {
-	// Rotate the agent if a shift key is pressed
-	const role = agent.attributes.seq;
-	let delta = role < 2 ? 2 : 1;
-	if (ev.ctrlKey) delta = -delta;
-	const dir = (agent.direction + delta + 8) % 8;
-	agent.direction = dir;
-	const team = role % 2;
-	agent.attributes.image.setAttribute(
-	  'href',
-	  role < 2 ? samuraiStanding[dir+8*team] :
-	    dogSitting[dir+8*team]);
+        // Rotate the agent if a shift key is pressed
+        const role = agent.attributes.seq;
+        let delta = role < 2 ? 2 : 1;
+        if (ev.ctrlKey) delta = -delta;
+        const dir = (agent.direction + delta + 8) % 8;
+        agent.direction = dir;
+        const team = role % 2;
+        agent.attributes.image.setAttribute(
+          'href',
+          role < 2 ? samuraiStanding[dir+8*team] :
+            dogSitting[dir+8*team]);
+	purgePlays();
       }
       field.addEventListener('mousemove', moveHandler);
       field.addEventListener(
-	'mouseup', new EndAgentMove(agent, moveHandler));
+        'mouseup', new EndAgentMove(agent, moveHandler));
     } else {
-      if (rec.holes.includes(this.cell)) {
-	rec.holes.splice(rec.holes.indexOf(this.cell), 1);
-	groundLayer.removeChild(this.cell.holeImage);
+      const cell = this.cell;
+      if (rec.holes.includes(cell)) {
+        rec.holes.splice(rec.holes.indexOf(cell), 1);
+        holeLayer.removeChild(cell.holeImage);
+      } else if (cell.gold != 0 || ev.shiftKey) {
+        let delta = ev.shiftKey ? 2 : -2;
+        if (ev.ctrlKey) delta *= 10;
+        delta = Math.max(-cell.gold, delta);
+	if (cell.gold != 0) {
+	  hiddenGoldLayer.removeChild(cell.goldImage);
+	  rec.hiddenGolds.splice(rec.hiddenGolds.indexOf(cell), 1);
+	}
+        cell.gold += delta;
+        rec.goldRemaining += delta;
+        remainingLabel.innerHTML = rec.goldRemaining;
+	if (cell.gold != 0) {
+          makeGoldImage(cell);
+	  rec.hiddenGolds.push(cell);
+	  hiddenGoldLayer.appendChild(cell.goldImage);
+        }
       } else {
-	let g = -1;
-	for (let k = 0; k != rec.hiddenGolds.length; k++) {
-	  if (rec.hiddenGolds[k].at == this.cell) {
-	    g = k; break;
-	  }
-	}
-	if (g >= 0) {
-	  const grec = rec.hiddenGolds[g];
-	  let delta = ev.shiftKey ? 2 : -2;
-	  if (ev.ctrlKey) delta *= 10;
-	  delta = Math.max(-grec.amount, delta);
-	  grec.amount += delta;
-	  rec.goldRemaining += delta;
-	  remainingLabel.innerHTML = rec.goldRemaining;
-	  groundLayer.removeChild(grec.image);
-	  if (grec.amount == 0) {
-	    rec.hiddenGolds.splice(g, 1);
-	  } else {
-	    grec.image = makeGoldImage(this.cell, grec.amount);
-	    drawGoldImage(this.cell, grec.image);
-	  }
-	} else if (ev.shiftKey) {
-	  const image = makeGoldImage(this.cell, 2);
-	  rec.hiddenGolds.push({
-	    at: this.cell, amount: 2, image: image
-	  });
-	  rec.goldRemaining += 2;
-	  remainingLabel.innerHTML = rec.goldRemaining;
-	  drawGoldImage(this.cell, image);
-	} else {
-	  rec.holes.push(this.cell);
-	  groundLayer.appendChild(this.cell.holeImage);
-	}
+        rec.holes.push(cell);
+        holeLayer.appendChild(cell.holeImage);
       }
+      purgePlays();
     }
   }
 }
@@ -1520,20 +1349,20 @@ class AgentMove {
     // Move the target cell
     const origat = this.agent.at;
     const cellXplusY =
-	  origat.x + origat.y + 2*(ev.pageY-this.startY)/cellHeight;
+          origat.x + origat.y + 2*(ev.pageY-this.startY)/cellHeight;
     const cellXminusY =
-	  origat.x - origat.y + 2*(ev.pageX-this.startX)/cellWidth;
+          origat.x - origat.y + 2*(ev.pageX-this.startX)/cellWidth;
     const cellX = Math.round((cellXplusY + cellXminusY)/2);
     const cellY = Math.round((cellXplusY - cellXminusY)/2);
     if ((agent.x != cellX || agent.y != cellY) &&
-	0 <= cellX && cellX < fieldSize &&
-	0 <= cellY && cellY < fieldSize) {
+        0 <= cellX && cellX < fieldSize &&
+        0 <= cellY && cellY < fieldSize) {
       const newCell = cells[cellX][cellY];
       const rec = stepRecords[currentStep];
       if (!rec.holes.includes(newCell) &&
-	  rec.agents.every(a => a == agent || a.at != newCell) &&
-	  rec.hiddenGolds.every(g => g.at != newCell)) {
-	this.nowAt = newCell;
+          rec.agents.every(a => a == agent || a.at != newCell) &&
+          rec.hiddenGolds.every(g => g.at != newCell)) {
+        this.nowAt = newCell;
       }
     }
   }
@@ -1549,32 +1378,32 @@ class EndAgentMove {
     field.removeEventListener('mousemove', this.moveHandler);
     const agent = this.moveHandler.agent;
     agent.at = this.moveHandler.nowAt;
+    purgePlays();
     repositionAgent(agent, true);
   }
 }
 
 function setStep(ev) {
-  let delta;
-  if (ev.type == "click") {
-    delta = (ev.shiftKey ? 1 : -1);
-  } else {
-    delta = ev.deltaY > 0 ? -1 : 1;
-  }
+  let delta =
+      ev.type == "click" ?
+      (ev.shiftKey ? 1 : -1) :
+      (ev.deltaY > 0 ? -1 : 1);
   if (ev.ctrlKey) delta *= 10;
   if (editMode) {
     maxSteps = Math.max(10, maxSteps+delta);
-    currentStepLabel.innerHTML = currentStep + "/" + maxSteps;
   } else {
     const newStep = currentStep + delta;
     if (0 <= newStep && newStep < stepRecords.length) {
       currentStep = newStep;
-      stepRecords[currentStep].redraw(true);
     }
   }
+  purgePlays();
+  stepRecords[0].redraw(true);
 }
 
-const LocalStorageKey = "SamurAI Dig Here Configurations";
-let previousConfigurationName = null;
+const LocalStorageKey = "SamurAI Dig Here Game Logs";
+const GameLogFileTypeString = "SamurAI Dig Here Game Log";
+let previousGameLogName = null;
 
 function menuChoice(message, items, store, makeHandler) {
   const menuDiv = document.createElement('div');
@@ -1606,37 +1435,65 @@ function menuChoice(message, items, store, makeHandler) {
   document.getElementById("topBar").appendChild(menuDiv);
 }
 
-class ConfigLoader {
+function applyGameLog(log) {
+  initialize(log.field);
+  let step = 0;
+  log.plays.forEach(p => {
+    const state = new GameState(stepRecords[step], p.plans);
+    // Check whether the play results agree
+    for (let a = 0; a != 4; a++) {
+      if (p.actions[a] != state.agents[a].action) {
+	showAlertBox(
+	  "Action of agent " + a + " do not match at step "
+	    + (step+1) + ":\n" +
+	    "  Recorded: " + p.actions[a] + "\n" +
+	    "  Played State: " + state.agents[a].action);
+	return;
+      }
+      if (p.scores[0] != state.golds[0] || p.scores[1] != state.golds[1]) {
+	showAlertBox(
+	  "Scores do not match at step " +
+	    + (step+1) + ":\n" +
+	    "  Recorded: " + p.scores[0] + ":" + p.scores[1] + "\n" +
+	    "  Played State: " + state.golds[0] + ":" + state.golds[1]);
+	return;
+      }
+    }
+    stepRecords[++step] = state;
+  });
+}
+
+class GameLogLoader {
   constructor(item, store, menu) {
     this.store = store; this.item = item; this.menu = menu;
   }
   handleEvent(ev) {
-    const config = this.store[this.item];
-    redrawField(config);
-    hideWhileEdit.forEach(b => b.style.display = "none");
-    showWhileEdit.forEach(b => b.style.display = "inline");
-    stepRecords[currentStep] = new GameState(null, null, config);
-    stepRecords[currentStep].redraw(true);
+    const log = this.store[this.item];
+    if (log.filetype != GameLogFileTypeString) {
+      showAlertBox("Data stored is not a game log");
+      return;
+    }
+    applyGameLog(log);
     document.getElementById("topBar").removeChild(this.menu);
   }
 }
 
-function loadConfiguration(ev) {
+function loadGameLog(ev) {
   if (localStorage == undefined) {
-    alert("Local storage not available on this browser");
+    showAlertBox("Local storage not available in this browser");
     return;
   }
-  const configInJSON = localStorage.getItem(LocalStorageKey);
-  if (configInJSON == undefined || configInJSON == "{}") {
-    alert("No configurations are stored locally");
+  const logsInJSON = localStorage.getItem(LocalStorageKey);
+  if (logsInJSON == undefined || logsInJSON == "{}") {
+    showAlertBox("No game logs are stored locally");
     return;
   }
-  const store = JSON.parse(configInJSON);
-  menuChoice("Which config to load?", Object.keys(store),
-	     store, (i, s, menu) => new ConfigLoader(i, s, menu));
+  const store = JSON.parse(logsInJSON);
+  menuChoice("Which game log to load?", Object.keys(store),
+             store, (i, s, menu) => new GameLogLoader(i, s, menu));
 }
 
-class ConfigRemover {
+class GameLogRemover {
   constructor(item, store, menu) {
     this.store = store; this.item = item; this.menu = menu;
   }
@@ -1647,100 +1504,211 @@ class ConfigRemover {
   }
 }
 
-function removeConfiguration(ev) {
+function removeGameLog(ev) {
   if (localStorage == undefined) {
-    alert("Local storage not available on this browser");
+    showAlertBox("Local storage not available on this browser");
     return;
   }
-  let configInJSON = localStorage.getItem(LocalStorageKey);
-  if (configInJSON == undefined || configInJSON == "{}") {
-    alert("No configurations are stored locally");
+  let logsInJSON = localStorage.getItem(LocalStorageKey);
+  if (logsInJSON == undefined || logsInJSON == "{}") {
+    showAlertBox("No game logs are stored locally");
     return;
   }
-  const store = JSON.parse(configInJSON);
-  menuChoice("Name of config to remove?", Object.keys(store),
-	     store, (i, s, menu) => new ConfigRemover(i, s, menu));
+  const store = JSON.parse(logsInJSON);
+  menuChoice("Name of game log to remove?", Object.keys(store),
+             store, (i, s, menu) => new GameLogRemover(i, s, menu));
 }
 
-function currentConfig() {
-  const rec = stepRecords[currentStep];
-  const agents = [];
-  rec.agents.forEach(a => agents.push({x: a.at.x, y: a.at.y}));
-  const holes = [];
-  rec.holes.forEach(h => holes.push({x: h.x, y: h.y}));
-  const golds = [];
-  rec.hiddenGolds.forEach(g => {
-    golds.push({x: g.at.x, y: g.at.y, amount: g.amount})});
+function initialConfig() {
+  const rec = stepRecords[0];
   return {
-    filetype: "SamurAI Dig Here Field",
     size: fieldSize,
     steps: maxSteps,
-    agents: agents,
-    holes: holes,
-    golds: golds
+    agents: rec.agents.map(a => {
+      return {x: a.at.x, y: a.at.y, direction: a.direction};
+    }),
+    holes: rec.holes.map(h => {
+      return {x: h.x, y:h.y};
+    }),
+    golds: rec.hiddenGolds.map(g => {
+      return {x: g.x, y: g.y, amount: g.gold};
+    })
   };
 }
 
-function saveConfiguration(ev) {
+function playLog() {
+  const log = [];
+  for (let s = 1; s != stepRecords.length; s++) {
+    const rec = stepRecords[s];
+    const plans = [];
+    const actions = [];
+    rec.agents.forEach(a => {
+      plans.push(a.planned);
+      actions.push(a.action);
+    });
+    log.push({
+      plans: plans, actions: actions, scores: rec.golds
+    });
+  }
+  return log;
+}
+
+function showAlertBox(message) {
+  const box = document.getElementById("promptBox");  
+  document.getElementById("promptMessage").innerHTML = message;
+  const input = document.getElementById("promptInput");
+  input.style.display = "none";
+  const button = document.getElementById("promptDoItButton");
+  button.innerHTML = "OK";
+  button.onclick = ev => box.style.display = "none";
+  document.getElementById("promptDismissButton").style.display = "none";
+  box.style.display = "block";
+}
+
+function showPromptBox(message, buttonLabel, initialValue, func) {
+  const box = document.getElementById("promptBox");
+  document.getElementById("promptMessage").innerHTML = message;
+  const input = document.getElementById("promptInput");
+  input.value = initialValue;
+  input.style.display = "inline";
+  function finishInput(ev) {
+    box.style.display = "none";
+    func(input.value);
+  }
+  input.onchange = finishInput;
+  const button = document.getElementById("promptDoItButton");
+  button.innerHTML = buttonLabel;
+  button.onclick = finishInput;
+  document.getElementById("promptDismissButton").style.display = "inline";
+  box.style.display = "block";
+  input.focus();
+}
+
+function saveGameLog(ev) {
   if (localStorage == undefined) {
-    alert("Local storage not available on this browser");
+    showAlertBox("Local storage not available on this browser");
     return;
   }
-  let configInJSON = localStorage.getItem(LocalStorageKey);
+  let logsInJSON = localStorage.getItem(LocalStorageKey);
   const stored =
-	configInJSON == undefined ? {} :
-	JSON.parse(configInJSON);
-  var configurationName = prompt(
-    "Save under configuration name?",
-    (previousConfigurationName || ""));
-  if (configurationName == null) return;
-  const config = currentConfig();
-  config.name = configurationName,
-  previousConfiguraionName = configurationName;
-  stored[configurationName] = config;
-  localStorage.setItem(LocalStorageKey, JSON.stringify(stored));
-}
-
-function expandField(ev) {
-  if (fieldSize == maxFieldSize) return;
-  const config = currentConfig();
-  config.size += 1;
-  editMode = false;
-  initialize(config);
-  toggleEditMode();
-}
-
-function shrinkField(ev) {
-  if (fieldSize == minFieldSize) return;
-  const config = currentConfig();
-  config.size -= 1;
-  config.holes = config.holes.filter(
-    h => h.x != config.size && h.y != config.size);
-  config.golds = config.golds.filter(
-    g => g.x != config.size && g.y != config.size);
-  config.agents.forEach(a => {
-    if (a.x == config.size) a.x -= 1;
-    if (a.y == config.size) a.y -= 1;
-    while (config.agents.some(a2 => a != a2 && a.x == a2.x && a.y == a2.y)) {
-      if (a.x != 0) {
-	a.x -= 1;
-      } else {
-	a.x = config.size - 1
-	a.y = (a.y + 1) % config.size;
+        logsInJSON == undefined ? {} :
+        JSON.parse(logsInJSON);
+  showPromptBox(
+    "Saved game name?",
+    "Save",
+    (previousGameLogName || ""),
+    gameLogName => {
+      stored[gameLogName] = {
+	filetype: GameLogFileTypeString,
+	name: gameLogName,
+	field: initialConfig(),
+	plays: playLog()
       }
+      previousGameLogName = gameLogName;
+      localStorage.setItem(LocalStorageKey, JSON.stringify(stored));
     }
-    config.golds = config.golds.filter(g => g.x != a.x || g.y != a.y);
-    config.holes = config.holes.filter(h => h.x != a.x || h.y != a.y);
-  });
-  editMode = false;
+  );
+}
+
+function importGameLog(ev) {
+  document.getElementById("importForm").click();
+}
+
+function importFile(ev) {
+  if (ev.target.files.length == 0) return;
+  var file = ev.target.files[0];
+  var reader = new FileReader();
+  reader.onload = e => {
+    const log = JSON.parse(e.target.result);
+    console.log(log);
+    if (log.filetype != GameLogFileTypeString) {
+      showAlertBox("Data stored is not a game log");
+      return;
+    }
+    applyGameLog(log);
+  }
+  reader.readAsText(file);
+}
+
+function exportGameLog(ev) {
+  showPromptBox(
+    "File name to export to?",
+    "Export",
+    "",
+    doExportToFile);
+}
+
+const DigHereFileExt = ".dighere";
+
+function doExportToFile(name) {
+  const periodPos = name.lastIndexOf(".");
+  let fileName = name;
+  if (periodPos < 0) { 
+    fileName = name + DigHereFileExt;
+  } else if (name.substr(-DigHereFileExt.length) == DigHereFileExt) {
+    name = name.substr(0, name.length-DigHereFileExt.length);
+  } else {
+    name = name.substr(0, periodPos);
+  }
+  var file = new Blob(
+    [JSON.stringify({
+      filetype: GameLogFileTypeString,
+      name: name,
+      field: initialConfig(),
+      plays: playLog()
+    })],
+    {type: 'application/json'});
+  if (window.navigator.msSaveOrOpenBlob) {// IE10+
+    window.navigator.msSaveOrOpenBlob(file, fileName);
+  } else { // Others
+    const a = document.createElement("a");
+    const url = URL.createObjectURL(file);
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() {
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    }, 0);
+  }
+}
+
+function expandOrShrink(ev) {
+  const config = initialConfig();
+  if (ev.shiftKey) {
+    if (fieldSize == minFieldSize) return;
+    config.size -= 1;
+    config.holes = config.holes.filter(
+      h => h.x != config.size && h.y != config.size);
+    config.golds = config.golds.filter(
+      g => g.x != config.size && g.y != config.size);
+    config.agents.forEach(a => {
+      if (a.x == config.size) a.x -= 1;
+      if (a.y == config.size) a.y -= 1;
+      while (config.agents.some(a2 => a != a2 && a.x == a2.x && a.y == a2.y)) {
+	if (a.x != 0) {
+          a.x -= 1;
+	} else {
+          a.x = config.size - 1
+          a.y = (a.y + 1) % config.size;
+	}
+      }
+      config.golds = config.golds.filter(g => g.x != a.x || g.y != a.y);
+      config.holes = config.holes.filter(h => h.x != a.x || h.y != a.y);
+    });
+  } else {
+    if (fieldSize == maxFieldSize) return;
+    config.size += 1;
+  }
+  purgePlays();
   initialize(config);
-  toggleEditMode();
 }
 
 function openHelp(ev) {
   const url =
-	"../documents/" +
-	( navigator.language.startsWith("ja") ?
-	  "help-jp.html" : "help.html" );
+        "../documents/" +
+        ( navigator.language.startsWith("ja") ?
+          "help-jp.html" : "help.html" );
   window.open(url, "_blank");
 }

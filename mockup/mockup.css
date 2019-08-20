@@ -87,3 +87,14 @@ svg {
 .menuItem:hover {
     background: rgb(255, 200, 200);
 }
+
+.promptBox {
+    display: none;
+    background: white;
+    margin: 20px;
+    padding: 5px;
+    font-size: 20px;
+    position: absolute;
+    height: 35px;
+    width: auto;
+}

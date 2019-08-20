@@ -3,6 +3,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="stylesheet" href="samuraidocs.css" >
+    <title>SamurAI Dig Here Page Manual</title>
   </head>
   <body>
     <span style="float:left">
@@ -12,13 +13,36 @@
     <center>
       <p>
 	IPSJ Programming Contest Committee<br>
-	2019/07/30
+	2019/08/20
       </p>
       <p>
-	The <em>SamurAI Dig Here</em> page is a tool to experience the game
-	of <em>SamurAI Dig Here</em> game on HTML browsers.
+	The <em>SamurAI Dig Here</em> page is a tool to enjoy the
+	game of <em>SamurAI Dig Here</em> on HTML browsers.
       </p>
     </center>
+
+    <h2>Overview</h2>
+    <p>
+      You can do the following in the <em>SamurAI Dig Here</em> page.
+      <dl>
+	<dt>Playing games:</dt>
+	<dd>
+	  You can play games by players built in the system or manually.
+	  Play results can be recorded in the storage of the browser or
+	  external files.
+	</dd>
+	<dt>Displaying play logs:</dt>
+	<dd>
+	  Records of game plays can be visualized.
+	</dd>
+	<dt>Configuring initial game field:</dt>
+	<dd>
+	  Initial states of game field states can be configured.
+	  The resultant configurations can be recorded and/or
+	  games can be played with them.
+	</dd>
+      </dl>
+    </p>
 
     <h2>Display</h2>
     <p>
@@ -32,8 +56,9 @@
 	  The green game field is displayed in the center.
 	</li>
 	<li>
-	  On the bottom, scores of both sides (red and blue) are displayed
-	  with icons of samurai.
+	  On the bottom, scores (amounts of treasure dug out so far) of
+	  both sides (red and blue) are displayed with icons of
+	  samurai.
 	</li>
       </ul>
     </p>
@@ -45,118 +70,167 @@
     <p>
       The game field is divided into grid-aligned cells.
     </p>
+
+    <img src="screenShots/agents.png" width="20%" class="figure">
     <h3>Agents</h3>
     <p>
       Four agents, one samurai and one dog for each side,
-      are initially located on the four corners of the game field.
-      Samurai can move to one of the <em>four</em> neighboring cells in
-      one game step, while dogs can move to one of <em>eight</em>
-      neighboring cells.
+      are initially located on some of the distinct cells of the game field.
+      In a single game step, samurai can move to one of the <em>four</em>
+      neighboring cells in one game step, while dogs can move to one
+      of <em>eight</em> neighboring cells.
+      They can also stay in the same cell.
     </p>
+
     <img src="screenShots/holes.png" width="15%" class="figure">
     <h3>Holes</h3>
     <p>
-      Initially, some of the cells in the game field are with a hole,
-      which game agents cannot step into.
+      Initially, some of the cells in the game field have a hole,
+      preventing game agents from stepping into them.
     </p>
     <p>
-      Samurai can plug the hole in one of its four neighboring cells
-      in stead of moving there, while dogs cannot.
-    </p>
-    <img src="screenShots/hidden-gold.png" width="25%" class="figure">
-
-    <h3>Embedded Gold</h3>
-    <p>
-      Some randomly chosen cells have some amount of hidden embedded
-      gold, which are hidden.
+      Samurai can plug the hole in one of four neighboring cells.
+      Samurai can also dig a new hole in four neighboring cells.
+      Dogs can do neither.
     </p>
 
-    <h3>Random Reconfiguration</h3>
+    <img src="screenShots/hidden-gold.png" width="20%" class="figure">
+    <h3>Buried Treasure</h3>
     <p>
-      You can choose another randomly constructed field configuration
-      by clicking the reinitialize button
-      <img src="../icons/reinit.png" class="inlineIcon">
-      on the upper left corner.
+      Some of the cells have certain amounts of buried treasure,
+      which are initially hidden.
+      The objective of the game is to dig out more treasure than the opponent.
+      Samurai can dig out the buried treasure in neighboring cells
+      by digging new holes there.
+    </p>
+    <p>
+      Dogs on one of the eight neighboring cells can detect the
+      existence and the amount of the buried treasure.
+      When a dog is on a cell with buried treasure,
+      the position and the amount of the treasure is revealed to
+      <em>all the agents of both teams.</em>
     </p>
 
     <h2>Automatic Play Mode</h2>
     <p>
       The initial play mode is <em>automatic.</em>
-      In the automatic mode, the computer chooses the moves of the agents
-      in each step.
+      In the automatic mode, steps beyond what are recorded
+      are automatically generated and displayed,
+      with agent moves chosen by players built in the system.
+      The generated moves are appended to the game record.
     </p>
-    <img src="screenShots/control-buttons.png" width="30%" class="figure">
     <p>
-      The game progresses controlled using some of the buttons on the top.
-      Buttons and their functions are as described below.
+      The game progresses controlled by some of the buttons on the top.
+    </p>
+    <p>
+      <img src="screenShots/control-buttons.png" width="25%" class="figure">
+      Buttons on the top left and their functions are as follows.
       <ul>
-	<li>
-	  Clicking the left-most <em>reinitialize button</em>
-	  <img src="../icons/reinit.png" class="inlineIcon">
-	  will initialize the game with different random configuration.
-	</li>
 	<li>
 	  Clicking the <em>rewind button</em>
 	  <img src="../icons/rewind.png" class="inlineIcon">
-	  that comes next
-	  will initialize the game with the same configuration.
+	  rolls back the display to the initial state of the game.
 	</li>
 	<li>
 	  Clicking the <em>step backward button</em>
 	  <img src="../icons/stepBackward.png" class="inlineIcon">
-	  will show the game state of one step before the current.
+	  displays the game state of one step before the current.
 	</li>
 	<li>
 	  Clicking the <em>play button</em>
 	  <img src="../icons/play.png" class="inlineIcon">
-	  starts automatic play.
+	  starts automatic playback that repetitively displays
+	  the following steps in a constant pace
+	  until the end of the game is reached.
 	  The button changes its form to
-	  <img src="../icons/stop.png" class="inlineIcon">
-	  and the play will continue until this button is clicked,
-	  all the embedded gold is dug out, or
-	  the maximum number of steps is played.
-	  The play speed can be adjusted using the
+	  <img src="../icons/stop.png" class="inlineIcon">,
+	  clicking which stops the playback.
+	  When the end of the plays in the recorded game is reached,
+	  but the game is not ended yet,
+	  following steps are automatically generated,
+	  as stated above.
+	  The speed of playback can be adjusted using the
 	  <em>speedometer button</em>
 	  explained below.
 	</li>
 	<li>
 	  Clicking the <em>step forward button</em>
 	  <img src="../icons/stepForward.png" class="inlineIcon">
-	  plays a single step of automatic play.
+	  makes a single step of playback.
 	</li>
 	<li>
 	  Clicking the <em>fast forward button</em>
 	  <img src="../icons/fastForward.png" class="inlineIcon">
-	  will show the game state with the largest step number ever reached.
-	  Note that this may not necessarily the final state of the game,
-	  as that state may not have reached yet.
+	  displays the game state of the last step of the game record.
 	</li>
 	<li>
 	  The <em>speedometer button</em>
 	  <img src="../icons/speedometer.png" class="inlineIcon">
-	  can be used to adjust the speed of automatic play.
+	  can be used to adjust the speed of playback.
 	  The number displayed on its right indicates
-	  the current play speed in steps per minute (spm, in short).
-	  Clicking the speedometer will decrease the play speed by 4 spm.
-	  If a shift key is pressed, it will increase by 4 spm.
-	  Alternatively, moving a mouse wheel while the mouse cursor
-	  is on the speedometer.
+	  the current playback speed in steps per minute (spm, in short).
+	  Clicking the speedometer will decrease the speed by 4 spm,
+	  or increase it by 4 spm if a shift key is pressed down.
+	  The speed can also be adjusted by rotating the mouse wheel
+	  while the mouse cursor is on the speedometer.
 	  The maximum play speed is 240 spm and the minimum is 24.
+	</li>
+      </ul>
+    </p>
+    <p>
+      <img src="screenShots/right-buttons.png" width="30%" class="figure">
+      Buttons on the top right and their functions are as follows.
+      <ul>
+	<li>
+	  Clicking the <em>edit button</em>
+	  <img src="../icons/edit.png" class="inlineIcon">
+	  starts the edit mode (described below).
+	</li>
+	<li>
+	  The number displayed next to the edit button is the
+	  total amount of buried treasure yet to be dug out.
+	  This is the total of those hidden and revealed.
+	</li>
+	<li>
+	  While pressing a mouse button the the <em>treasure icon</em>
+	  <img src="../icons/coins-icon.png" class="inlineIcon">
+	  coming next, the positions and the amounts of all the buried
+	  treasure in the game field are displayed.
+	  Releasing the button makes them hidden again.
 	</li>
 	<li>
 	  The state of the game displayed can be advanced or
-	  rewound by mouse oepration on the <em>clock icon</em>
+	  by mouse operation on the <em>clock icon</em>
 	  <img src="../icons/clock.png" class="inlineIcon">
 	  displayed on the top right of the screen.
-	  Clicking the icon advances the displayed state with one step
-	  if a shift key is pressed; rewound otherwise.
-	  Rotating the wheel up or down also advances or rewinds
-	  the game state.
+	  Clicking the icon advances or rolls back the displayed state
+	  by one step, depending whether or not a shift key is pressed.
+	  Rotating the wheel up or down also advances or rolls back
+	  the displayed state.
 	  When a control key is pressed,
-	  10 steps are advanced or rewound at a time.
+	  10 steps are advanced or rolled back at a time.
 	  Neither going before the initial state nor
-	  beyond the last step ever reached in the game is possible.
+	  beyond the last recorded step is possible.
 	</li>
+	<li>
+	  Two numbers coming next, separated by a slash symbol ('/')
+	  shows the step number of the state currently displayed
+	  and the maximum possible step number of the game.
+	  These numbers are in red if the end of the game is displayed,
+	  in light blue if the last step recorded is displayed,
+	  and in yellow, otherwise.
+	</li>
+	<li>
+	  Clicking the <em>manual play button</em>
+	  <img src="../icons/manual.png" class="inlineIcon">
+	  starts the manual play mode (described below).
+	</li>
+	<li>
+	  Clicking the <em>help button</em>
+	  <img src="../icons/help.png" class="inlineIcon">
+	  opens the manual page, that is, this page, in a separate tab.
+	  If the language is set to Japanese (ja), the page in Japanese
+	  is shown; the English page, otherwise.
       </ul>
     </p>
     <h2>Manual Play Mode</h2>
@@ -168,30 +242,26 @@
     <p>
       Clicking the <em>manual play button</em>
       <img src="../icons/manual.png" class="inlineIcon">
-      on the top right changes the play mode to manual.
+      on the top right starts the manual play mode.
     </p>
     <p>
       The first click on the button makes the red samurai controlled
       manually.  The button changes its color to red
       <img src="../icons/red-hand.png" class="inlineIcon">.
       All the other agents, dogs and the blue samurai, are
-      still controlled by the computer.
-    </p>
-    <p>
-      Another click makes the blue samurai under manually control,
+      controlled by the built-in players.
+      Another click makes the blue samurai under manual control,
       and changes the button color to blue
       <img src="../icons/blue-hand.png" class="inlineIcon">.
-      The computer will start controlling the red samurai,
+      The the red samurai is then controlled by the built-in player,
       as well as dogs.
-    </p>
-    <p>
       Still another click will revert the play mode to automatic,
-      reverting the button color to the original.
+      changing the button color back to the original white.
     </p>
     <img src="screenShots/manual-play.png" width="15%" class="figure">
     <h3>Manual Stepping</h3>
     <p>
-      When the play mode is manual, arrow symbols are displayed
+      In the manual play mode, arrow symbols are displayed
       on cells around the manually controlled agent,
       showing possible plays.
       Arrows on cells with a hole outlined red.
@@ -199,26 +269,25 @@
       <ul>
 	<li>
 	  If a shift key is pressed when the cell is clicked,
-	  the tried action is either plugging a hole or digging a new one,
-	  depending on whether a hole is already there.
+	  the action indicated is either plugging a hole or digging a new one.
 	  <ul>
 	    <li>
 	      If the cell has a hole, the hole will be plugged up.
 	    </li>
 	    <li>
-	      If the cell is flat and has some embedded gold,
+	      If the cell does not have a hole and with buried treasure,
 	      whether or not it is already revealed,
-	      the samurai tries to dig it out.
+	      the treasure is dug out.
 	    </li>
 	    <li>
-	      If the cell is flat and does not have any gold,
-	      simply a new hole is dug out in the cell.
+	      If the cell does not have a hole and without any buried treasure,
+	      a new hole is dug out in the cell.
 	    </li>
-	    Digging will not be successful
+	    Digging will not be done
 	    if some other agent successfully moves on to that same cell.
-	    When both samurai try to dig on the same cell,
-	    digging will be successful, and gold embedded, if any,
-	    will be halved and shared by two sides.
+	    Two samurai can dig the same cell at a time,
+	    and treasure buried there, if any,
+	    will be halved and shared by both sides.
 	  </ul>
 	</li>
 	<li>
@@ -232,24 +301,25 @@
       no actions are taken for that step.
     </p>
     <p>
-      Actions of the samurai can also be told by key presses.
+      Actions of the manually controlled samurai can also be told by
+      pressing keys.
       The keys and their meaning are as follows.
       <table>
 	<tr>
 	  <th><tt>h w &larr;</tt></th>
-	  <td>Specifies the upper left cell (&nwarr;)</td>
-	</tr>
-	<tr>
-	  <th><tt>j s &darr;</tt></th>
 	  <td>Specifies the lower left cell (&swarr;)</td>
 	</tr>
 	<tr>
+	  <th><tt>j s &darr;</tt></th>
+	  <td>Specifies the lower right cell (&searr;)</td>
+	</tr>
+	<tr>
 	  <th><tt>k n &uarr;</tt></th>
-	  <td>Specifies the upper right cell (&nearr;)</td>
+	  <td>Specifies the upper left cell (&nwarr;)</td>
 	</tr>
 	<tr>
 	  <th><tt>l e &rarr;</tt></th>
-	  <td>Specifies the lower right cell (&searr;)</td>
+	  <td>Specifies the upper right cell (&nearr;)</td>
 	</tr>
 	<tr>
 	  <th><tt>.</tt> <em>space</em></th>
@@ -257,60 +327,39 @@
 	</tr>
       </table>
       As with clicking on the screen.
-      holding shift keys down tells digging a new hole or
+      holding shift keys down means digging a new hole or
       plugging an already existing hole.
     </p>
+    <h3>Automatic Plays in the Manual Play Mode</h3>
     <p>
-      Automatic step play by the step forward button
+      Automatic plays can also be instructed in the manual play mode.
+      Single step by the step forward button
       <img src="../icons/stepForward.png" class="inlineIcon">,
-      automatic repetitive play by the play button
+      and repetitive play by the play button
       <img src="../icons/play.png" class="inlineIcon">,
-      and game initialization by the rewind button
-      <img src="../icons/rewind.png" class="inlineIcon">
-      are also possible in the manual play mode.
+      are possible.
       When the play stops, the play mode is kept to be manual.
+      Rolling back to the initial state by the rewind button
+      <img src="../icons/rewind.png" class="inlineIcon">
+      is also possible.
     </p>
-    <h2>Game State Information</h2>
-    <p>
-      Information on the game state is also displayed on the screen.
-    </p>
-    <img src="screenShots/step-number.png" width="15%" class="figure">
-    <h3>Step Number</h3>
-    <p>
-      The current step number and the maximum number of steps
-      are displayed on the top row to the right of the clock icon.
-    </p>
-    <img src="screenShots/remaining.png" width="8%" class="figure">
-    <h3>Gold Remaining</h3>
-    <p>
-      The total units of gold not dug out yet, either hidden or made apparent,
-      is displayed on the top to the left of the <em>gold button</em>
-      <img src="../icons/coins-icon.png" class="inlineIcon">.
-      Positions and amounts of hidden gold can be displayed
-      by pressing down the gold button.
-    </p>
-    <img src="screenShots/score.png" width="15%" class="figure">
-    <h3>Scores</h3>
-    <p>
-      Scores (number of units of gold so far obtained) of both teams
-      are displayed on the bottom.
-    </p>
+
     <h2>Edit Mode</h2>
     <p>
       <em>Edit mode</em> is enabled by clicking the <em>edit button</em>
-      <img src="../icons/pencil.png" class="inlineIcon">
+      <img src="../icons/edit.png" class="inlineIcon">
       on top of the screen.
       The edit mode enables editing, saving, and loading the
-      configuration of the game field.
+      game log and/or configuration of the game field.
     </p>
     <p>
-      The game is brought back to its initial state,
-      and the following changes are made on the screen.
-      <nl>
+      The following changes are made on the displayed screen.
+      <ul>
+	<li>The initial game state is displayed</li>
+	<li>The background color becomes gray</li>
 	<li>The buttons on top are replaced by those for editing</li>
-	<li>Hidden embedded golds are made apparent</li>
-	<li>The background color will change</li>
-      </nl>
+	<li>The hidden buried treasure are made apparent</li>
+      </ul>
     </p>
     <center>
       <img src="screenShots/edit-mode.png" width="75%">
@@ -318,59 +367,55 @@
     <p>
       <img src="screenShots/cell-highlight.png" width="25%" class="figure">
       In the edit mode, the border of the cell with the mouse pointer
-      becomes white, and 
-      the following editing are available on the cell.
+      becomes white, indicating that the cell is being edited.
+      Any configuration changes discard all of the recorded play.
     </p>
-    <h3>Setting the Agents</h3>
+    <h3>Configuring the Agents</h3>
     <p>
       Pressing a mouse button on a cell with an agent on it, and
-      dragging the mouse moves the agent another cell.  When the mouse
-      button is released on a cell with embedded gold or a hole, the
-      agent moves to the cell the mouse cursor was previously on.
+      dragging the mouse moves the agent another cell.
+      Agents cannot be moved to a cell with buried treasure or a hole;
+      instead, the position will be the cell the mouse cursor was previously on.
     </p>
     <p>
       If a shift key is pressed when the mouse mouse button is pressed,
       the agent rotates clockwise.
-      This also takes place when the mouse is not dragged, that is,
-      when the cell with an agent is simply clicked with a shift key pressed.
       Note that, although this changes the appearance of the agent
       in the initial state, it has no influence on the game play.
     </p>
-    <h3>Setting Embedded Gold</h3>
+    <h3>Configuring Buried Treasure</h3>
     <p>
-      The amount of embedded gold in a cell can be increased or
+      The amount of buried treasure in a cell can be increased or
       decreased by clicking the mouse button on the cell.
       With a mouse click <em>without</em> pressing a shift key
       <em>decreases</em> the amount by 2.
-      When the amount becomes 0, the cell loses embedded gold.
-      With a mouse click <em>with</em> pressing a shift key
-      <em>increases</em> the amount by 2.
-      With a mouse click on a cell <em>with</em> pressing a
-      shift key on a cell without any gold,
-      the cell is given with embedded gold of amount 2.
+      When the amount becomes 0, the buried treasure in the cell disappears.
+      A mouse click while pressing a shift key <em>increases</em> the
+      amount by 2.
+      When the click is on a cell while pressing a
+      shift key on a cell without any buried treasure,
+      treasure of amount 2 is buried in the cell.
       When a control key is pressed on a click,
-      the amount of increase/decrease is multiplied by ten.
+      the amount of treasure increased or decreased is multiplied by ten.
     </p>
-    <h3>Setting Holes</h3>
+    <h3>Configuring Holes</h3>
     <p>
-      With a mouse click on a cell without an agent nor any embedded gold,
-      a new hole is dug out on the cell, if none is there.
-      If the cell already has a hole, it is plugged up.
+      With a mouse click on a cell with a hole, it is plugged up.
+      Otherwise, if the cell does not have any buried treasure,
+      a new hole is dug out.
     </p>
-    <h3>Setting the Field Size</h3>
+    <h3>Configuring the Field Size</h3>
     <p>
       Clicking the <em>expand button</em>
       <img src="../icons/expand.png" class="inlineIcon">
-      increments the number of cells in one side of the field,
-      and clicking the <em>shrink button</em>
-      <img src="../icons/shrink.png" class="inlineIcon">
-      decrements it.
+      increments the number of cells in one side of the field.
+      Clicking it with a shift key pressed down decrements it.
       The size cannot be made smaller than 6 nor larger than 20.
       Agents on cells lost on resize will be moved to some other cells.
-      Any holes and embedded gold in the lost cells or on the cell
+      Any holes and buried treasures in the cells lost or on the cell
       to which an agent is moved will be lost.
     </p>
-    <h3>Setting the Maximum Number of Steps</h3>
+    <h3>Configuring the Maximum Number of Steps</h3>
     <p>
       The maximum number of steps of the game can be
       incremented or decremented by
@@ -385,56 +430,83 @@
       When a control key is pressed, the change amount is multiplied by 10.
       It cannot be set to be less than 10.
     </p>
-    <h3>Saving and Loading the Configuration</h3>
+    <h3>Random Configuration</h3>
     <p>
-      The current configuration can be saved to the storage of the browser
-      and loaded afterwards.
-      This storage is kept in the browser, and will not be lost
-      when the page is reloaded and/or the browser is restarted,
-      but cannot be accessed from other browsing applications
-      on the same system.
+      Clicking the <em>random configurations button</em>
+      <img src="../icons/randomize.png" class="inlineIcon">
+      makes a new random field configuration.
+      Play logs, if any, will be lost.
     </p>
-    <img src="screenShots/save.png" width="30%" class="figure">
+    <h3>Clearing the Play Log</h3>
+    <p>
+      Clicking the <em>clear log button</em>
+      <img src="../icons/clearLog.png" class="inlineIcon">
+      discards play logs, if any, keeping the field configuration as is.
+      This is meant for saving or exporting the field configuration
+      without any play logs.
+    </p>
+    <h3>Saving and Loading the Game State</h3>
+    <p>
+      The current game state, that is,
+      the configuration of the game field as well as the play log,
+      can be saved to the storage of the browser
+      for loading afterwards.
+      This storage is kept in the browser of the system;
+      Neither page reloading reload nor browser is restart
+      will destroy the record.
+      The record, however, cannot be accessed with other browsers
+      or on other systems.
+    </p>
+    <img src="screenShots/save.png" width="40%" class="figure"
+	 style="border: 1px solid black">
     <p>
       Clicking the <em>save button</em>
       <img src="../icons/save.png" class="inlineIcon">
-      on the screen top, a dialog window to enter a configuration name
-      pops up.
-      When a name is entered, the current configuration is saved
-      with that name.
+      on the screen top, a dialog window pops up for entering a name.
+      When the name is entered, the current game is saved with that name.
+      Game states saved with the same name, if any, will be overwritten.
     </p>
     <img src="screenShots/load.png" width="18%" class="figure">
     <p>
       Clicking the <em>load button</em>
       <img src="../icons/load.png" class="inlineIcon">
-      on the screen top, a list of names of saved configurations appears.
-      Choosing one of them will load the configuration with that name.
+      on the screen top, a list of names of saved game states appears.
+      Choosing one of them will load the game state with that name.
     </p>
     <p>
       Clicking the <em>remove button</em>
       <img src="../icons/remove.png" class="inlineIcon">
-      on the screen top, a list of names of saved configurations appears.
-      Choosing one of them will remove the configuration with that name
+      on the screen top, a list of names of saved game states appears.
+      Choosing one of them will remove the game state with that name
       from the storage.
     </p>
-    <h3>Importing and Exporting Configurations</h3>
+    <h3>Importing and Exporting Game Logs</h3>
     <p>
       Clicking the <em>import button</em>
       <img src="../icons/import.png" class="inlineIcon">
-      or the <em>export button</em>
+      on top of the screen,
+      a window for selecting a file to import pops up.
+      A game log is imported by choosing a file.
+    </p>
+    <p>
+      Cliking the <em>export button</em>
       <img src="../icons/export.png" class="inlineIcon">
-      on the screen top is planned to have functionalities
-      of reading in and writing out configurations
-      from and to a file,
-      <em>which yet to be implemented.</em>
+      on top of the screen,
+      a window to input the name for a file pops up.
+      <img src="screenShots/export.png" width="40%"
+	   class="figure" style="border:1px solid black">
+      Game log of the current game is exported into the file with
+      given name.
+      If no file name extension is specified,
+      the extension of "<tt>.dighere</tt>" is automatically appended to
+      the name.
     </p>
     <h3>Exiting from the Edit Mode</h3>
     <p>
-      The <em>edit mode button</em>
-      <img src="../icons/pencil-writing.png" class="inlineIcon">
-      on the screen top will end the edit mode.
-      The game is reset to the initial state of the edited configuration.
+      Clicking the <em>exit edit mode button</em>
+      <img src="../icons/exitEdit.png" class="inlineIcon">
+      on the screen top ends the edit mode,
+      and the display the initial state reflecting the editing.
     </p>
-
   </body>
 </html>
