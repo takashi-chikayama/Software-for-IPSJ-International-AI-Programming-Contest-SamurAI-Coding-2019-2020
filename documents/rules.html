@@ -122,15 +122,22 @@
     <h2>Player Programs</h2>
     <h3>Player Processes</h3>
     <p>
-      The contestant should provide one <em>player program</em> each for
+      The contestant should provide a <em>player program</em> for
       controlling two agents, a samurai and a dog, belonging to the
       team.
     </p>
     <p>
-      The player programs are started on start of a game by the <em>game
-	management system</em> as separate processes.  The player
-      processes have no direct communication paths between them; the
-      only communication possible is with the game management system.
+      The game management system starts two <em>player processes</em>
+      for each of the two teams.  The two player processes of one
+      teams executes the same program, one of which controls the
+      samurai and the other the dog of the team.  Which agent to
+      control is informed by the game management system after the
+      processes are started.
+    </p>
+    <p>
+      The player processes have no direct communication paths between
+      them; the only communication possible is with the game
+      management system.
     </p>
 
     <h3>Input and Output</h3>
