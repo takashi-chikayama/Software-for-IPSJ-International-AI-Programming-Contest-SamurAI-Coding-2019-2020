@@ -13,7 +13,7 @@
     <center>
       <p>
 	IPSJ Programming Contest Committee<br>
-	Draft as of 2019/08/20
+	Draft as of 2019/08/27
       </p>
       <p>
 	This document gives the rules of the <em>SamurAI Dig Here</em> game,
@@ -42,6 +42,10 @@
       the game field, that is, the number of cells in one side of the
       field may differ from one game to another.  The minimum size is
       six.
+    </p>
+    <p>
+      The figure to the right is a bird’s eye view of the square game
+      field from a diagonal direction.
     </p>
 
     <h3>Game Agents</h3>
@@ -78,13 +82,12 @@
     <h3>Holes</h3>
     <p>
       Some of the cells in the field may have a <em>hole</em> in them,
-      preventing game agents to step into.
-      A samurai agents can, however, instead of making a move,
-      plug a hole in one of the four neighboring cells.
-      Samurai can also dig new holes in the four neighboring cells.
-      Digging a new hole is not possible if another agent is in the cell.
-      Moreover, digging will not be successful either if another agent
-      moves to the cell in the same step.
+      preventing game agents to step into.  A samurai agents can,
+      however, instead of making a move, plug a hole in one of the
+      four neighboring cells.  Samurai can also dig new holes in the
+      four neighboring cells.  Digging a new hole is not possible if
+      another agent is already in the cell or moves moves to the cell
+      in the same step.
     </p>
     <h3>Buried Treasures</h3>
     <p>
