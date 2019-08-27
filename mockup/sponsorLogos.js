@@ -6,5 +6,5 @@ const sponsorLogos = [
   { category: "platinum", source: "taikai.png" },
   { category: "silver", source: "seizoroi.png" },
   { category: "silver", source: "ipsj-landscape.jpg" },
-  { category: "gold", source: "hitachi.png" },
+  // { category: "gold", source: "hitachi.png" },
 ];

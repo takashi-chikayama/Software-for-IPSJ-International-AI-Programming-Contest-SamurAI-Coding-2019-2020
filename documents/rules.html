@@ -164,7 +164,7 @@
       the digging will be unsuccessful.
       If, however, two other agents plan to move to the cell in which
       a dig is planned, the moves conflict each other and are
-      cancelled, and the dig will be effective.
+      canceled, and the dig will be effective.
     </p>
     <p>
       Play plans and actions are represented as an integer <var>m</var>
@@ -211,18 +211,43 @@
       shown in the table to the right.
     </p>
     <p>
-      Digging or plugging a hole by dogs is invalid.
-      For samurai, move, digging, and plugging is valid only for
-      four neighboring cells, and thus <var>d</var> should be even.
-      Invalid play plans are treated the same as &minus;1.
+      Samurai can move to or dig/plug a hole in one of four
+      neighboring cells.  Thus <var>d</var> above must be even.  A
+      play plans of a samurai is called <em>invalid</em> if it is
+      neither a non-negative even number less than or equal to 24 nor
+      &minus; 1.
     </p>
-
+    <p>
+      Dog cannot dig or plug a hole.
+      A play plan of a dog less than &minus;1 or greater than 8
+      is <em>invalid.</em>
+    </p>
+    <p>
+      Invalid play plans are treated the same as &minus;1.  Not only
+      the action of the agent becomes &minus;1, but also the play
+      plans recorded in the game state information, described below,
+      becomes &minus;1.
+    </p>
+    <p>
+      On the other hand, if a play plan cannot be carried out because
+      of cell states and/or positions and moves of agents, the plans
+      are called <em>inoperable.</em>  The action taken for an
+      inoperable plan also becomes &minus;1, but the play plan is
+      recorded in the game state information as it is.
+    </p>
     <h3>Game State Information</h3>
     <p>
       The game state information sent from the game management system to
       the player processes at the beginning of each step contains the
-      following in this order.
+      following items, in this order.
       <ul>
+	<li>
+	  The agent number of the agent controlled by the player
+	  process receiving the information.
+	  0 for one of the samurai, 1 for its opponent samurai,
+	  2 for the friend dog of the samurai numbered 0,
+	  and 3 for the opponent dog.
+	</li>
 	<li>
 	  Field size, that is, the number of cells in one side of the
 	  field (integer).
@@ -237,33 +262,31 @@
 	</li>
 	<li>
 	  List of buried treasures already known to all the agents.
+	  Treasures already excavated are not in the list.
 	</li>
 	<li>
-	  List of buried treasures sensed by the agent controlled by the
-	  player process receiving the information, but not made open to
-	  the rest.  Note that, for a samurai, this list is always empty.
+	  For a dog agent, list of the buried treasures in eight
+	  neighboring cells and not made known to all the agents.
+	  For a samurai agent, an empty list.
 	</li>
 	<li>
-	  List of positions of the four agents.  First comes the
-	  position of the samurai of the team the controlled agent
-	  belongs to, next comes that of the opponent samurai,
-	  then comes that of the friedly dog, and finally comes that of
-	  the opponent dog.
+	  Positions of the four agents, in the order of agent numbers.
 	</li>
 	<li>
-	  List of play plans indicated by the four agents in the
-	  previous step.  The order of agents is the same as the
-	  list of their positions described above.
-	  For the first step of a game, all will be &minus;1.
+	  Play plans of the agents in the previous step, in the order
+	  of agent numbers.  As stated above, invalid play plans
+	  are recorded as &minus;1.  For the first step of a game, all
+	  will be &minus;1.
 	</li>
 	<li>
-	  List of actions taken by the four agents in the previous step.
-	  The order of agents is the same again.
+	  Actions taken by the agents in the previous step, in the
+	  order of agent numbers.
 	</li>
 	<li>
-	  Scores, that are, the total amount of treasure already dug out
-	  by the previous step (two integers).  The score of the friend
-	  team comes first, follows by that of the opponent team.
+	  Scores, that are, the total amount of treasure already dug
+	  out by the previous step (two integers).  The score of the
+	  team of agents 0 and 2 comes first, followed by that of the
+	  opponent team.
 	</li>
 	<li>
 	  The total amount of treasure not excavated yet (an integer).
@@ -274,10 +297,9 @@
       </ul>
     </p>
     <p>
-      All the lists of items start with the number of items in the list
-      (an integer).
-      For an empty list, it is 0.
-      Descriptions of items in the list follows it, if any.
+      All the items describes as <em>lists</em> above start with the
+      number of items in the list (an integer).  For an empty list, it
+      is 0.  Descriptions of items in the list follows it, if any.
       Each item may consist of one or more integers.
     </p>
     <p>
@@ -289,11 +311,13 @@
       Buried treasures are represented by three integers.
       The first two of them are the coordinates of the cell the treasure
       is buried in, and the third is the amount of the treasure,
-      which is a even positive integer.
+      which is an even positive integer.
     </p>
     <p>
       As described above, all the items in the game state information
-      are integers.  They are separated by either a space or a newline.
+      are given as integers.  A newline is placed between the items in
+      the itemized list above, and when two or more integers in an
+      item, they are separated by a space.
       A newline follows the last item.
     </p>
 
@@ -302,8 +326,7 @@
       In response to the game state information received,
       the player program should send a play plan
       for the correspondent agent.
-      The play plan is an integer in the range &minus;1, &hellip; 23,
-      with the meaning described above.
+      The play plan is an integer with the meaning described above.
       A newline should follow the play plan.
     </p>
 
@@ -311,7 +334,7 @@
     <p>
       A limit is set on the total the think time of player processes.
       The think time is the period of time between when the game
-      state information is sent to the player pcoesses and when its
+      state information is sent to the player processes and when its
       response, a play plan, is received by the game management system.
       Note that it is wallclock time rather than CPU time.
       Think times of each step are accumulated and the limit is set on
