@@ -44,3 +44,20 @@ table.bordered td {
 pre {
     margin-left: 20px;
 }
+
+.footnotes {
+    counter-reset: footnote;
+    list-style: none;
+}
+
+.footnotes li {
+    counter-increment: footnote;
+    display: table-row;
+}
+
+.footnotes li::before {
+    content: "[" counter(footnote) "]";
+    display: table-cell;
+    padding-right: 5px;
+    text-align: right;
+}

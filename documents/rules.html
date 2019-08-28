@@ -13,7 +13,7 @@
     <center>
       <p>
 	IPSJ Programming Contest Committee<br>
-	Draft as of 2019/08/27
+	Draft as of 2019/08/28
       </p>
       <p>
 	This document gives the rules of the <em>SamurAI Dig Here</em> game,
@@ -236,14 +236,33 @@
       Invalid play plans are treated the same as &minus;1.  Not only
       the action of the agent becomes &minus;1, but also the play
       plans recorded in the game state information, described below,
-      becomes &minus;1.
+      becomes &minus;1 <a href="#invalid plan">[1]</a>.
     </p>
     <p>
       On the other hand, if a play plan cannot be carried out because
       of cell states and/or positions and moves of agents, the plans
-      are called <em>inoperable.</em>  The action taken for an
-      inoperable plan also becomes &minus;1, but the play plan is
-      recorded in the game state information as it is.
+      are <em>inoperable.</em>
+    </p>
+    <p>
+      Moving to, or trying to dig or plug a hole outside of the field
+      is inoperable.
+      Digging a hole in a cell already with a hole or plugging a
+      non-existent hole is inoperable.
+      Moving to or digging/plugging a hole in a cell where another
+      agent is in at the start of a step is also inoperable.
+    <p>
+      When two or more agents plan to move to the same cell in the
+      same step, all such moves are inoperable.
+      Digging a hole in a cell to which another agent moves to in the
+      same step is inoperable.
+      Digging a hole in a cell can be carried out, however, when two
+      or more agents plan to move to the cell and their moves are
+      inoperable.
+    </p>
+    <p>
+      The action taken for an inoperable plan also becomes &minus;1,
+      but, unlike invalid plans, the play plan is recorded in the game
+      state information as it is.
     </p>
     <h3>Game State Information</h3>
     <p>
@@ -371,6 +390,13 @@
       the agents are swapped between two teams.
       The result of the match is judged by the total amounts of
       treasure dug out in two games.
+    </p>
+    <hr>
+    <ul class="footnotes">
+      <li id="invalid plan">
+	Because invalid play plans recorded in the game state information
+	would allow information exchange between agents.
+      </li>
     </p>
   </body>
 </html>
