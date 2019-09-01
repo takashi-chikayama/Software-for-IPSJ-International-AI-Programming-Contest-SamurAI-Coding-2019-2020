@@ -117,6 +117,13 @@ class Cell {
     this.neighbors = [];
     this.holeImage = createSVG('image');
     this.diamond = createSVG('polygon');
+    const downListener = new DiamondDownListener(this);
+    const enterListener = new DiamondEnterListener(this.diamond);
+    const leaveListener = new DiamondLeaveListener(this.diamond);
+    this.diamond.addEventListener('mouseenter', enterListener);
+    this.diamond.addEventListener('mouseleave', leaveListener);
+    this.diamond.addEventListener('mousedown', downListener);
+
     this.isCorner =
       (x == 0 || x == fieldSize-1) && (y == 0 || y == fieldSize-1)
     this.gold = 0;
@@ -820,15 +827,7 @@ function resizeField() {
   diamondLayer = createSVG('g');
   for (let x = 0; x != fieldSize; x++) {
     for (let y = 0; y != fieldSize; y++) {
-      const cell = cells[x][y];
-      cell.resize();
-      const diamond = cell.diamond;
-      const downListener = new DiamondDownListener(cell);
-      const enterListener = new DiamondEnterListener(diamond);
-      const leaveListener = new DiamondLeaveListener(diamond);
-      diamond.addEventListener('mouseenter', enterListener);
-      diamond.addEventListener('mouseleave', leaveListener);
-      diamond.addEventListener('mousedown', downListener);
+      cells[x][y].resize();
     }
   }
   field.setAttribute('width', fieldWidth+"px");
@@ -889,7 +888,7 @@ function resizeField() {
   field.appendChild(holeLayer);
   // Redraw golds
   hiddenGoldLayer = createSVG('g');
-  hiddenGoldLayer.style.display = "none";
+  hiddenGoldLayer.style.display = editMode ? "block" : "none";
   field.appendChild(hiddenGoldLayer);
   knownGoldLayer = createSVG('g');
   field.appendChild(knownGoldLayer);
@@ -913,7 +912,7 @@ function resizeField() {
   document.getElementById("bottomBar").style.top =
     0.72*fieldHeight + "px";
   field.appendChild(arrowsLayer);
-  diamondLayer.style.display = 'none';
+  diamondLayer.style.display = editMode ? "block" : "none";
   field.appendChild(diamondLayer);
 }
 
@@ -1069,10 +1068,6 @@ function initialize(config) {
   stepRecords = [new GameState(null, null, config)];
   currentStep = 0;
   stepRecords[0].redraw(true);
-  if (editMode) {
-    hiddenGoldLayer.style.display = 'block';
-    diamondLayer.style.display = 'block';
-  }
   window.onresize = () => {
     setSizes();
     resizeField();
