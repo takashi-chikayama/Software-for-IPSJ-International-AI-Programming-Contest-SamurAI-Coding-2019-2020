@@ -32,7 +32,7 @@
 	       accept=".dighere"
 	       onchange="importFile(event)">
 	<img id="export" src="../icons/export.png" title="export">
-	<img id="expand" src="../icons/expand.png" title="expand">
+	<img id="resize" src="../icons/resize.png" title="resize">
       </div>
       <div class="alignRight">
 	<img id="edit" src="../icons/edit.png">
@@ -61,10 +61,10 @@
       <input id="promptInput" type="text" style="font-size: 20px;">
       <button id="promptDoItButton"></button>
       <button
-	id="promptDismissButton"
+	id="promptCancelButton"
 	onclick=
 	"document.getElementById('promptBox').style.display='none';">
-	Dismiss
+	Cancel
       </button>
     </div>
     <script>

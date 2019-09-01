@@ -36,13 +36,16 @@ let lawnColor = "rgb(40,160,40)";
 let leftFenceColor = "rgb(180,180,180)";
 let rightFenceColor = "rgb(210,210,210)";
 let scoreColor = "rgb(255,255,0)";
+let hiddenScoreColor = "rgb(255,64,0)";
 let clockColor = "rgb(255,255,0)";
 let endGameClockColor = "rgb(255,100,100)";
 let lastRecordClockColor = "rgb(100,255,255)";
 let speedColor = "rgb(100,255,255)";
 let scores = [];
 
-const logoSizes = { platinum: 2.8, gold: 2.3, silver: 1.6, bronze: 1.0 };
+const logoSizes = {
+  platinum: 2.8, gold: 2.3, silver: 1.6, bronze: 1.0, supporter: 0.6
+};
 let leftLogos;
 let rightLogos;
 let leftLogoWidth;
@@ -212,34 +215,30 @@ function setManualPlay(agent) {
   manualButton.src = "../icons/" + manualIcons[manualAgent+1] + ".png";
 }
 
-function makeGoldImage(cell) {
+function makeGoldImage(cell, known) {
   const amount = cell.gold;
   const gold = createSVG('image');
-  gold.setAttribute('x', -0.3);
-  gold.setAttribute('y', -0.35);
-  gold.setAttribute('width', 0.6);
-  gold.setAttribute('height', 0.6);
+  gold.setAttribute('x', cell.cx-0.25*cellWidth);
+  gold.setAttribute('y', cell.cy-0.55*cellHeight);
+  gold.setAttribute('width', 0.5*cellWidth);
+  gold.setAttribute('height', 0.5*cellWidth);
   const figIndex = Math.min(10, Math.max(10*Math.abs(amount)/maxGold2/2, 5));
   gold.setAttribute('href', goldImageFile + twoDigits[figIndex] + ".png");
   const amnt = createSVG('text');
-  amnt.setAttribute('x', 0);
-  amnt.setAttribute('y', 0);
-  amnt.setAttribute('font-size', 0.3);
+  amnt.setAttribute('x', cell.cx);
+  amnt.setAttribute('y', cell.cy);
+  amnt.setAttribute('font-size', 0.3*cellWidth);
   amnt.setAttribute('font-family', 'roman');
   amnt.setAttribute('font-weight', 'bold');
   amnt.setAttribute('style', 'text-shadow:1px 1px black');
   amnt.setAttribute('text-anchor', 'middle');
-  amnt.style.fill = scoreColor;
+  amnt.style.fill = known ? scoreColor : hiddenScoreColor;
   amnt.innerHTML = Math.abs(amount);
   amnt.style.pointerEvents = "none";
-  const group = createSVG('g');
-  group.appendChild(gold);
-  group.appendChild(amnt);
-  group.setAttribute(
-    "transform",
-    "translate(" + cell.cx + "," + cell.cy + ")" +
-      "scale(" + (0.9*cellWidth) + ")");
-  cell.goldImage = group;
+  const g = createSVG('g');
+  g.appendChild(gold);
+  g.appendChild(amnt);
+  cell.goldImage = g;
 }
 
 function repositionAgent(a, init) {
@@ -254,31 +253,38 @@ function repositionAgent(a, init) {
       - (isDog ? 1.7 : 2.3)*cellHeight);
 }
 
-function randomConfig() {
-  const config = {
-    size: fieldSize || 10,
-    steps: maxSteps || 100,
-    agents: [], holes: [], golds: []
-  };
-  for (let na = 0; na != 4; ) {
-    const x = Math.floor(config.size*random.gen());
-    const y = Math.floor(config.size*random.gen());
-    let d = Math.floor(8*random.gen());
-    if (na < 2) d = d & 6;
-    if (config.agents.every(a => a.x != x || a.y != y)) {
-      config.agents.push({x: x, y: y, direction: d});
-      na++;
+function randomConfig(onlyGolds) {
+  let config;
+  if (!onlyGolds) {
+    config = {
+      size: fieldSize || 10,
+      steps: maxSteps || 100,
+      agents: [], holes: [], known: [], hidden: []
+    };
+    for (let na = 0; na != 4; ) {
+      const x = Math.floor(config.size*random.gen());
+      const y = Math.floor(config.size*random.gen());
+      let d = Math.floor(8*random.gen());
+      if (na < 2) d = d & 6;
+      if (config.agents.every(a => a.x != x || a.y != y)) {
+	config.agents.push({x: x, y: y, direction: d});
+	na++;
+      }
     }
-  }
-  const numHoles = Math.floor((config.size*config.size-4)*holeProb);
-  for (let nh = 0; nh != numHoles; ) {
-    const x = Math.floor(config.size*random.gen());
-    const y = Math.floor(config.size*random.gen());
-    if (config.agents.every(a => a.x != x || a.y != y) &&
-        config.holes.every(h => h.x != x || h.y != y)) {
-      config.holes.push({x: x, y: y});
-      nh++;
+    const numHoles = Math.floor((config.size*config.size-4)*holeProb);
+    for (let nh = 0; nh != numHoles; ) {
+      const x = Math.floor(config.size*random.gen());
+      const y = Math.floor(config.size*random.gen());
+      if (config.agents.every(a => a.x != x || a.y != y) &&
+          config.holes.every(h => h.x != x || h.y != y)) {
+	config.holes.push({x: x, y: y});
+	nh++;
+      }
     }
+  } else {
+    config = initialConfig();
+    config.known = [];
+    config.hidden = [];
   }
   const numGolds = Math.floor((config.size*config.size-4)*goldProb);
   for (let ng = 0; ng != numGolds; ) {
@@ -286,9 +292,11 @@ function randomConfig() {
     const y = Math.floor(config.size*random.gen());
     if (config.agents.every(a => a.x != x || a.y != y) &&
         config.holes.every(h => h.x != x || h.y != y) &&
-        config.golds.every(h => h.x != x || h.y != y)) {
+	config.known.every(h => h.x != x || h.y != y) &&
+        config.hidden.every(h => h.x != x || h.y != y)) {
       const amount = 2*Math.floor(maxGold2*random.gen()+1);
-      config.golds.push({x: x, y: y, amount: amount});
+      (random.gen() > 0.5 ? config.known : config.hidden).
+	push({x: x, y: y, amount: amount});
       ng++;
     }
   }
@@ -323,7 +331,13 @@ class GameState {
       // Prepare golds
       this.knownGolds = [];
       this.hiddenGolds = [];
-      config.golds.forEach(g => {
+      config.known.forEach(g => {
+        const cell = cells[g.x][g.y];
+	cell.gold = g.amount;
+        this.knownGolds.push(cell);
+        this.goldRemaining += g.amount;
+      });
+      config.hidden.forEach(g => {
         const cell = cells[g.x][g.y];
 	cell.gold = g.amount;
         this.hiddenGolds.push(cell);
@@ -526,14 +540,14 @@ class GameState {
         hiddenGoldLayer.removeChild(hiddenGoldLayer.firstChild)
       }
       this.hiddenGolds.forEach(g => {
-	makeGoldImage(g);
+	makeGoldImage(g, false);
         hiddenGoldLayer.appendChild(g.goldImage);
       });
       while (knownGoldLayer.hasChildNodes()) {
         knownGoldLayer.removeChild(knownGoldLayer.firstChild);
       }
       this.knownGolds.forEach(g => {
-	makeGoldImage(g);
+	makeGoldImage(g, true);
         knownGoldLayer.appendChild(g.goldImage);
       });
       // Update scores 
@@ -716,7 +730,7 @@ const topBarButtons = [
   "rewind", "stepBackward", "playStop", "stepForward", "fastForward",
   "speedometer", "clock", "goldImage", "manual", "edit", "help",
   "randomize", "clearLog", "load", "save", "remove", "import", "export",
-  "expand", "exitEdit"
+  "resize", "exitEdit"
 ];
 const infoLabels = ["stepsPerMin", "currentStepLabel", "remainingLabel"];
 
@@ -940,7 +954,7 @@ function redrawField(config) {
   importButton.onclick = importGameLog;
   exportButton.onclick = exportGameLog;
   removeButton.onclick = removeGameLog;
-  expandButton.onclick = expandOrShrink;
+  resizeButton.onclick = resize;
   clockButton.onclick = setStep;
   clockButton.onwheel = setStep;
   helpButton.onclick = openHelp;
@@ -954,7 +968,7 @@ function redrawField(config) {
   showWhileEdit = [
     randomizeButton, clearLogButton,
     loadButton, saveButton, removeButton, importButton, exportButton,
-    expandButton, exitEditButton
+    resizeButton, exitEditButton
   ];
   if (editMode) {
     showWhileEdit.forEach(b => b.style.display = 'inline');
@@ -990,11 +1004,9 @@ function hideHiddenGold() {
   hiddenGoldLayer.style.display = 'none';
 }
 
-let randomSeed = 123456789;
-
 class Random {
   constructor() {
-    this.x = randomSeed;
+    this.x = 1234567890;
     this.y = 362436069;
     this.z = 521288629;
     this.w = 88675123;
@@ -1009,10 +1021,8 @@ class Random {
 
 let random;
 
-function randomize() {
-  // Change the random number generator seed
-  randomSeed = Math.floor(100000000*random.gen());
-  initialize(randomConfig());
+function randomize(ev) {
+  initialize(randomConfig(ev.shiftKey));
 }
 
 function clearPlayLog() {
@@ -1046,7 +1056,7 @@ function setSizes() {
 
 function start() {
   random = new Random();
-  initialize(randomConfig());
+  initialize(randomConfig(false));
 }
 
 function initialize(config) {
@@ -1304,21 +1314,34 @@ class DiamondDownListener {
       if (rec.holes.includes(cell)) {
         rec.holes.splice(rec.holes.indexOf(cell), 1);
         holeLayer.removeChild(cell.holeImage);
+      } else if (cell.gold != 0 && ev.ctrlKey) {
+	const isKnown = rec.knownGolds.includes(cell);
+	const currentLayer = isKnown ? knownGoldLayer : hiddenGoldLayer;
+	const currentList = isKnown ? rec.knownGolds : rec.hiddenGolds;
+	const newLayer = !isKnown ? knownGoldLayer : hiddenGoldLayer;
+	const newList = !isKnown ? rec.knownGolds : rec.hiddenGolds;
+	currentLayer.removeChild(cell.goldImage);
+	currentList.splice(currentList.indexOf(cell), 1);
+	makeGoldImage(cell, !isKnown);
+	newLayer.appendChild(cell.goldImage);
+	newList.push(cell);
       } else if (cell.gold != 0 || ev.shiftKey) {
+	const isKnown = rec.knownGolds.includes(cell);
+	const goldLayer = isKnown ? knownGoldLayer : hiddenGoldLayer;
+	const goldList = isKnown ? rec.knownGolds : rec.hiddenGolds;
         let delta = ev.shiftKey ? 2 : -2;
-        if (ev.ctrlKey) delta *= 10;
         delta = Math.max(-cell.gold, delta);
 	if (cell.gold != 0) {
-	  hiddenGoldLayer.removeChild(cell.goldImage);
-	  rec.hiddenGolds.splice(rec.hiddenGolds.indexOf(cell), 1);
+	  goldLayer.removeChild(cell.goldImage);
+	  goldList.splice(goldList.indexOf(cell), 1);
 	}
         cell.gold += delta;
         rec.goldRemaining += delta;
         remainingLabel.innerHTML = rec.goldRemaining;
 	if (cell.gold != 0) {
-          makeGoldImage(cell);
-	  rec.hiddenGolds.push(cell);
-	  hiddenGoldLayer.appendChild(cell.goldImage);
+          makeGoldImage(cell, isKnown);
+	  goldList.push(cell);
+	  goldLayer.appendChild(cell.goldImage);
         }
       } else {
         rec.holes.push(cell);
@@ -1530,7 +1553,10 @@ function initialConfig() {
     holes: rec.holes.map(h => {
       return {x: h.x, y:h.y};
     }),
-    golds: rec.hiddenGolds.map(g => {
+    known: rec.knownGolds.map(g => {
+      return {x: g.x, y: g.y, amount: g.gold};
+    }),
+    hidden: rec.hiddenGolds.map(g => {
       return {x: g.x, y: g.y, amount: g.gold};
     })
   };
@@ -1561,7 +1587,7 @@ function showAlertBox(message) {
   const button = document.getElementById("promptDoItButton");
   button.innerHTML = "OK";
   button.onclick = ev => box.style.display = "none";
-  document.getElementById("promptDismissButton").style.display = "none";
+  document.getElementById("promptCancelButton").style.display = "none";
   box.style.display = "block";
 }
 
@@ -1579,7 +1605,7 @@ function showPromptBox(message, buttonLabel, initialValue, func) {
   const button = document.getElementById("promptDoItButton");
   button.innerHTML = buttonLabel;
   button.onclick = finishInput;
-  document.getElementById("promptDismissButton").style.display = "inline";
+  document.getElementById("promptCancelButton").style.display = "inline";
   box.style.display = "block";
   input.focus();
 }
@@ -1620,7 +1646,6 @@ function importFile(ev) {
   var reader = new FileReader();
   reader.onload = e => {
     const log = JSON.parse(e.target.result);
-    console.log(log);
     if (log.filetype != GameLogFileTypeString) {
       showAlertBox("Data stored is not a game log");
       return;
@@ -1674,7 +1699,7 @@ function doExportToFile(name) {
   }
 }
 
-function expandOrShrink(ev) {
+function resize(ev) {
   const config = initialConfig();
   if (ev.shiftKey) {
     if (fieldSize == minFieldSize) return;

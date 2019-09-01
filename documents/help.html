@@ -3,6 +3,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="stylesheet" href="samuraidocs.css" >
+    <link rel="icon" href="../icons/samurai-icon.png" >
     <title>SamurAI Dig Here Page Manual</title>
   </head>
   <body>
@@ -13,7 +14,7 @@
     <center>
       <p>
 	IPSJ Programming Contest Committee<br>
-	2019/08/20
+	2019/09/01
       </p>
       <p>
 	The <em>SamurAI Dig Here</em> page is a tool to enjoy the
@@ -97,8 +98,9 @@
     <img src="screenShots/hidden-gold.png" width="20%" class="figure">
     <h3>Buried Treasure</h3>
     <p>
-      Some of the cells have certain amounts of buried treasure,
-      which are initially hidden.
+      Some of the cells have certain amounts of buried treasure.
+      Positions and amounts of some of them are already known
+      initially, while some are not.
       The objective of the game is to dig out more treasure than the opponent.
       Samurai can dig out the buried treasure in neighboring cells
       by digging new holes there.
@@ -358,7 +360,8 @@
 	<li>The initial game state is displayed</li>
 	<li>The background color becomes gray</li>
 	<li>The buttons on top are replaced by those for editing</li>
-	<li>The hidden buried treasure are made apparent</li>
+	<li>The hidden buried treasure are made apparent, with their
+	amounts in red</li>
       </ul>
     </p>
     <center>
@@ -395,8 +398,11 @@
       When the click is on a cell while pressing a
       shift key on a cell without any buried treasure,
       treasure of amount 2 is buried in the cell.
-      When a control key is pressed on a click,
-      the amount of treasure increased or decreased is multiplied by ten.
+    </p>
+    <p>
+      A mouse click on a cell with buried treasure while pressing a
+      control key toggles the treasure status between apparent and
+      hidden.
     </p>
     <h3>Configuring Holes</h3>
     <p>
@@ -407,7 +413,7 @@
     <h3>Configuring the Field Size</h3>
     <p>
       Clicking the <em>expand button</em>
-      <img src="../icons/expand.png" class="inlineIcon">
+      <img src="../icons/resize.png" class="inlineIcon">
       increments the number of cells in one side of the field.
       Clicking it with a shift key pressed down decrements it.
       The size cannot be made smaller than 6 nor larger than 20.
@@ -436,6 +442,11 @@
       <img src="../icons/randomize.png" class="inlineIcon">
       makes a new random field configuration.
       Play logs, if any, will be lost.
+    </p>
+    <p>
+      If a shift key is pressed on clicking, only the buried treasures
+      (both hidden and known) are reconfigured at random, without
+      changing the positions of agents and holes.
     </p>
     <h3>Clearing the Play Log</h3>
     <p>
@@ -489,7 +500,7 @@
       A game log is imported by choosing a file.
     </p>
     <p>
-      Cliking the <em>export button</em>
+      Clicking the <em>export button</em>
       <img src="../icons/export.png" class="inlineIcon">
       on top of the screen,
       a window to input the name for a file pops up.

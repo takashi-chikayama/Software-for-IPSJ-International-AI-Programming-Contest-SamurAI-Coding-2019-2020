@@ -52,7 +52,8 @@
   "size": <i>l</i>,
   "steps": <i>s</i>,
   "holes": [<i>H</i><sub>1</sub>, &hellip;, <i>H<sub>n</sub></i>],
-  "golds": [<i>E</i><sub>1</sub>, &hellip;, <i>E<sub>m</sub></i>],
+  "known": [<i>K</i><sub>1</sub>, &hellip;, <i>K<sub>m</sub></i>],
+  "hidden": [<i>E</i><sub>1</sub>, &hellip;, <i>E<sub>m</sub></i>],
   "agents": [<i>A</i><sub>1</sub>, &hellip;, <i>A</i><sub>4</sub>]
 }
       </pre>
@@ -66,8 +67,10 @@
       <i>H<sub>i</sub></i> (<i>i</i> &equals; 1, &hellip;, <i>n</i>)
       は穴の初期位置の座標で <tt>{ "x": <i>x</i>, "y": <i>y</i> }</tt>
       という形式である.
+      <i>K<sub>j</sub></i> (<i>j</i> &equals; 1, &hellip;, <i>m</i>)
+      は公知の埋蔵金の位置と量を,
       <i>E<sub>j</sub></i> (<i>j</i> &equals; 1, &hellip;, <i>m</i>)
-      は埋蔵金の位置と量を
+      は秘匿された埋蔵金の位置と量を, それぞれ
       <tt>{"x": <i>x</i>, "y": <i>y</i>, "amount": <i>g</i>}</tt>
       という形式で表す.
       ここで埋蔵金の位置の座標値を表す  <i>x, y</i> は,
