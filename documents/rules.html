@@ -13,7 +13,7 @@
     <center>
       <p>
 	IPSJ Programming Contest Committee<br>
-	Draft as of 2019/08/28
+	Draft as of 2019/08/31
       </p>
       <p>
 	This document gives the rules of the <em>SamurAI Dig Here</em> game,
@@ -54,11 +54,11 @@
       one <em>dog.</em>
     </p>
     <p>
-      Game agents are controlled by programs provided by the contestants.
-      Two separate processes, one for controlling the samurai and one for
-      the dog of a team are run, and they share only those information
-      provided by the game management system.
-      No other communication is possible.
+      Game agents are controlled by programs provided by the
+      contestants.  A single program is run as two separate processes,
+      one for controlling the samurai and one for the dog of a team.
+      They share only those information provided by the game
+      management system.  No other communication is possible.
     </p>
     <p>
       When the game starts, agents are positioned in some distinct cells
@@ -66,12 +66,12 @@
       a time throughout a game.
     </p>
     <p>
-      In one step of a game, samurai agents can move to one of
+      In one step of a game, a samurai agent can move to one of
       the <em>four</em> neighboring cells, that is, those cells that
-      share a edge with the cell the samurai is in.  Dog agents can move
-      to one of the <em>eight</em> neighboring cells, that is, those
-      cell that share one or two corners with the cell the dog is in.
-      They can also stay in the cell they are in.
+      share a edge with the cell the samurai is in.  A dog agent can
+      move to one of the <em>eight</em> neighboring cells, that is,
+      those cell that share one or two corners with the cell the dog
+      is in.  They can also stay in the cell they are in.
     </p>
     <p>
       When two or more agents are instructed to move to the same cell,
@@ -86,9 +86,13 @@
       however, instead of making a move, plug a hole in one of the
       four neighboring cells.  Samurai can also dig new holes in the
       four neighboring cells.  Digging a new hole is not possible if
-      another agent is already in the cell or moves moves to the cell
-      in the same step.
+      another agent is already in the cell or moves to the cell in the
+      same step.
     </p>
+    <p>
+      No holes are in the cells where a agents are initially in.
+    </p>
+
     <h3>Buried Treasures</h3>
     <p>
       Some of the cells in the field may have <em>buried treasure</em> in them.
@@ -107,19 +111,22 @@
       Not only the colleague samurai but also the opponent samurai
       and the opponent dog hear the bark.
     </p>
+    <p>
+      Treasures are not buried in the initial positions of agents.
+    </p>
+
     <h3>Game Steps</h3>
     <p>
-      A game is played in a step-wise manner.
-      When a game step starts, all the agent makes a <em>play
-	plan</em> of the step simultaneously.
-      The play plans are checked their validity and also
-      collated to detect conflicts between them,
-      resulting a set of <em>actions</em> agents can take.
-      The actions are then carried out and the field state is updated.
+      A game is played in a step-wise manner.  When a game step
+      starts, all the agents make their <em>play plans</em> of the
+      step simultaneously.  The play plans are checked their validity
+      and also collated to detect conflicts between them, resulting in
+      a set of <em>actions</em> the agents can actually take.  The
+      actions are then carried out and the field state is updated.
     </p>
     <p>
       Game steps are repeated until the predefined maximum number of
-      steps are played or all the buried treasures has been excavated.
+      steps are played or all the buried treasures have been excavated.
     </p>
 
     <h2>Player Programs</h2>
@@ -132,7 +139,7 @@
     <p>
       The game management system starts two <em>player processes</em>
       for each of the two teams.  The two player processes of one
-      teams executes the same program, one of which controls the
+      teams execute the same program, one of which controls the
       samurai and the other the dog of the team.  Which agent to
       control is informed by the game management system after the
       processes are started.
@@ -148,37 +155,37 @@
       At the start of each of the game step,
       the game management system sends information on the game state
       to those player processes.
-      The player processes should receive the information respond with
+      Each player process should receive the information and respond with
       a play plan for the corresponding agent.
     </p>
     <p>
       The game state information sent from the game manager can be read
-      from the standard input of the player processes.
-      The play plan in its response should sent to the standard output.
+      from the standard input of the player process.
+      The play plan in its response should be sent to the standard output.
     </p>
 
     <h3>Play Plans and Actions</h3>
     <p>
       The <em>play plans</em> are the plans of agents' plays sent by the
       player programs, and the <em>actions</em> are the plays actually
-      taken by the agent decided by the game management system after
-      avoiding any collisions.
+      taken by the agents decided by the game management system after
+      validity conflict checks.
     </p>
     <p>
       For example, if two agents' play plans tell to move to the same
       cell, their plans conflict each other, and thus the game
-      management system makes both of the agent to stay at the same
-      position.
+      management system makes both of the agents stop.
       If a samurai plans to dig a new hole in a cell and another agent
       plans to move to the same cell, the move has the precedence and
       the digging will be unsuccessful.
       If, however, two other agents plan to move to the cell in which
-      a dig is planned, the moves conflict each other and are
+      a dig is planned, the moves conflict with each other and are
       canceled, and the dig will be effective.
     </p>
     <p>
-      Play plans and actions are represented as an integer <var>m</var>
-      (-1 &leq; <var>m</var> &leq; 23), meaning the following.
+      Each of play plans and actions is represented as an
+      integer <var>m</var> (-1 &leq; <var>m</var> &leq; 23), meaning
+      the following.
       <div class="figure">
 	<table class="bordered">
 	  <tr>
@@ -224,18 +231,18 @@
       Samurai can move to or dig/plug a hole in one of four
       neighboring cells.  Thus <var>d</var> above must be even.  A
       play plans of a samurai is called <em>invalid</em> if it is
-      neither a non-negative even number less than or equal to 24 nor
-      &minus; 1.
+      neither a non-negative even number less than or equal to 22 nor
+      &minus;1.
     </p>
     <p>
       Dog cannot dig or plug a hole.
-      A play plan of a dog less than &minus;1 or greater than 8
+      A play plan of a dog less than &minus;1 or greater than 7
       is <em>invalid.</em>
     </p>
     <p>
       Invalid play plans are treated the same as &minus;1.  Not only
       the action of the agent becomes &minus;1, but also the play
-      plans recorded in the game state information, described below,
+      plan recorded in the game state information, described below,
       becomes &minus;1 <a href="#invalid plan">[1]</a>.
     </p>
     <p>
@@ -287,7 +294,7 @@
 	</li>
 	<li>Maximum number of game steps (integer).</li>
 	<li>
-	  List of positions of cells with a hole.
+	  List of positions of cells with holes.
 	</li>
 	<li>
 	  List of buried treasures already known to all the agents.
@@ -309,7 +316,8 @@
 	</li>
 	<li>
 	  Actions taken by the agents in the previous step, in the
-	  order of agent numbers.
+	  order of agent numbers.  For the first step of a game, all
+	  will be &minus;1.
 	</li>
 	<li>
 	  Scores, that are, the total amount of treasure already dug
@@ -328,7 +336,7 @@
     <p>
       All the items describes as <em>lists</em> above start with the
       number of items in the list (an integer).  For an empty list, it
-      is 0.  Descriptions of items in the list follows it, if any.
+      is 0.  Descriptions of items in the list, if any, follow it.
       Each item may consist of one or more integers.
     </p>
     <p>
@@ -361,12 +369,12 @@
 
     <h3 id="timeLimit">Think Time Limit</h3>
     <p>
-      A limit is set on the total the think time of player processes.
+      A limit is set on the total think time of player processes.
       The think time is the period of time between when the game
-      state information is sent to the player processes and when its
+      state information is sent to the player process and when its
       response, a play plan, is received by the game management system.
       Note that it is wallclock time rather than CPU time.
-      Think times of each step are accumulated and the limit is set on
+      The think time of each step is accumulated and the limit is set on
       the total.
     </p>
     <p>
