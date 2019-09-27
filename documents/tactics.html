@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="samuraidocs.css" >
+    <title>SamurAI Dig Here: Potential Tactics</title>
+  </head>
+  <body>
+    <span style="float:left">
+      <a href="tactics-jp.html" target="_blank">日本語</a>
+    </span>
+    <h1>
+      <img
+	src="screenShots/red-samurai.png" width="70px"
+	style="margin: 0px 20px -40px 0px">
+      SamurAI Dig Here: Potential Tactics
+      <img
+	src="screenShots/red-dog.png" width="80px"
+	style="margin: 0px 0px -30px 20px">
+    </h1>
+    <center>
+      <p>
+	IPSJ Programming Contest Committee<br>
+	2019/09/27
+      </p>
+      <p>
+	Some potential tactics of the SamurAI Dig Here game are given here.
+      </p>
+    </center>
+    <h2>Dog Tactics</h2>
+    <h3>Barking Timelily</h3>
+    <p>
+      The dog should move to the cell with hidden treasure and bark
+      only when the friend samurai can reach the cell earlier than the
+      opponent samurai.  Otherwise, the dog can stroll around waiting
+      for an opportunity.
+    </p>
+    <h3>Covering the Treasure</h3>
+    <p>
+      While the dog is staying in the cell with treasure,
+      the opponent samurai cannot dig it up.
+      The dog may stay on the cell for the friend samurai to come closer.
+    </p>
+    <h3>Reporting Treasures without Barking</h3>
+    <p>
+      The dog may show some unusual maneuver arranged beforehand, such
+      as repeating moves back and forth, to inform the position of
+      some treasure without barking on the cell only to the friend
+      samurai.
+    </p>
+    <h3>Interfering Opponents' Moves</h3>
+    <p>
+      Interfering moves of opponent agents by blocking their routes is
+      a conceivable tactic.  Especially, as dogs have more freedom in
+      their moves than samurai, interfering moves of the opponent
+      samurai may be effective.
+    </p>
+    <h3>Collecting as Much Information as Possible</h3>
+    <p>
+      The dog can gather more information on hidden treasure by moving
+      to the area where it has not visited.
+    </p>
+    <h2>Samurai Tactics</h2>
+    <h3>Keeping Close to the Dog</h3>
+    <p>
+      The samurai should stay close to the dog to be able to rapidly
+      approach the treasures found by the dog.
+    </p>
+    <h3>Confining the Opponent Dog</h3>
+    <p>
+      Dogs cannot fill a hole, and thus cannot move out of an area
+      completely surrounded by cells with holes and field edges
+      without help of the samurai.
+      Samurai may dig holes around the position of the enemy dogs to
+      make it confined in an narrow area.  This may be most effective
+      on corners of the field.
+    </p>
+    <h3>Freeing the Friend Dog</h3>
+    <p>
+      Freeing the dog confined in a narrow area by filling one of the
+      holes surround the area might be effective.
+    </p>
+  </body>
+</html>
