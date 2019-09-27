@@ -2,8 +2,9 @@ CXXFLAGS= -g -Wall
 CXX= c++
 LDFLAGS= -lm
 OBJECTS= playerMain.o gameInfo.o fieldMap.o greedySamurai.o snoopyDog.o
+EXECUTABLE= simplePlayer
 
-all: simplePlayer
+all: $(EXECUTABLE)
 
 simplePlayer: $(OBJECTS)
 	${CXX} -o $@ $^ $(LDFLAGS)
@@ -21,3 +22,6 @@ clean:
 	rm -f TAGS
 	rm -f *.o *.d
 	rm -rf *~ */*~ \#*\#
+
+distclean: clean
+	rm -f ${EXECUTABLE}

@@ -450,6 +450,7 @@ class GameState {
               newAgent.action = plan;
             }
           } else {
+	    console.log("In step "+this.stepNumber);
             console.log("INVALID ACTION BY AGENT "+a);
             console.log("Planned action is: ", plan);
           }
@@ -1144,6 +1145,10 @@ function stepBackward() {
 }
 
 function stepForward(repeat, commandPlay) {
+  if (stepRecords[currentStep].goldRemaining == 0 ||
+      stepRecords[currentStep].stepNumber == maxSteps) {
+    return;
+  }
   if (playTimer == undefined) {
     if (commandPlay != undefined ||
         stepRecords.length <= currentStep+1) {
@@ -1701,7 +1706,9 @@ function resize(ev) {
     config.size -= 1;
     config.holes = config.holes.filter(
       h => h.x != config.size && h.y != config.size);
-    config.golds = config.golds.filter(
+    config.known = config.known.filter(
+      g => g.x != config.size && g.y != config.size);
+    config.hidden = config.hidden.filter(
       g => g.x != config.size && g.y != config.size);
     config.agents.forEach(a => {
       if (a.x == config.size) a.x -= 1;
@@ -1714,7 +1721,8 @@ function resize(ev) {
           a.y = (a.y + 1) % config.size;
 	}
       }
-      config.golds = config.golds.filter(g => g.x != a.x || g.y != a.y);
+      config.known = config.known.filter(g => g.x != a.x || g.y != a.y);
+      config.hidden = config.hidden.filter(g => g.x != a.x || g.y != a.y);
       config.holes = config.holes.filter(h => h.x != a.x || h.y != a.y);
     });
   } else {
