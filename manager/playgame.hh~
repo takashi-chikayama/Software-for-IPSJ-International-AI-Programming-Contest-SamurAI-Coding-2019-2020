@@ -1,0 +1,5 @@
+#include "gamelog.hh"
+
+extern void playGame(const Configuration &config,
+		     char *playerNames[],
+		     char *dumpPath);

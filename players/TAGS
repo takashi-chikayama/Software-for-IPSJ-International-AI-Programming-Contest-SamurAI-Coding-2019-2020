@@ -1,0 +1,65 @@
+
+fieldMap.cc,80
+CellInfo **cells;cells4,49
+void initFieldMap(6,68
+int samuraiDistance30,759
+
+gameInfo.cc,233
+Cell::Cell(3,24
+Cell::Cell(Cell5,65
+bool Cell::operator<(operator<9,110
+bool Cell::operator==(operator==13,224
+ostream &operator<<(operator<<17,321
+GameInfo::GameInfo(GameInfo22,440
+ostream &operator<<(operator<<46,1086
+
+greedySamurai.cc,61
+const int FailureAvoidPercentage 4,44
+int planSamurai(6,84
+
+playerMain.cc,15
+int main(3,23
+
+randomSamurai.cc,31
+void plan(3,24
+int main(5,55
+
+snoopyDog.cc,90
+const int FailureAvoidPercentage 3,23
+const int WaitChanceThresh 4,62
+int planDog(6,96
+
+fieldMap.hh,270
+struct CellInfo 6,77
+  Cell position;7,95
+  vector <CellInfo*> fourNeighbors;8,112
+  vector <CellInfo*> eightNeighbors;9,148
+  bool inspected 10,185
+  bool noGold 11,211
+  inline bool operator<(12,234
+inline int directionOf(23,485
+inline bool noAgentsIn(28,647
+
+gameInfo.hh,470
+struct Cell 7,73
+  int x,8,87
+  int x, y;8,87
+  Cell(9,99
+struct GameInfo 18,303
+  int id;19,321
+  int size;20,331
+  int step;21,343
+  int maxSteps;22,355
+  set <Cell> holes;23,371
+  map 24,391
+  map <Cell, int> revealedTreasure;24,391
+  map 25,427
+  map <Cell, int> sensedTreasure;25,427
+  Cell positions[positions26,461
+  int plans[plans27,482
+  int actions[actions28,498
+  int scores[scores29,516
+  int remaining;30,533
+  int thinkTime;31,550
+
+players.hh,0

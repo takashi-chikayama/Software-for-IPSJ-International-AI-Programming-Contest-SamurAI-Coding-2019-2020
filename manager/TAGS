@@ -1,0 +1,69 @@
+
+field.cc,347
+Cell::Cell(3,21
+Cell::Cell(4,61
+Cell::Cell(7,140
+Cell&Cell::operator=(operator=9,208
+bool Cell::operator==(operator==13,302
+Agent::Agent(17,393
+Agent::Agent(19,458
+Agent::Agent(21,537
+Gold::Gold(24,626
+Gold::Gold(26,686
+Gold::Gold(28,757
+Field::Field(Field31,837
+Field::Field(Field42,1312
+ostream &operator<<(operator<<171,4991
+
+gamelog.cc,129
+StepLog::StepLog(StepLog3,23
+Configuration::Configuration(15,440
+Configuration::Configuration20,577
+GameLog::GameLog(25,774
+
+main.cc,215
+void openErrorCheck(8,121
+void readLogData(15,305
+void usageError(29,753
+void verifyPlays(36,905
+const char *OPTIONS OPTIONS72,1886
+char *dumpPath dumpPath73,1914
+int playerNumber 74,1940
+int main(76,1963
+
+playgame.cc,161
+pid_t playerIds[playerIds10,159
+FILE *toPlayers[toPlayers11,179
+FILE *fromPlayers[fromPlayers12,199
+static void sendGameInfo14,222
+void playGame(60,1737
+
+field.hh,363
+const string DigHereLogString 6,71
+struct Cell 8,133
+  int x,9,147
+  int x, y;9,147
+  Cell(10,159
+struct Agent:Agent18,341
+  int direction;19,362
+struct Gold:Gold25,464
+  int amount;26,484
+struct Field 32,580
+  int size;33,595
+  vector <Agent> agents;34,607
+  vector <Cell> holes;35,632
+  vector <Gold> known;36,655
+  vector <Gold> hidden;37,678
+
+gamelog.hh,250
+struct StepLog 3,21
+  int plans[plans4,38
+  int actions[actions5,54
+  int scores[scores6,72
+struct Configuration:Configuration10,118
+  int timeLimit;11,148
+  int steps;12,165
+struct GameLog:GameLog18,308
+  vector <StepLog> plays;20,365
+
+playgame.hh,0

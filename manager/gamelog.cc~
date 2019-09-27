@@ -1,0 +1,30 @@
+#include "gamelog.hh"
+
+StepLog::StepLog(object &json) {
+  auto plansJson = json["plans"].get<value::array>();
+  auto actionsJson = json["actions"].get<value::array>();
+  for (int a = 0; a != 4; a++) {
+    plans[a] = plansJson[a].get<double>();
+    actions[a] = actionsJson[a].get<double>();
+  }
+  auto scoresJson = json["scores"].get<value::array>();
+  scores[0] = scoresJson[0].get<double>();
+  scores[1] = scoresJson[1].get<double>();
+}
+
+Configuration::Configuration(object &json): Field(json) {
+  size = json["size"].get<double>();
+  steps = json["steps"].get<double>();
+}
+
+Configuration::Configuration
+(const Configuration &prev, const int plans[], int actions[], int scores[]):
+  Field(prev, plans, actions, scores),
+  timeLimit(prev.timeLimit), steps(prev.steps) {};
+
+GameLog::GameLog(object &json): Configuration(json["field"].get<object>()) {
+  auto playsJson = json["plays"].get<value::array>();
+  for (auto step: playsJson) {
+    plays.emplace_back(StepLog(step.get<object>()));
+  }
+}
