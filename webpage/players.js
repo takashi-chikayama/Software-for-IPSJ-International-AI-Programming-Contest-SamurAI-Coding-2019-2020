@@ -235,7 +235,7 @@ class SnoopyDog {
       if (adj != null &&
 	  !agents.includes(adj) && !holes.includes(adj) &&
 	  Math.abs(directionOf(pos, adj) - actions[2]) != 4) {
-	const gain = infoGain(5, adj, [], [adj], this.inspected);
+	const gain = infoGain(6, adj, [], [adj], this.inspected);
 	if (gain > maxGain) {
 	  bestMove = directionOf(pos, adj);
 	  maxGain = gain;

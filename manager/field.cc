@@ -30,21 +30,25 @@ Gold::Gold(const Gold &original):
 
 Field::Field(object &json) {
   auto &agts = json["agents"].get<value::array>();
-  for (auto &a: agts) agents.push_back(Agent(a.get<object>()));
+  int i = 0;
+  for (auto &a: agts) agents[i++] = Agent(a.get<object>());
   auto &hls = json["holes"].get<value::array>();
   for (auto &h: hls) holes.push_back(Cell(h.get<object>()));
   auto &kg = json["known"].get<value::array>();
   for (auto &g: kg) known.push_back(Gold(g.get<object>()));
   auto &hg = json["hidden"].get<value::array>();
   for (auto &g: hg) hidden.push_back(Gold(g.get<object>()));
+  thinkTime = (int)json["thinkTime"].get<double>();
 }
 
 Field::Field(const Field &fld) {
   size = fld.size;
-  for (auto a: fld.agents) agents.push_back(Agent(a));
+  int i = 0;
+  for (auto a: fld.agents) agents[i++] = Agent(a);
   for (auto h: fld.holes) holes.push_back(Cell(h));
   for (auto kg: fld.known) known.push_back(Gold(kg));
   for (auto hg: fld.hidden) hidden.push_back(Gold(hg));
+  thinkTime = fld.thinkTime;
 }
 
 Field::Field(const Field &prev, const int plans[],
@@ -70,7 +74,7 @@ Field::Field(const Field &prev, const int plans[],
       continue;
     }
     Cell target(nx, ny);
-    if (find(agents.begin(), agents.end(), target) != agents.end()) {
+    if (find(agents, agents+4, target) != agents+4) {
       // Moving to, digging, or plugging hole in a cell with another agent
       continue;
     }
@@ -94,25 +98,29 @@ Field::Field(const Field &prev, const int plans[],
     targets[a] = target;
     agents[a].direction = plan%8;
   }
-  // Decide agent posisions
+  // Two or more agents moving to the same cell have to stop
+  bool conflicts[4];
   for (int a = 0; a != 4; a++) {
-    // Two or more agents moving to the same cell have to stop
+    conflicts[a] = false;
     int action = actions[a];
-    if (action < 8) {
+    if (0 <= action && action < 8) {
       Cell &target = targets[a];
-      if (0 <= action && action < 8) {
-	for (int b = a+1; b != 4; b++) {
-	  if (target == targets[b] && 0 <= actions[b] && actions[b] < 8) {
-	    actions[a] = actions[b] = -1;
-	    targets[a] = agents[a];
-	    targets[b] = agents[b];
-	    goto NOMOVE;
-	  }
+      for (int b = 0; b != 4; b++) {
+	if (a != b && target == targets[b] &&
+	    0 <= actions[b] && actions[b] < 8) {
+	  conflicts[a] = true;
 	}
-	agents[a].x = target.x;
-	agents[a].y = target.y;
-      NOMOVE:;
       }
+    }
+  }
+  for (int a = 0; a != 4; a++) {
+    int action = actions[a];
+    if (conflicts[a]) {
+      actions[a] = -1;
+    } else if (0 <= action && action < 8) {
+      Cell &target = targets[a];
+      agents[a].x = target.x;
+      agents[a].y = target.y;
     }
   }
   for (int a = 0; a != 4; a++) {

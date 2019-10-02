@@ -8,6 +8,7 @@ let agentLayer;
 let arrowsLayer;
 let diamondLayer;
 let fieldSize;
+let thinkTime = 5*60*1000;
 const maxFieldSize = 20;
 const minFieldSize = 6;
 let fieldWidth, fieldHeight, topMargin;
@@ -41,7 +42,9 @@ let clockColor = "rgb(255,255,0)";
 let endGameClockColor = "rgb(255,100,100)";
 let lastRecordClockColor = "rgb(100,255,255)";
 let speedColor = "rgb(100,255,255)";
+let expiredColor = "rgb(255,0,0)";
 let scores = [];
+let timeLeftLabels = [];
 
 const logoSizes = {
   platinum: 2.8, gold: 2.3, silver: 1.6, bronze: 1.0, supporter: 0.6
@@ -266,6 +269,7 @@ function randomConfig(onlyGolds) {
     config = {
       size: fieldSize || 10,
       steps: maxSteps || 100,
+      thinkTime: thinkTime,
       agents: [], holes: [], known: [], hidden: []
     };
     for (let na = 0; na != 4; ) {
@@ -316,9 +320,7 @@ function randomConfig(onlyGolds) {
 //   golds: Array of the amounts of gold already dug out (2 elems)
 //   goldRemaining: Amount of gold not dug out yet
 //   knownGolds: Array of info on *known* embedded golds
-//      { at: cell, amount: gold amount, image: SVG image }
 //   hiddenGolds: Array of cells with *hidden* embedded golds
-//      { at: cell, amount: gold amount }
 //   dogsBark: Whether dogs bark or not (2-elem array of bool)
 //   holes: Array of cells with a hole
 //   dug: Array of cells dug out in this step
@@ -352,8 +354,9 @@ class GameState {
       });
       this.golds = [0, 0];
       this.dogsBark = [false, false];
-      // Initialize agents
+      // Initialize agents and times left
       this.agents = [];
+      this.timeLeft = [];
       for (let a = 0; a != 4; a++) {
         const agentPlayers = [
           new GreedySamurai(fieldSize, maxSteps),
@@ -366,18 +369,29 @@ class GameState {
           new AgentState(
             new AgentAttributes(a, agentPlayers[a]),
             cells[agent.x][agent.y], agent.direction));
+	this.timeLeft[a] = config.thinkTime;
       }
-      remainingLabel.innerHTML = this.goldRemaining;
     } else {
       this.stepNumber = prevGameState.stepNumber + 1;
       function invalidAction(role, plan, targetPos, prev) {
-        return (
-          plan < -1 || plan >= 24 || // Invalid plan value
-          targetPos === null || // or trying to go beyond an edge
-          (role < 2 && plan%2 != 0) || // or diagonal move/dig/plug by samurai
-          (role >= 2 && plan >= 8) ||  // or dig by a dog
-          prev.agents.some(b => (b.at == targetPos)) // or someone is there
-        );
+	if (plan < -1 || plan >= 24)
+	  return "Plan " + plan + " out of range";
+        if (targetPos === null)
+	  return "Target cell is out of the field";
+	if (role < 2 && plan%2 != 0)
+	  return "Diagonal move by a samurai";
+        if (role >= 2 && plan >= 8)
+	  return "Dig by a dog";
+	if (plan >= 0) {
+	  for (let b = 0; b != 4; b++) {
+	    if (b.at == targetPos) {
+	      return (plan < 8 ? "Moving to" : "Digging") +
+	      " (" + targetPos.x + "," + targetPos.y +
+	      ") occupied by agent " + b;
+	    }
+	  }
+	}
+	return false;
       }
       // Copy cells, gold and hole info from the previous state
       this.goldRemaining = prevGameState.goldRemaining;
@@ -388,6 +402,7 @@ class GameState {
       this.knownGolds = Array.from(prevGameState.knownGolds);
       this.golds = Array.from(prevGameState.golds);
       this.dogsBark = [false, false];
+      this.timeLeft = prevGameState.timeLeft.slice();
       // Plan actions
       const plannedPositions = [];
       const plannedDig = [null, null];
@@ -414,6 +429,7 @@ class GameState {
             }
           });
         }
+	const planStart = performance.now();
         const plan =
 	      Array.isArray(commandPlay) ? commandPlay[a] :
               (a == manualAgent && commandPlay !== undefined) ?
@@ -430,13 +446,16 @@ class GameState {
                 [ scores[teamOrder[0]], scores[teamOrder[1]] ],
                 prevGameState.goldRemaining
               );
+	const planEnd = performance.now();
+	this.timeLeft[a] = Math.max(0, this.timeLeft[a] - planEnd + planStart);
         const targetPos = agent.at.neighbors[plan%8];
         plannedPositions[a] = agent.at;
         newAgent.planned = plan;
         newAgent.action = -1;
         if (plan >= 0) {
           newAgent.direction = plan % 8;
-          if (!invalidAction(a, plan, targetPos, prevGameState)) {
+	  const invalid = invalidAction(a, plan, targetPos, prevGameState);
+          if (!invalid) {
             if (plan < 8 && !prevGameState.holes.includes(targetPos)) {
               plannedPositions[a] = targetPos;
               newAgent.action = plan;
@@ -450,9 +469,11 @@ class GameState {
               newAgent.action = plan;
             }
           } else {
-	    console.log("In step "+this.stepNumber);
-            console.log("INVALID ACTION BY AGENT "+a);
-            console.log("Planned action is: ", plan);
+	    console.log("In step "+this.stepNumber +
+			"; agent "+ a +
+			"@(" + agent.at.x + "," + agent.at.y + ")");
+	    console.log(invalid);
+            console.log("Action planned: ", plan);
           }
         }
       }
@@ -492,7 +513,9 @@ class GameState {
             this.agents[a].action = -1;
             continue;
           }
-          if (dug.gold != 0) {
+          if (dug.gold != 0 &&
+	      (this.hiddenGolds.includes(dug) ||
+	       this.knownGolds.includes(dug))) {
             this.goldRemaining -= dug.gold;
             if (digTogether) {
               this.golds[0] += dug.gold/2;
@@ -522,6 +545,12 @@ class GameState {
     }
   }
   redraw(init) {
+    function encodeTime(t) {
+      t /= 1000;
+      const min = Math.floor(t/60);
+      const sec = Math.floor(t%60);
+      return min + ":" + (sec < 10 ? "0" : "") + sec;
+    }
     if (init || substep == midStep) {
       // Remove manual play targets, if any
       while (arrowsLayer.hasChildNodes()) {
@@ -558,11 +587,17 @@ class GameState {
 	makeGoldImage(g, true);
         knownGoldLayer.appendChild(g.goldImage);
       });
-      // Update scores 
+      // Update scores and think time left
       for (let t = 0; t != 2; t++) {
         scores[t].innerHTML = this.golds[t];
       }
       remainingLabel.innerHTML = this.goldRemaining;
+      for (let a = 0; a != 4; a++) {
+	const label = timeLeftLabels[a];
+	const left = this.timeLeft[a];
+	label.innerHTML = encodeTime(left);
+	label.style.color = left == 0 ? expiredColor : speedColor;
+      }
       currentStepLabel.style.color =
         this.stepNumber == maxSteps || this.goldRemaining == 0 ?
         endGameClockColor :
@@ -742,7 +777,7 @@ const topBarButtons = [
 ];
 const infoLabels = ["stepsPerMin", "currentStepLabel", "remainingLabel"];
 
-function prepareLogos() {
+function prepareFenceLogos() {
   leftLogos = [...sponsorLogos];
   rightLogos = [];
   let logoWidthSum = 0;
@@ -839,6 +874,8 @@ function resizeField() {
     button.style.height = buttonSize;
   });
   const fontSize = Math.max(14, fieldWidth/25) + "px";
+  const scoreFontSize = Math.max(14, fieldWidth/15) + "px";
+  const timeFontSize = Math.max(12, fieldWidth/35) + "px";
   infoLabels.forEach(
     name => document.getElementById(name).style.fontSize = fontSize);
   background = createSVG('g');
@@ -895,23 +932,48 @@ function resizeField() {
   field.appendChild(knownGoldLayer);
   agentLayer = createSVG('g');
   field.appendChild(agentLayer);
-  // Resize agent icons and score labels
+  // Resize agent icons and score
   for (let t = 0; t != 2; t++) {
     const samurai = document.getElementById("samuraiFigure" + t);
-    samurai.height = 0.25*fieldHeight;
+    samurai.height = 0.2*fieldHeight;
     samurai.style.position = "relative";
-    samurai.style.top = 0.05*fieldHeight + "px";
+    const dog = document.getElementById("dogFigure" + t);
+    dog.height = 0.18*fieldHeight;
+    dog.style.position = "relative";
     const score = document.getElementById("scoreLabel" + t);
-    score.style.fontSize = fontSize;
+    score.style.fontSize = scoreFontSize;
     score.style.fontFamily = 'roman';
     score.style.fontWeight = 'bold';
     score.style.textShadow = "1px 1px black"
     score.style.color = scoreColor;
     scores[t] = score;
   }
+  // Resize time left labels
+  for (let a = 0; a != 4; a++) {
+    const timeLeft = document.getElementById("timeLeft" + a);
+    timeLeft.style.fontSize = timeFontSize;
+    timeLeft.style.fontFamily = 'roman';
+    timeLeft.style.fontWeight = 'bold';
+    timeLeft.style.textShadow = "1px 1px black"
+    timeLeftLabels[a] = timeLeft;
+  }
   document.getElementById("topBar").style.top = "0px";
-  document.getElementById("bottomBar").style.top =
-    0.72*fieldHeight + "px";
+  document.getElementById("bottomBar").style.top = 0.73*fieldHeight + "px";
+  // Sponsor logos
+  const logoAreaSize = 0.007*fieldWidth*fieldWidth;
+  if (goldLogos.length == 2) {
+    for (let s = 0; s != 2; s++) {
+      const logo = document.getElementById("sponsorLogo" + s);
+      logo.src = "../logos/" + goldLogos[s];
+      logo.style.background = "white";
+      logo.onload = () => {
+	const area = logo.naturalWidth*logo.naturalHeight;
+	const mag = Math.sqrt(logoAreaSize/area);
+	logo.width = mag*logo.naturalWidth;
+      }
+    }
+  }
+  // Arrow and diamond layers
   field.appendChild(arrowsLayer);
   diamondLayer.style.display = editMode ? "block" : "none";
   field.appendChild(diamondLayer);
@@ -1062,8 +1124,8 @@ function start() {
 function initialize(config) {
   // Prepare the field
   field = document.getElementById("battle field");
-  // Prepare sponsor logos
-  prepareLogos();
+  // Prepare sponsor logos on fences
+  prepareFenceLogos();
   // Initialize a game
   redrawField(config);
   stepRecords = [new GameState(null, null, config)];
@@ -1250,6 +1312,9 @@ function enterEditMode() {
   backgroundDirt.style.fill = editingBackgroundColor;
   stepRecords[0].redraw(true);
   diamondLayer.style.display = 'block';
+  timeLeftLabels.forEach(l => {
+    l.onclick = l.onwheel = adjustThinkTime;
+  });
   showHiddenGold();
 }
 
@@ -1260,6 +1325,9 @@ function exitEditMode() {
   stepRecords[currentStep].redraw(true);
   hideHiddenGold();
   diamondLayer.style.display = 'none';
+  timeLeftLabels.forEach(l => {
+    l.onclick = l.onwheel = null;
+  });
   editMode = false;
 }
 
@@ -1463,25 +1531,42 @@ function applyGameLog(log) {
   let step = 0;
   log.plays.forEach(p => {
     const state = new GameState(stepRecords[step], p.plans);
-    // Check whether the play results agree
+    if (p.step != step) {
+      showAlertBox(
+	"Step number " + p.step + " is recorded, that should be " + step);
+      throw new Error("Inconsistency in Step Number Found");
+    }
     for (let a = 0; a != 4; a++) {
-      if (p.actions[a] != state.agents[a].action) {
+      const pa = p.actions[a];
+      const sa = state.agents[a].action;
+      if (pa != sa) {
 	showAlertBox(
-	  "Action of agent " + a + " do not match at step "
+	  "Action of agent " + a + " does not match at step "
 	    + (step+1) + ":\n" +
-	    "  Recorded: " + p.actions[a] + "\n" +
-	    "  Played State: " + state.agents[a].action);
-	return;
+	    "  Recorded: " + pa + "\n" +
+	    "  Actual: " + sa);
+	throw new Error("Inconsistency in Agent Action Found");
       }
-      if (p.scores[0] != state.golds[0] || p.scores[1] != state.golds[1]) {
+      const pp = p.agents[a];
+      const sp = state.agents[a].at;
+      if (pp.x != sp.x || pp.y != sp.y) {
 	showAlertBox(
-	  "Scores do not match at step " +
+	  "Position of agent " + a + " does not match at step "
 	    + (step+1) + ":\n" +
-	    "  Recorded: " + p.scores[0] + ":" + p.scores[1] + "\n" +
-	    "  Played State: " + state.golds[0] + ":" + state.golds[1]);
-	return;
+	    "  Recorded: (" + pp.x + "," + pp.y + ")\n" +
+	    "  Actual: (" + sp.x + "," + sp.y + ")");
+	throw new Error("Inconsistency in Agent Position Found");
       }
     }
+    if (p.scores[0] != state.golds[0] || p.scores[1] != state.golds[1]) {
+      showAlertBox(
+	"Scores do not match at step " +
+	  + (step+1) + ":\n" +
+	  "  Recorded: " + p.scores[0] + ":" + p.scores[1] + "\n" +
+	  "  Played State: " + state.golds[0] + ":" + state.golds[1]);
+      throw new Error("Inconsistency in Scores Found");
+    }
+    state.timeLeft = p.timeLeft.slice();
     stepRecords[++step] = state;
   });
 }
@@ -1558,7 +1643,8 @@ function initialConfig() {
     }),
     hidden: rec.hiddenGolds.map(g => {
       return {x: g.x, y: g.y, amount: g.gold};
-    })
+    }),
+    thinkTime: thinkTime
   };
 }
 
@@ -1568,35 +1654,55 @@ function playLog() {
     const rec = stepRecords[s];
     const plans = [];
     const actions = [];
+    const agents = [];
     rec.agents.forEach(a => {
       plans.push(a.planned);
       actions.push(a.action);
+      agents.push({x: a.at.x, y: a.at.y});
     });
     log.push({
-      plans: plans, actions: actions, scores: rec.golds
+      step: s-1,
+      plans: plans, actions: actions, agents: agents, scores: rec.golds
     });
   }
   return log;
 }
 
 function showAlertBox(message) {
+  const fontSize = Math.max(14, fieldWidth/40) + "px";
   const box = document.getElementById("promptBox");  
-  document.getElementById("promptMessage").innerHTML = message;
-  const input = document.getElementById("promptInput");
-  input.style.display = "none";
+  box.style.fontSize = fontSize;
+  box.childNodes.forEach(node => {
+    if (node.style) {
+      node.style.fontSize = fontSize;
+      node.style.fontFamily = "roman";
+      node.style.display = "none";
+    }
+  });
+  const msg = document.getElementById("promptMessage");
+  msg.innerHTML = message;
+  msg.style.display = "inline";
   const button = document.getElementById("promptDoItButton");
   button.innerHTML = "OK";
+  button.style.display = "inline";
   button.onclick = ev => box.style.display = "none";
-  document.getElementById("promptCancelButton").style.display = "none";
   box.style.display = "block";
 }
 
 function showPromptBox(message, buttonLabel, initialValue, func) {
+  const fontSize = Math.max(14, fieldWidth/40) + "px";
   const box = document.getElementById("promptBox");
+  box.style.fontSize = fontSize;
+  box.childNodes.forEach(node => {
+    if (node.style) {
+      node.style.fontSize = fontSize;
+      node.style.fontFamily = "roman";
+      node.style.display = "inline";
+    }
+  });
   document.getElementById("promptMessage").innerHTML = message;
   const input = document.getElementById("promptInput");
   input.value = initialValue;
-  input.style.display = "inline";
   function finishInput(ev) {
     box.style.display = "none";
     func(input.value);
@@ -1606,6 +1712,7 @@ function showPromptBox(message, buttonLabel, initialValue, func) {
   button.innerHTML = buttonLabel;
   button.onclick = finishInput;
   document.getElementById("promptCancelButton").style.display = "inline";
+  document.body.appendChild(box);
   box.style.display = "block";
   input.focus();
 }
@@ -1729,6 +1836,18 @@ function resize(ev) {
     if (fieldSize == maxFieldSize) return;
     config.size += 1;
   }
+  purgePlays();
+  initialize(config);
+}
+
+function adjustThinkTime(ev) {
+  let delta =
+      ev.type == "click" ?
+      (ev.shiftKey ? -1 : 1) :
+      (ev.deltaY > 0 ? -1 : 1);
+  if (ev.ctrlKey) delta *= 10;
+  thinkTime = Math.max(thinkTime+1000*delta, 1000);
+  const config = initialConfig();
   purgePlays();
   initialize(config);
 }

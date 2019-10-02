@@ -21,6 +21,7 @@ struct Agent: Cell {
   Agent(int x, int y, int d);
   Agent(object &o);
   Agent(const Agent &another);
+  Agent() {};
   object json();
 };
 
@@ -34,10 +35,11 @@ struct Gold: Cell {
 
 struct Field {
   int size;
-  vector <Agent> agents;
+  Agent agents[4];
   vector <Cell> holes;
   vector <Gold> known;
   vector <Gold> hidden;
+  int thinkTime;
   Field(object &json);
   Field(const Field &prev, const int plans[], int actions[], int scores[]);
   Field(const Field &f);

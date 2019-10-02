@@ -12,25 +12,39 @@ StepLog::StepLog(object &json) {
   scores[1] = scoresJson[1].get<double>();
 }
 
-StepLog::StepLog(int p[], int a[], int s[]) {
-  for (int i = 0; i != 4; i++) { plans[i] = p[i]; actions[i] = a[i]; }
+StepLog::StepLog
+(int step, int p[], int a[], const Agent agts[], int t[], int s[])
+  :step(step) {
+  for (int i = 0; i != 4; i++) {
+    plans[i] = p[i];
+    actions[i] = a[i];
+    agents[i] = agts[i];
+    timeLeft[i] = t[i];
+  }
   scores[0] = s[0]; scores[1] = s[1];
 }
 
 object StepLog::json() {
   object obj;
+  obj.emplace(make_pair("step", value((double)step)));
   value::array plansArray;
   value::array actionsArray;
+  value::array timeLeftArray;
+  value::array agentsArray;
   for (int i = 0; i != 4; i++) {
     plansArray.push_back(value((double)plans[i]));
     actionsArray.push_back(value((double)actions[i]));
+    timeLeftArray.push_back(value((double)timeLeft[i]));
+    agentsArray.push_back(value(agents[i].json()));
   }
   value::array scoresArray;
   scoresArray.push_back(value((double)scores[0]));
   scoresArray.push_back(value((double)scores[1]));
   obj.emplace(make_pair("plans", plansArray));
   obj.emplace(make_pair("actions", actionsArray));
+  obj.emplace(make_pair("agents", agentsArray));
   obj.emplace(make_pair("scores", scoresArray));
+  obj.emplace(make_pair("timeLeft", timeLeftArray));
   return obj;
 }
 
@@ -42,10 +56,10 @@ Configuration::Configuration(object &json): Field(json) {
 Configuration::Configuration
 (const Configuration &prev, const int plans[], int actions[], int scores[]):
   Field(prev, plans, actions, scores),
-  timeLimit(prev.timeLimit), steps(prev.steps) {};
+  steps(prev.steps) {};
 
 Configuration::Configuration(const Configuration &conf):
-  Field(conf), timeLimit(conf.timeLimit), steps(conf.steps) {};
+  Field(conf), steps(conf.steps) {};
 
 GameLog::GameLog(object &json): Configuration(json["field"].get<object>()) {
   auto playsJson = json["plays"].get<value::array>();
@@ -61,7 +75,7 @@ GameLog::GameLog(Configuration &cnf, vector <StepLog> &stepLogs):
 
 object Configuration::json() {
   object obj = Field::json();
-  obj.emplace(make_pair("timeLimit", value(double(timeLimit))));
+  obj.emplace(make_pair("thinkTime", value(double(thinkTime))));
   obj.emplace(make_pair("steps", value(double(steps))));
   return obj;
 }

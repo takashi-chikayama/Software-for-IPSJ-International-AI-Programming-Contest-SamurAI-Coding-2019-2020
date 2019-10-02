@@ -1,16 +1,18 @@
 #include "field.hh"
 
 struct StepLog {
+  int step;
   int plans[4];
   int actions[4];
+  Agent agents[4];
   int scores[2];
+  int timeLeft[4];
   StepLog(object &json);
-  StepLog(int p[], int a[], int s[]);
+  StepLog(int step, int p[], int a[], const Agent agts[], int t[], int s[]);
   object json();
 };
 
 struct Configuration: Field {
-  int timeLimit;
   int steps;
   Configuration(object &json);
   Configuration

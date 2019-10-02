@@ -1,12 +1,17 @@
 CXXFLAGS= -g -Wall
 CXX= c++
 LDFLAGS= -lm
-OBJECTS= playerMain.o gameInfo.o fieldMap.o greedySamurai.o snoopyDog.o
-EXECUTABLE= simplePlayer
+BASICOBJECTS= playerMain.o gameInfo.o fieldMap.o
+SIMPLEOBJECTS= $(BASICOBJECTS) greedySamurai.o snoopyDog.o
+RANDOMOBJECTS= $(BASICOBJECTS) randomSamurai.o randomDog.o
+EXECUTABLES= simplePlayer randomPlayer
 
-all: $(EXECUTABLE)
+all: $(EXECUTABLES)
 
-simplePlayer: $(OBJECTS)
+simplePlayer: $(SIMPLEOBJECTS)
+	${CXX} -o $@ $^ $(LDFLAGS)
+
+randomPlayer: $(RANDOMOBJECTS)
 	${CXX} -o $@ $^ $(LDFLAGS)
 
 -include ${OBJECTS:.o=.d}
@@ -24,4 +29,4 @@ clean:
 	rm -rf *~ */*~ \#*\#
 
 distclean: clean
-	rm -f ${EXECUTABLE}
+	rm -f ${EXECUTABLES}

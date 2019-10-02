@@ -6,13 +6,16 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <signal.h>
+#include <chrono>
 #include "playgame.hh"
+
+using namespace chrono;
 
 pid_t playerIds[4];
 FILE *toPlayers[4];
 FILE *fromPlayers[4];
 
-bool gameReport = false;
+bool stepSummary = false;
 
 static const int dx[] = { 0,-1,-1,-1, 0, 1, 1, 1 };
 static const int dy[] = { 1, 1, 0,-1,-1,-1, 0, 1 };
@@ -122,10 +125,12 @@ vector <StepLog> playGame
   int scores[] = { 0, 0 };
   int plans[] = { -1, -1, -1, -1 };
   int actions[] = { -1, -1, -1, -1 };
-  for (int step = 0; step <= config->steps; step++) {
+  int timeLeft[4];
+  fill(timeLeft, timeLeft+4, initialConf.thinkTime);
+  for (int step = 0; step < config->steps; step++) {
     if (scores[0] + scores[1] == totalGolds) break;
-    if (gameReport) {
-      cerr << "Step: " << step << endl;
+    if (stepSummary) {
+      cerr << "Step: " << step+1 << endl;
       if (config->known.size() != 0) {
 	cerr << "Golds known:";
 	for (auto g: config->known) {
@@ -138,20 +143,22 @@ vector <StepLog> playGame
     for (int p = 0; p != 4; p++) {
       sendGameInfo(toPlayers[p], p, step, *config,
 		   plans, actions, scores);
-      fflush(toPlayers[p]);
       if (dumpPath != nullptr) {
 	sendGameInfo(dump[p], p, step, *config,
 		     plans, actions, scores);
 	fflush(dump[p]);
       }
-    }
-    for (int p = 0; p != 4; p++) {
+      fflush(toPlayers[p]);
+      steady_clock::time_point sentAt = steady_clock::now();
       fscanf(fromPlayers[p], "%d", &plans[p]);
+      steady_clock::time_point receivedAt = steady_clock::now();
+      milliseconds elapsed = duration_cast<milliseconds>(receivedAt - sentAt);
+      timeLeft[p] -= elapsed.count();
     }
     Configuration *next =
       new Configuration(*config, plans, actions, scores);
-    stepLogs.emplace_back(plans, actions, scores);
-    if (gameReport) {
+    stepLogs.emplace_back(step, plans, actions, next->agents, timeLeft, scores);
+    if (stepSummary) {
       for (int p = 0; p != 4; p++) {
 	cerr << "Agent " << p
 	     << "@(" << setw(coordWidth) << config->agents[p].x << ","

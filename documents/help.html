@@ -14,7 +14,7 @@
     <center>
       <p>
 	IPSJ Programming Contest Committee<br>
-	2019/09/01
+	2019/09/29
       </p>
       <p>
 	The <em>SamurAI Dig Here</em> page is a tool to enjoy the
@@ -57,9 +57,11 @@
 	  The green game field is displayed in the center.
 	</li>
 	<li>
-	  On the bottom, scores (amounts of treasure dug out so far) of
-	  both sides (red and blue) are displayed with icons of
-	  samurai.
+	  On the bottom, scores (amounts of treasure dug out so far)
+	  of both sides (red and blue) and remaining think times of
+	  samurai and dog agents are displayed below their icons.
+	  Remaining times are truncated down to seconds and are
+	  normally in sky blue, but in red if expired.
 	</li>
       </ul>
     </p>
@@ -196,9 +198,10 @@
 	<li>
 	  While pressing a mouse button the the <em>treasure icon</em>
 	  <img src="../icons/coins-icon.png" class="inlineIcon">
-	  coming next, the positions and the amounts of all the buried
-	  treasure in the game field are displayed.
-	  Releasing the button makes them hidden again.
+	  coming next, the positions and the amounts of all the hidden
+	  buried treasure in the game field are displayed with their
+	  amounts in red figures.  Releasing the button makes them
+	  hidden again.
 	</li>
 	<li>
 	  The state of the game displayed can be advanced or
@@ -401,8 +404,9 @@
     </p>
     <p>
       A mouse click on a cell with buried treasure while pressing a
-      control key toggles the treasure status between apparent and
-      hidden.
+      control key toggles the treasure initial status between apparent
+      and hidden.  Amounts of hidden treasures are displayed in red
+      figures while those of apparent ones are in yellow.
     </p>
     <h3>Configuring Holes</h3>
     <p>

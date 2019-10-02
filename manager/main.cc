@@ -69,7 +69,7 @@ void verifyPlays(const GameLog &gamelog) {
   }
 }
 
-const char *OPTIONS = "RD:";
+const char *OPTIONS = "SD:";
 char *dumpPath = nullptr;
 int playerNumber = 0;
 
@@ -78,8 +78,8 @@ int main(int argc, char *argv[]) {
        opt != -1;
        opt = getopt(argc, argv, OPTIONS)) {
     switch (opt) {
-    case 'R':			// Report game summary to stderr
-      gameReport = true;
+    case 'S':			// Game summary output to stderr
+      stepSummary = true;
       break;
     case 'D':			// Dump communication log
       dumpPath = optarg;
@@ -98,10 +98,10 @@ int main(int argc, char *argv[]) {
     usageError("Invalid log data in ", argv[optind]);
   }
   GameLog gamelog(logData.get<object>());
-  gamelog.plays.clear();
   if (argc == optind+1) {
     verifyPlays(gamelog);
   } else if (argc == optind+3) {
+    gamelog.plays.clear();
     char **playerPaths = argv+optind+1;
     vector <StepLog> playLogs = playGame(gamelog, playerPaths, dumpPath);
     GameLog result(gamelog, playLogs);

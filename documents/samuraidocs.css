@@ -34,9 +34,25 @@ table.bordered td {
     width: 50px;
     text-align: center;
 }
+
 .figure {
-    float:right; margin:10px;
+    float: right;
+    margin: 10px;
 }
+
+.exampleText {
+    float: right;
+    background: rgb(255, 255, 200);
+    color: rgb(50, 0, 50);
+    border: 1px solid black;
+    margin: 10px;
+}
+
+.exampleText pre {
+    padding: 0px;
+    margin: 10px;
+}
+
 .inlineIcon {
     height:18px;
 }

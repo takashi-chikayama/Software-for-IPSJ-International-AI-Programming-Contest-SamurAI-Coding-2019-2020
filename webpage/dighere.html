@@ -6,6 +6,7 @@
     <script src="sponsorLogos.js"></script>
     <script src="dighere.js"></script>
     <script src="players.js"></script>
+    <script src="preload.js"></script>
     <link rel="stylesheet" href="dighere.css" >
     <link rel="icon" href="../icons/samurai-icon.png" >
   </head>
@@ -34,6 +35,8 @@
 	       onchange="importFile(event)">
 	<img id="export" src="../icons/export.png" title="export">
 	<img id="resize" src="../icons/resize.png" title="resize">
+	<br>
+	<img id="sponsorLogo0" style="margin:10px">
       </div>
       <div class="alignRight">
 	<img id="edit" src="../icons/edit.png">
@@ -45,21 +48,45 @@
 	<span id="currentStepLabel"></span>
 	<img id="manual" src="../icons/manual.png">
 	<img id="help" src="../icons/help.png">
+	<br>
+	<img id="sponsorLogo1" class="alignRight" style="margin:10px">
       </div>
     </div>
     <div id="bottomBar" class="infoBar">
-      <div class="alignLeft hideOverflow">
-	<img id="samuraiFigure0" src="../icons/samurai-figure-0.png">
-	<span id="scoreLabel0"></span>
-      </div>
-      <div class="alignRight hideOverflow">
-	<span id="scoreLabel1"></span>
-	<img id="samuraiFigure1" src="../icons/samurai-figure-1.png">
-      </div>
+      <table class="alignLeft">
+	<tr>
+	  <td class="nopadding">
+	    <img id="samuraiFigure0" src="../icons/samurai-figure-0.png">
+	  </td>
+	  <td class="nopadding">
+	    <img id="dogFigure0" src="../icons/dog-poses00.png">
+	  </td>
+	  <td rowspan="2" id="scoreLabel0" />
+	</tr>
+	<tr>
+	  <td id="timeLeft0" />
+	  <td id="timeLeft2" />
+	</tr>
+      </table>
+      <table class="alignRight">
+	<tr>
+	  <td rowspan="2" id="scoreLabel1"></td>
+	  <td class="nopadding">
+	    <img id="dogFigure1" src="../icons/dog-poses14.png">
+	  </td>
+	  <td>
+	    <img id="samuraiFigure1" src="../icons/samurai-figure-1.png">
+	  </td>
+	</tr>
+	<tr>
+	  <td id="timeLeft3" />
+	  <td id="timeLeft1" />
+	</tr>
+      </table>
     </div>
     <div id="promptBox" class="promptBox overlaid">
       <span id="promptMessage"></span>
-      <input id="promptInput" type="text" style="font-size: 20px;">
+      <input id="promptInput" type="text">
       <button id="promptDoItButton"></button>
       <button
 	id="promptCancelButton"

@@ -24,16 +24,16 @@
       <pre>
 {
   "filetype": "SamurAI Dig Here Game Log",
-  "field": <i>F</i>,
-  "plays": [<i>P</i><sub>1</sub>, &hellip; <i>P<sub>s</sub></i>]
+  "field": <var>F</var>,
+  "plays": [<var>P</var><sub>1</sub>, &hellip; <var>P<sub>s</sub></var>]
 }      
       </pre>
       JSON 形式なので項目の順序はこのとおりとは限らない.
       以下も同様である.
     </p>
     <p>
-      ここで <i>F</i> は競技フィールドの記述,
-      <i>P</i><sub>0</sub>, &hellip; <i>P<sub>s</sub></i>
+      ここで <var>F</var> は競技フィールドの記述,
+      <var>P</var><sub>0</sub>, &hellip; <var>P<sub>s</sub></var>
       はそのフィールド上で競われたゲームのプレイログである
       (いずれも後述).
     </p>
@@ -49,49 +49,53 @@
       競技フィールド記述ファイルは以下の形式である.
       <pre>
 {
-  "size": <i>l</i>,
-  "steps": <i>s</i>,
-  "holes": [<i>H</i><sub>1</sub>, &hellip;, <i>H<sub>n</sub></i>],
-  "known": [<i>K</i><sub>1</sub>, &hellip;, <i>K<sub>m</sub></i>],
-  "hidden": [<i>E</i><sub>1</sub>, &hellip;, <i>E<sub>m</sub></i>],
-  "agents": [<i>A</i><sub>1</sub>, &hellip;, <i>A</i><sub>4</sub>]
+  "size": <var>l</var>,
+  "steps": <var>s</var>,
+  "holes": [<var>H</var><sub>1</sub>, &hellip;, <var>H<sub>n</sub></var>],
+  "known": [<var>K</var><sub>1</sub>, &hellip;, <var>K<sub>m</sub></var>],
+  "hidden": [<var>E</var><sub>1</sub>, &hellip;, <var>E<sub>m</sub></var>],
+  "agents": [<var>A</var><sub>1</sub>, &hellip;, <var>A</var><sub>4</sub>],
+  "thinkTime": <var>t</var>
 }
       </pre>
     </p>
     <p>
-      ここで <i>l</i> はフィールドの一辺のセル数,
-      <i>s</i> は最大ステップ数で,
+      ここで <var>l</var> はフィールドの一辺のセル数,
+      <var>s</var> は最大ステップ数で,
       それぞれ非負整数である.
     </p>
     <p>
-      <i>H<sub>i</sub></i> (<i>i</i> &equals; 1, &hellip;, <i>n</i>)
-      は穴の初期位置の座標で <tt>{ "x": <i>x</i>, "y": <i>y</i> }</tt>
+      <var>H<sub>i</sub></var> (<var>i</var> &equals; 1, &hellip;, <var>n</var>)
+      は穴の初期位置の座標で <tt>{ "x": <var>x</var>, "y": <var>y</var> }</tt>
       という形式である.
-      <i>K<sub>j</sub></i> (<i>j</i> &equals; 1, &hellip;, <i>m</i>)
+      <var>K<sub>j</sub></var> (<var>j</var> &equals; 1, &hellip;, <var>m</var>)
       は公知の埋蔵金の位置と量を,
-      <i>E<sub>j</sub></i> (<i>j</i> &equals; 1, &hellip;, <i>m</i>)
+      <var>E<sub>j</sub></var> (<var>j</var> &equals; 1, &hellip;, <var>m</var>)
       は秘匿された埋蔵金の位置と量を, それぞれ
-      <tt>{"x": <i>x</i>, "y": <i>y</i>, "amount": <i>g</i>}</tt>
+      <tt>{"x": <var>x</var>, "y": <var>y</var>, "amount": <var>g</var>}</tt>
       という形式で表す.
-      ここで埋蔵金の位置の座標値を表す  <i>x, y</i> は,
-      0 &leq; <i>x</i> &lt; <i>l</i>, 0 &leq; <i>y</i> &lt; <i>l</i>
+      ここで埋蔵金の位置の座標値を表す  <var>x, y</var> は,
+      0 &leq; <var>x</var> &lt; <var>l</var>, 0 &leq; <var>y</var> &lt; <var>l</var>
       を満たす整数値である.
-      また, <i>g</i> は埋蔵金の量を表す正の偶数である.
+      また, <var>g</var> は埋蔵金の量を表す正の偶数である.
     </p>
     <p>
-      <i>A</i><sub>1</sub>, <i>A</i><sub>2</sub>
+      <var>A</var><sub>1</sub>, <var>A</var><sub>2</sub>
       はチーム 1, 2 の侍,
-      <i>A</i><sub>3</sub>, <i>A</i><sub>4</sub>
+      <var>A</var><sub>3</sub>, <var>A</var><sub>4</sub>
       はチーム 1, 2 の犬の初期位置と向きで
-      <tt>{ "x": <i>x</i>, "y": <i>y</i>, "direction": <i>dir</i>}</tt>
+      <tt>{ "x": <var>x</var>, "y": <var>y</var>, "direction": <var>dir</var>}</tt>
       という形式である.
-      ここで <i>x, y</i> は位置の座標値を表す整数である.
-      <i>dir</i> は向きを表す 0 から 7 の整数で,
-      0 が <i>y</i> 軸方向 (画面上では左下向き),
+      ここで <var>x, y</var> は位置の座標値を表す整数である.
+      <var>dir</var> は向きを表す 0 から 7 の整数で,
+      0 が <var>y</var> 軸方向 (画面上では左下向き),
       1 増すごとに時計回りで 45 度ずつ変わる.
-      侍については <i>dir</i> は必ず偶数である.
+      侍については <var>dir</var> は必ず偶数である.
       なお, 犬や侍の向きは表示のためだけのもので,
       ゲームを競う上では特段の意味を持たない.
+    </p>
+    <p>
+      <var>t</var> は考慮時間制限を表す整数値 (ミリ秒単位) である.
     </p>
     <p>
       競技フィールドの記述には上記の他に,
@@ -100,40 +104,52 @@
     </p>
     <h2>プレイの記述</h2>
     <p>
-      <i>P<sub>i</sub></i> (<i>i</i> &equals; 1 &hellip; <i>s</i>)
-      はステップ <i>i</i> におけるプレイのログである.
-      ここで <i>s</i> はプレイログ中の最後のステップの番号である.
+      <var>P<sub>i</sub></var> (<var>i</var> &equals; 1 &hellip; <var>s</var>)
+      はステップ <var>i</var> におけるプレイのログである.
+      ここで <var>s</var> はプレイログ中の最後のステップの番号である.
       ゲームは最大ステップ数に到達するか,
       埋蔵金をすべて掘り起こすかすれば終了するが,
       プレイログはゲームの途中までの記録しかない場合もある.
-      ことに <i>s</i> &equals; 0, すなわちプレイログが空リストであれば,
+      ことに <var>s</var> &equals; 0, すなわちプレイログが空リストであれば,
       そのゲームログは競技フィールドのみを記述するものである.
     </p>
     <p>
       ステップごとのプレイログは以下の形式である.
     <pre>
 {
-  "plans": [<i>P</i><sub>1</sub>, &hellip;, <i>P</i><sub>4</sub>],
-  "actions": [<i>A</i><sub>1</sub>, &hellip;, <i>A</i><sub>4</sub>],
-  "scores": [<i>G</i><sub>1</sub>, <i>G</i><sub>2</sub>]
+  "step": <var>S</var>,
+  "plans": [<var>P</var><sub>1</sub>, &hellip;, <var>P</var><sub>4</sub>],
+  "actions": [<var>E</var><sub>1</sub>, &hellip;, <var>E</var><sub>4</sub>],
+  "agents": [<var>A</var><sub>1</sub>, &hellip;, <var>A</var><sub>4</sub>],
+  "scores": [<var>G</var><sub>1</sub>, <var>G</var><sub>2</sub>],
+  "timeLeft": <var>t</var>
 }
     </pre>
     <p>
-      ここで <i>P<sub>i</sub></i> は各ゲームエージェントの行動指示を,
-      <i>A<sub>i</sub></i> は他のエージェントとの干渉を受けた実際の行動を,
+      ここで <var>S</var> はステップ番号,
+      <var>P<sub>i</sub></var> は各ゲームエージェントの行動指示を,
+      <var>E<sub>i</sub></var> は他のエージェントとの干渉を受けた実際の行動を,
       それぞれ整数値ひとつで表す.
+      <var>A<sub>i</sub></var> は行動後の各エージェントの位置の座標を,
+      <tt>{ "x": <var>x</var>, "y": <var>y</var> }</tt> という形式で表す.
       添字 1 はチーム 1 の侍, 2 はチーム 2 の侍,
       3 はチーム 1 の犬, 4 はチーム 2 の犬を表す.
     </p>
     <p>
-      <i>G</i><sub>1</sub>, <i>G</i><sub>2</sub> は,
+      <var>G</var><sub>1</sub>, <var>G</var><sub>2</sub> は,
       それぞれチーム 1 と 2 の侍がこのステップまでに掘り出した埋蔵金の総量である.
     </p>
     <p>
-      なお, ステッププレイログ中の <tt>actions</tt> や <tt>scores</tt>
-      は冗長な情報で,
+      <var>t</var> は当該ステップ終了時の残り考慮時間を示す整数値
+      (ミリ秒単位) である.
+      考慮時間制限を超過した場合は &minus;1 になる.
+    </p>
+    <p>
+      なお, ステッププレイログ中の <tt>step</tt>, <tt>actions</tt>,
+      <tt>agents</tt>, <tt>scores</tt> の各項目は,
       フィールド記述に示された状態から <tt>plans</tt>
-      とゲームのルールに従ってゲームの進行を追うことでも得られる.
+      とゲームルールに従って進行を追うことでも得られる冗長な情報で,
+      整合性検査とデバッグに用いるためのものである.
     </p>
   </body>
 </html>

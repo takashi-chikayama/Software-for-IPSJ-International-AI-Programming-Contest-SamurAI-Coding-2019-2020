@@ -16,11 +16,13 @@ int planSamurai(GameInfo &info) {
   Cell digCand;
   int maxTreasure = -1;
   for (auto &n: myCell.fourNeighbors) {
-    auto treasure = info.revealedTreasure.find(n->position);
-    if (treasure != info.revealedTreasure.end() &&
-	treasure->second > maxTreasure) {
-      digCand = n->position;
-      maxTreasure = treasure->second;
+    if (noAgentsIn(n->position, info)) {
+      auto treasure = info.revealedTreasure.find(n->position);
+      if (treasure != info.revealedTreasure.end() &&
+	  treasure->second > maxTreasure) {
+	digCand = n->position;
+	maxTreasure = treasure->second;
+      }
     }
   }
   if (maxTreasure > 0) return directionOf(pos, digCand) + 8;

@@ -91,10 +91,26 @@ svg {
 .promptBox {
     display: none;
     background: white;
+    border: 2px solid red;
     margin: 20px;
-    padding: 5px;
-    font-size: 20px;
+    padding: 10px;
     position: absolute;
-    height: 35px;
+    height: 5%;
     width: auto;
+}
+
+.infoBar table {
+    display: inline;
+    border-spacing: 0px;
+}
+
+.infoBar td {
+    margin: 0px;
+    padding: 0px 2px 0px 2px;
+    text-align: center;
+    vertical-align: bottom;
+}
+
+.nopadding {
+    padding: 0px;
 }
