@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="samuraidocs.css" >
+    <link rel="icon" href="../icons/samurai-icon.png" >
+    <title>SamurAI Dig Here ゲームマネージャ</title>
+  </head>
+  <body>
+    <span style="float:left">
+      <a href="manager.html" target="_blank">English</a>
+    </span>
+    <h1>SamurAI Dig Here ゲームマネージャ</h1>
+    <center>
+      <p>
+	情報処理学会プログラミングコンテスト委員会<br>
+	2019/10/01
+      </p>
+      <p>
+	SamurAI Dig Here ゲームマネージャは,
+	ふたつのプレイヤエージェントプログラム同士で
+	SamurAI Dig Here ゲームを競わせ,
+	そのゲームのログを生成するツールである.
+      </p>
+    </center>
+
+    <h2>機能</h2>
+    <p>
+      SamurAI Dig Here ゲームマネージャは以下の機能を持つ.
+      <dl>
+	<dt>ゲームの実施:</dt>
+	<dd>
+	  与えられたゲーム競技場において,
+	  ふたつのプレイヤエージェントプログラムを競わせ,
+	  ゲームのログを出力する.
+	</dd>
+	<dt>通信ログの生成:</dt>
+	<dd>
+	  ゲーム実施中にマネージャからプレイヤプログラムに送ったデータのコピーを外部ファイルに格納できる.
+	  これはプレイヤプログラムのデバッグに有用だろう.
+	</dd>
+	<dt>プレイログの確認:</dt>
+	<dd>
+	  与えられたプレイログの整合性をチェックできる.
+	</dd>
+      </dl>
+    </p>
+
+    <h2>使用法</h2>
+    <p>
+      コマンドラインは以下のフォーマットである.
+      <pre>
+./manager [<em>options</em>] &lt;<em>log</em>&gt; [&lt;<em>player1</em>&gt; &lt;<em>player2</em>&gt;]
+      </pre>
+    </p>
+    <h3>競技場</h3>
+    <p>
+      引数 <em>log</em> は競技場の記述と (空かも知れない)
+      その上でのゲームのログを格納するログファイルへのパスである.
+      このファイルは通常
+      <a href="help-jp.html">SamurAI Dig Here ウェブページ</a>
+      を用いて作成するもので, ファイル名拡張子 "<tt>.dighere</tt>" を持つ.
+    </p>
+    <h3>プレイヤプログラム</h3>
+    <p>
+      引数 &lt;<em>player1</em>&gt; と
+      &lt;<em>player2</em>&gt; を与えなければ,
+      マネージャはログファイルに記された内容の整合性をチェックする.
+    </p>
+    <p>
+      引数 &lt;<em>player1</em>&gt;
+      と &lt;<em>player2</em>&gt; を与えれば,
+      これらはプレイヤプログラムへのパスと解釈される.
+      マネージャは引数 &lt;<em>log</em>&gt; に与えられた競技場を用いて,
+      これらふたつのプレイヤにゲームを競わせる.
+      詳細は後述する.
+    </p>
+    <h3>オプション</h3>
+    <p>
+      以下のオプションがある.
+      <dl>
+	<dt><tt>-S</tt>:</dt>
+	<dd>
+	  ゲームの各ステップのサマリを標準エラー出力に書き出す.
+	  サマリは以下の行からなる.
+	  <div class="exampleText">
+	    <pre>
+Step: 8
+Golds known: 18@(6,6) 14@(6,8)
+Agent 0@(6,7) dig  (6,8)
+Agent 1@(5,6) move (5,7)X
+Agent 2@(4,8) move (3,8)
+Agent 3@(6,6) move (5,7)X
+Scores are 14:0</pre>
+	  </div>
+	  <ul>
+	    <li>
+	      ゲームステップ番号.
+	    </li>
+	    <li>
+	      公開されている埋蔵金の量と位置.
+	    </li>
+	    <li>
+	      4 エージェントの位置とプレイプランを各1行に.
+	      移動, 穴掘り, 埋め戻しをするセルの位置も表示する.
+	      実際にはプレイプランが他のエージェントのプランと衝突する場合は,
+	      <tt>X</tt> を付してそのことを示す.
+	    </li>
+	    <li>
+	      当該ステップまでの両チームの得点.
+	    </li>
+	  </ul>
+	  右図に例を示す.
+	  この例では片方のチームの侍 (agent 1) と犬 (agent 3)
+	  が同じセルに動こうとしたので衝突が生じ,
+	  両者は元の場所から動けない.
+	  公開されている (6,8) にある埋蔵金は相手の侍 (agent 0) が掘り出した.
+	</dd>
+	<dt><tt>-D &lt;<em>path</em>&gt;</tt></dt>
+	<dd>
+	  マネージャからプレイヤプログラムに送るデータのコピーを指定ファイルに書き出す.
+	  エージェントは4体あるので, 出力先は4ファイルになる.
+	  各ファイルのパスは指定した &lt;<em>path</em>&gt;
+	  にエージェントの ID を付加したものになる.
+	  ID は以下である.
+	  <table>
+	    <tr><td>0:</td><td>Player 1 の侍</td></tr>
+	    <tr><td>1:</td><td>Player 2 の侍</td></tr>
+	    <tr><td>2:</td><td>Player 1 の犬</td></tr>
+	    <tr><td>3:</td><td>Player 2 の犬</td></tr>
+	  </table>
+	</dd>
+      </dl>
+    </p>
+    <h2>プレイヤプロセス</h2>
+    <p>
+      プレイヤプログラムはマネージャの子プロセスとして動作する.
+      両チームそれぞれ 2 プロセス, ひとつは侍,
+      もうひとつは犬を制御するプロセスが同じプログラムで動作する.
+      どちらのエージェントの担当かはマネージャから送られるデータでわかる.
+    </p>
+    <p>
+      各プロセスは,
+      ゲームステップごとに標準入力に送られるゲーム状態のデータを読み込み,
+      そのステップのプレイプランを標準出力に書き出す.
+      詳細は <a href="rules-jp.html">SamurAI Dig Here ゲームルール</a>
+      を参照されたい.
+    </p>
+  </body>
+</html>
