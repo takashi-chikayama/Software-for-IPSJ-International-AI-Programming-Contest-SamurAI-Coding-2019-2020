@@ -23,7 +23,8 @@ static const int dy[] = { 1, 1, 0,-1,-1,-1, 0, 1 };
 static void sendGameInfo
 (FILE *out, int id, int step,
  const Configuration &l,
- const int plans[], const int actions[], const int scores[]) {
+ const int plans[], const int actions[], const int scores[],
+ int timeLeft) {
   fprintf(out, "%d\n%d\n%d\n%d\n", id, l.size, step, l.steps);
   fprintf(out, "%d", (int)l.holes.size());
   for (auto h: l.holes) fprintf(out, " %d %d", h.x, h.y);
@@ -70,7 +71,7 @@ static void sendGameInfo
   for (auto &g: l.known) remaining += g.amount;
   for (auto &g: l.hidden) remaining += g.amount;
   fprintf(out, "%d\n", remaining);
-  fprintf(out, "2000\n");	 // think time
+  fprintf(out, "%d\n", timeLeft); // think time left
 }
 
 vector <StepLog> playGame
@@ -124,6 +125,7 @@ vector <StepLog> playGame
   vector <StepLog> stepLogs;
   int scores[] = { 0, 0 };
   int plans[] = { -1, -1, -1, -1 };
+  int newPlans[4];
   int actions[] = { -1, -1, -1, -1 };
   int timeLeft[4];
   fill(timeLeft, timeLeft+4, initialConf.thinkTime);
@@ -142,19 +144,20 @@ vector <StepLog> playGame
     }
     for (int p = 0; p != 4; p++) {
       sendGameInfo(toPlayers[p], p, step, *config,
-		   plans, actions, scores);
+		   plans, actions, scores, timeLeft[p]);
       if (dumpPath != nullptr) {
 	sendGameInfo(dump[p], p, step, *config,
-		     plans, actions, scores);
+		     plans, actions, scores, timeLeft[p]);
 	fflush(dump[p]);
       }
       fflush(toPlayers[p]);
       steady_clock::time_point sentAt = steady_clock::now();
-      fscanf(fromPlayers[p], "%d", &plans[p]);
+      fscanf(fromPlayers[p], "%d", &newPlans[p]);
       steady_clock::time_point receivedAt = steady_clock::now();
       milliseconds elapsed = duration_cast<milliseconds>(receivedAt - sentAt);
       timeLeft[p] -= elapsed.count();
     }
+    copy(newPlans, newPlans+4, plans);
     Configuration *next =
       new Configuration(*config, plans, actions, scores);
     stepLogs.emplace_back(step, plans, actions, next->agents, timeLeft, scores);

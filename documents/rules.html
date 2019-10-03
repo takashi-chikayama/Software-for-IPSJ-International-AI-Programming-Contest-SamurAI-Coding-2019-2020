@@ -279,7 +279,7 @@
       following items, in this order.
       <ul>
 	<li>
-	  The agent number of the agent controlled by the player
+	  The agent ID of the agent controlled by the player
 	  process receiving the information.
 	  0 for one of the samurai, 1 for its opponent samurai,
 	  2 for the friend dog of the samurai numbered 0,
@@ -335,6 +335,12 @@
       </ul>
     </p>
     <p>
+      All the items in the game state information are given as
+      integers.  A newline is placed between the items in the itemized
+      list above, and when two or more integers in an item, they are
+      separated by a space.  A newline follows the last item.
+    </p>
+    <p>
       All the items describes as <em>lists</em> above start with the
       number of items in the list (an integer).  For an empty list, it
       is 0.  Descriptions of items in the list, if any, follow it.
@@ -351,14 +357,76 @@
       is buried in, and the third is the amount of the treasure,
       which is an even positive integer.
     </p>
+    <div class="exampleText">
+      <table class="shrunk">
+	<tr><td><tt>3</tt></td><td>// Agent ID</td></tr>
+	<tr><td><tt>10</tt></td><td>// Field size</td></tr>
+	<tr><td><tt>1</tt></td><td>// Step number</td></tr>
+	<tr><td><tt>100</tt></td><td>// Max. number of steps</td></tr>
+	<tr><td><tt>6 5 1 7 3 7 0 8 1 6 0 5 2</tt></td>
+	  <td>// Cells with holes</td></tr>
+	<tr><td><tt>1 6 6 6</tt></td><td>// Known treasure</td></tr>
+	<tr><td><tt>1 2 7 8</tt></td><td>// Hidden treasure detected</td></tr>
+	<tr><td><tt>9 6 2 4 5 3 1 6</tt></td><td>// Agent positions</td></tr>
+	<tr><td><tt>0 0 7 7</tt></td><td>// Play plans</td></tr>
+	<tr><td><tt>0 0 7 7</tt></td><td>// Actions taken in prev. step</td></tr>
+	<tr><td><tt>0 0</tt></td><td>// Scores</td></tr>
+	<tr><td><tt>50</tt></td><td>// Remaining treasure</td></tr>
+	<tr><td><tt>299941</tt></td><td>// Think time left</td></tr>
+      </table>
+    </div>
     <p>
-      As described above, all the items in the game state information
-      are given as integers.  A newline is placed between the items in
-      the itemized list above, and when two or more integers in an
-      item, they are separated by a space.
-      A newline follows the last item.
+      An example of game state information is shown in the figure on
+      the right.  The notes beginning with "//" are for explanation
+      here and are not actually sent to player processes.
+      <ul>
+	<li>
+	  This information is sent to for player ID 3, the dog of one team.
+	</li>
+	<li>
+	  The field consists of ten by ten cells.
+	</li>
+	<li>
+	  The game step number is 1.
+	</li>
+	<li>
+	  The maximum number of steps is 100 in this game.
+	</li>
+	<li>
+	  There are 6 cells with a hole in them, located at
+	  coordinates (5, 1), (7, 3), (7, 0), (8, 1), (6, 0), and (5, 2).
+	</li>
+	<li>
+	  There is one publicly known buried treasure at (6, 6) with
+	  the amount of 6.
+	</li>
+	<li>
+	  The dog agent this information is sent detected hidden
+	  treasure at (2, 7) of the amount of 8.
+	</li>
+	<li>
+	  The four agents are at (9, 6), (2, 4), (5, 3), and (1, 6).
+	</li>
+	<li>
+	  The play plans of the agents in the previous step were 0, 0,
+	  7, and 7.
+	</li>
+	<li>
+	  The actions taken by the agents in the previous step were 0,
+	  0, 7, and 7, that is, all the plans were carried out as
+	  specified.
+	</li>
+	<li>
+	  No treasure has been dug out yet.
+	</li>
+	<li>
+	  The total amount treasure yet to be dug out is 50.
+	</li>
+	<li>
+	  The think time left for this agent is 299941 msec.
+	</li>
+      </ul>
     </p>
-
     <h3>Play Plans</h3>
     <p>
       In response to the game state information received,

@@ -53,6 +53,11 @@ table.bordered td {
     margin: 10px;
 }
 
+.shrunk * {
+    margin: 0px;
+    padding: 0px;
+}
+
 .inlineIcon {
     height:18px;
 }
