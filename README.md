@@ -1,20 +1,32 @@
-# Software-for-IPSJ-International-AI-Programming-Contest-SamurAI-Coding-2019-2020
+# Software for IPSJ International AI Programming Contest
+#   SamurAI Coding 2019-20
 
 ## Documents
-
-The rules of the game SamurAI Dig Here found in the following files.
-
-* [documents/rules.html](documents/rules.html)
-* [documents/rules-jp.html](documents/rules-jp.html)
+### Game Rules
+The rules of the game SamurAI Dig Here can found in the following files.
+* English version: [documents/rules.html](documents/rules.html)
+* Japanese version: [documents/rules-jp.html](documents/rules-jp.html)
+### Game Manager
+The manuals for the game manager are in the following files.
+* English version: [documents/manager.html](documents/manager.html)
+* Japanese version: [documents/manager-jp.html](documents/manager-jp.html)
+### Web Page
+The manuals for the game log visualizer web page are in the following files.
+* English version: [documents/help.html](documents/help.html)
+* Japanese version: [documents/help-jp.html](documents/help-jp.html)
+### Tactics
+Some potential game tactics are suggested in the following files.
+* English version: [documents/tactics.html](documents/tactics.html)
+* Japanese version: [documents/tactics-jp.html](documents/tactics-jp.html)
 
 ## Getting Started
 ### Prerequisites
 
 * C++ development environment (compiler and standard libraries for c++11 or later)
-* A web browsers
+* A web browser
 
 The web browser is used to view the documents, to show replays of
-games, and also to edit game field configuration.
+games, and also to edit game field configurations.
 
 ### Installing
 
@@ -26,11 +38,11 @@ This will make the following software.
 * manager/manager
    Game management system
 * players/simplePlayer
-   Sample player AI
+   A simple sample player AI
 * players/randomPlayer
-   Player with random plays
+   A player with random plays
 * players/timeoutPlayer
-   Player that sometimes fall asleep
+   A player that sometimes falls asleep
 
 ## Testing
 
@@ -59,14 +71,14 @@ The manual for using the web page can be visited by clicking the button with a q
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This software is distributed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
-A part of the project (picojson) is licenced by Cybozu Labs, Inc. and Kazuo Oku.
+A part of the project (picojson) is licenced by Cybozu Labs, Inc. and Kazuho Oku.
 See [manager/picojson.h](manager/picojson.h) for details.
 
 ## Acknowledgments
 
-Members of the Programming Contest Committee of Information Processing Society of Japan and SamurAI Coding Game Design and Development Support team helped testing the system, whose names are listed below.
+Members of the Programming Contest Committee of Information Processing Society of Japan helped designing the game and testing the system, whose names are listed below.
 
 * Committee Members: 
 Tasuku Hiraishi (Director), Hironori Washizaki (Executive Advisor), Takashi Chikayama, Shingo Takada, Yuki Kobayashi Kazunori Sakamoto, Tetsuro Tanaka, Makoto Miwa, Kenta Cho, Tsutomu Terada, Kiyokuni Kawachiya, Noriko Fukasawa, Daisaku Yokoyama
