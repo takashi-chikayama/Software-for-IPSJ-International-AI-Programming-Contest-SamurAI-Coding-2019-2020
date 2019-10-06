@@ -4,7 +4,8 @@ LDFLAGS= -lm
 BASICOBJECTS= playerMain.o gameInfo.o fieldMap.o
 SIMPLEOBJECTS= $(BASICOBJECTS) greedySamurai.o snoopyDog.o
 RANDOMOBJECTS= $(BASICOBJECTS) randomSamurai.o randomDog.o
-EXECUTABLES= simplePlayer randomPlayer
+TIMEOUTOBJECTS=  $(BASICOBJECTS) timeoutSamurai.o randomDog.o
+EXECUTABLES= simplePlayer randomPlayer timeoutPlayer
 
 all: $(EXECUTABLES)
 
@@ -12,6 +13,9 @@ simplePlayer: $(SIMPLEOBJECTS)
 	${CXX} -o $@ $^ $(LDFLAGS)
 
 randomPlayer: $(RANDOMOBJECTS)
+	${CXX} -o $@ $^ $(LDFLAGS)
+
+timeoutPlayer: $(TIMEOUTOBJECTS)
 	${CXX} -o $@ $^ $(LDFLAGS)
 
 -include ${OBJECTS:.o=.d}

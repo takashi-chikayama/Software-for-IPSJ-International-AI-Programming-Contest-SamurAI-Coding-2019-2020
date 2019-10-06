@@ -29,6 +29,8 @@ This will make the following software.
    Sample player AI
 * players/randomPlayer
    Player with random plays
+* players/timeoutPlayer
+   Player that sometimes fall asleep
 
 ## Testing
 

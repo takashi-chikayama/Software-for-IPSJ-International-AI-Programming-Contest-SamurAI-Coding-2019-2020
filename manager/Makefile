@@ -1,6 +1,6 @@
 CXXFLAGS= -g -Wall
 CXX= c++
-LDFLAGS= -lm
+LDFLAGS= -lm -lpthread
 OBJECTS= main.o field.o gamelog.o playgame.o
 EXECUTABLE= manager
 

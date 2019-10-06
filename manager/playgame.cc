@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <signal.h>
 #include <chrono>
+#include <future>
+#include <thread>
 #include "playgame.hh"
 
 using namespace chrono;
@@ -17,8 +19,8 @@ FILE *fromPlayers[4];
 
 bool stepSummary = false;
 
-static const int dx[] = { 0,-1,-1,-1, 0, 1, 1, 1 };
-static const int dy[] = { 1, 1, 0,-1,-1,-1, 0, 1 };
+static const int dx[] = { 0, 0,-1,-1,-1, 0, 1, 1, 1 };
+static const int dy[] = { 0, 1, 1, 0,-1,-1,-1, 0, 1 };
 
 static void sendGameInfo
 (FILE *out, int id, int step,
@@ -37,8 +39,8 @@ static void sendGameInfo
   vector <Gold> sensed;
   if (id >= 2) {
     for (int k = 0; k != 8; k++) {
-      int nx = x+dx[k];
-      int ny = y+dy[k];
+      int nx = x+dx[k+1];
+      int ny = y+dy[k+1];
       auto found =
 	find_if(l.hidden.begin(), l.hidden.end(),
 		[nx, ny](auto &g) { return g.x == nx && g.y == ny; });
@@ -143,19 +145,49 @@ vector <StepLog> playGame
       }
     }
     for (int p = 0; p != 4; p++) {
-      sendGameInfo(toPlayers[p], p, step, *config,
-		   plans, actions, scores, timeLeft[p]);
       if (dumpPath != nullptr) {
 	sendGameInfo(dump[p], p, step, *config,
 		     plans, actions, scores, timeLeft[p]);
 	fflush(dump[p]);
       }
+      if (timeLeft[p] == 0) {
+	newPlans[p] = -1;
+	continue;
+      }
+      sendGameInfo(toPlayers[p], p, step, *config,
+		   plans, actions, scores, timeLeft[p]);
       fflush(toPlayers[p]);
+      bool done = false;
       steady_clock::time_point sentAt = steady_clock::now();
-      fscanf(fromPlayers[p], "%d", &newPlans[p]);
-      steady_clock::time_point receivedAt = steady_clock::now();
-      milliseconds elapsed = duration_cast<milliseconds>(receivedAt - sentAt);
-      timeLeft[p] -= elapsed.count();
+      steady_clock::time_point receivedAt;
+      thread receiver
+	([](FILE *in, int &plan, bool &done,
+	    steady_clock::time_point &receivedAt) {
+	  fscanf(in, "%d", &plan);
+	  receivedAt = steady_clock::now();
+	  done = true;
+	},
+	 ref(fromPlayers[p]), ref(newPlans[p]), ref(done), ref(receivedAt));
+      const int checkInterval = 10;
+      while (!done) {
+	usleep(1000*checkInterval);
+	steady_clock::time_point current = steady_clock::now();
+	int used = duration_cast<milliseconds>(current - sentAt).count();
+	if (used > timeLeft[p]) break;
+      }
+      if (done) {
+	receiver.join();
+	steady_clock::time_point current = steady_clock::now();
+	int used = duration_cast<milliseconds>(current - sentAt).count();
+	timeLeft[p] = max(0, timeLeft[p] - used);
+      } else {
+	cerr << "Agent " << p << " timed out" << endl;
+	receiver.detach();
+	kill(playerIds[p], SIGKILL);
+	timeLeft[p] = 0;
+	fclose(toPlayers[p]);
+	newPlans[p] = -1;
+      }
     }
     copy(newPlans, newPlans+4, plans);
     Configuration *next =
@@ -166,12 +198,15 @@ vector <StepLog> playGame
 	cerr << "Agent " << p
 	     << "@(" << setw(coordWidth) << config->agents[p].x << ","
 	     << setw(coordWidth) << config->agents[p].y << ") ";
-	int targetX = config->agents[p].x + dx[plans[p]%8];
-	int targetY = config->agents[p].y + dy[plans[p]%8];
-	cerr << (plans[p] < 8 ? "move" : plans[p] < 16 ? "dig " : "plug")
+	int targetX = config->agents[p].x + dx[(plans[p]+1)%8];
+	int targetY = config->agents[p].y + dy[(plans[p]+1)%8];
+	cerr << (plans[p] < 0 ? "stay" :
+		 plans[p] < 8 ? "move" :
+		 plans[p] < 16 ? "dig " : "plug")
 	     << " (" << setw(coordWidth) << targetX
 	     << "," << setw(coordWidth) << targetY << ")"
-	     << (plans[p] != actions[p] ? "X" : "")
+	     << (plans[p] != actions[p] ? "X" : " ")
+	     << " " << timeLeft[p] << " msec left"
 	     << endl;
       }
       cerr << "Scores are " << scores[0] << ":" << scores[1] << endl;
