@@ -8,7 +8,7 @@ let agentLayer;
 let arrowsLayer;
 let diamondLayer;
 let fieldSize;
-let thinkTime = 5*60*1000;
+let thinkTime = 1*60*1000;	// default: 1 minute for each agent
 const maxFieldSize = 20;
 const minFieldSize = 6;
 let fieldWidth, fieldHeight, topMargin;
@@ -1029,7 +1029,7 @@ function redrawField(config) {
   ];
   showWhileEdit = [
     randomizeButton, clearLogButton,
-    loadButton, saveButton, removeButton, importButton, exportButton,
+    loadButton, saveButton, removeButton, exportButton,
     resizeButton, exitEditButton
   ];
   if (editMode) {

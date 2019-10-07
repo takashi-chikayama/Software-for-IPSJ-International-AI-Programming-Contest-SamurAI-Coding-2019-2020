@@ -54,7 +54,13 @@ $ make testrun
 
 ### 結果の可視化
 
-ウェブページ [webpage/dighere.html](webpage/dighere.html) をウェブブラウザで開いてください.  画面上の鉛筆と紙のアイコンのボタンをクリックして編集モードに入ります.  次に地球儀と下向き矢印のアイコンの import ボタンをクリックすると, ファイル選択ダイアログが出ますので, ゲームログ [samples/testout.dighere](samples/testout.dighere) を選んでください.  画面上の鉛筆と紙のアイコンのボタン (今度は鉛筆が上を向いています) をクリックすると, 編集モードから抜けます.  そこでプレイボタンを押せばゲームを見ることができます.
+ウェブページ [webpage/dighere.html](webpage/dighere.html)
+をウェブブラウザで開いてください.
+![Image](icons/import.png "import button") をクリックすると,
+ファイル選択ダイアログが出るので,
+ゲームログ [samples/testout.dighere](samples/testout.dighere)
+を選んで読み込んでください.
+そしてプレイボタンを押せば記録したゲームの進行を可視化することができます.
 
 ページ右上のクエスチョンマークのアイコンのボタンを押せば, このウェブページの使い方のマニュアルを表示できます.
 

@@ -14,7 +14,7 @@
     <center>
       <p>
 	IPSJ Programming Contest Committee<br>
-	2019/09/29
+	2019/10/07
       </p>
       <p>
 	The <em>SamurAI Dig Here</em> page is a tool to enjoy the
@@ -115,13 +115,30 @@
       <em>all the agents of both teams.</em>
     </p>
 
+    <h2>Importing a Game Log</h2>
+    <p>
+      Clicking the <em>import button</em>
+      <img src="../icons/import.png" class="inlineIcon">
+      on top of the screen,
+      a window for selecting a file to import pops up.
+      A game log is imported by choosing a file.
+    </p>
+    <p>
+      Note that, when the game log is updated after importing, loading
+      the same file expecting the updated one to be loaded may fail,
+      because the browser sticks to the cache kept on the first
+      import, that is, the version before the update.  Reloading the
+      whole web page by the reload feature of the browser may solve
+      the problem.
+    </p>
+
     <h2>Automatic Play Mode</h2>
     <p>
-      The initial play mode is <em>automatic.</em>
-      In the automatic mode, steps beyond what are recorded
-      are automatically generated and displayed,
-      with agent moves chosen by players built in the system.
-      The generated moves are appended to the game record.
+      The initial play mode is <em>automatic.</em>  In the automatic
+      mode, game steps recorded in the game log loaded are visualized,
+      and steps beyond what are recorded are automatically generated
+      with agent moves chosen by players built in the system.  The
+      generated moves are appended to the game record.
     </p>
     <p>
       The game progresses controlled by some of the buttons on the top.
@@ -179,6 +196,10 @@
 	  while the mouse cursor is on the speedometer.
 	  The maximum play speed is 240 spm and the minimum is 24.
 	</li>
+	<li>
+	  As described above, a game log can be imported by clicking the
+	  <em>import button</em>
+	  <img src="../icons/import.png" class="inlineIcon">.
       </ul>
     </p>
     <p>
@@ -334,6 +355,11 @@
       As with clicking on the screen.
       holding shift keys down means digging a new hole or
       plugging an already existing hole.
+    </p>
+    <p>
+      Stepping manually deletes any play records of steps beyond the
+      played step, and the result of the stepping is recorded as the
+      last step.
     </p>
     <h3>Automatic Plays in the Manual Play Mode</h3>
     <p>
@@ -495,14 +521,7 @@
       Choosing one of them will remove the game state with that name
       from the storage.
     </p>
-    <h3>Importing and Exporting Game Logs</h3>
-    <p>
-      Clicking the <em>import button</em>
-      <img src="../icons/import.png" class="inlineIcon">
-      on top of the screen,
-      a window for selecting a file to import pops up.
-      A game log is imported by choosing a file.
-    </p>
+    <h3>Exporting Game Logs</h3>
     <p>
       Clicking the <em>export button</em>
       <img src="../icons/export.png" class="inlineIcon">

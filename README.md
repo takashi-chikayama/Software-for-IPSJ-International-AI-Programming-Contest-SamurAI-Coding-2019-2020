@@ -55,15 +55,14 @@ This will play a game between two simple players and output a log in the file [s
 
 ### Viewing the Result
 
-Open the web page [webpage/dighere.html](webpage/dighere.html) with a web browser.
-Go to the edit mode by clicking a button with a pencil and paper icon on the screen top.
-Then click the import button with the icon of the globe and a down arrow,
-bringing up a file selection dialog.
-Select the game log  [samples/testout.dighere](samples/testout.dighere).
-Then click exit the edit mode by clicking a button with a pencil and paper icon on the screen top (now the icon shows the pencil upside-down).
-You can now view the game by clicking the play button on screen top.
+Open the web page [webpage/dighere.html](webpage/dighere.html) with a
+web browser.  Clicking the ![Image](icons/import.png
+"import button"), a file selection dialog will pop up.  Select the
+game log [samples/testout.dighere](samples/testout.dighere), to load
+it.  you can view the game by clicking the play button on screen top.
 
-The manual for using the web page can be visited by clicking the button with a question mark icon on top right of the page.
+The manual for using the web page can be visited by clicking the
+button with a question mark icon on top right of the page.
 
 ## Authors
 
