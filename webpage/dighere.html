@@ -47,6 +47,7 @@
 	<img id="clock" src="../icons/clock.png">
 	<span id="currentStepLabel"></span>
 	<img id="manual" src="../icons/manual.png">
+	<img id="tweak" src="../icons/tweak.png">
 	<img id="help" src="../icons/help.png">
 	<br>
 	<img id="sponsorLogo1" class="alignRight" style="margin:10px">
@@ -94,6 +95,42 @@
 	"document.getElementById('promptBox').style.display='none';">
 	Cancel
       </button>
+    </div>
+    <div id="tweakBox" class="tweakBox overlaid">
+      BGM&#9835;
+      <select id="bgmChoice">
+	<option value="">MUTE</option>
+	<option value="jazzy">Jazzy</option>
+	<option value="bossa">Bossa</option>
+	<option value="japanesque">Japanesque</option>
+	<option value="waltz">Waltz</option>
+      </select>
+      <br>
+      <img src="../icons/hole.png">&percnt;
+      <input id="holeProb" type="number" min="0" max="30" value="7">
+      <br>
+      <img src="../icons/gold10.png">&percnt;
+      <input id="goldProb" type="number" min="0" max="30" value="6">
+      max:
+      <input id="goldMax" type="number" value="20" min="2" max="100" step="2">
+      hidden&percnt;
+      <input id="hiddenProb" type="number" value="50" min="0" max="100">
+      <br>
+      Randomize:
+      <div style="display: inline">
+	<img id="randomize agents"
+	     onclick="toggleRandomize(this, 'agents')"
+	     src="../icons/samurai-figure-1.png">
+	<img id="randomize holes"
+	     onclick="toggleRandomize(this, 'holes')"
+	     src="../icons/hole.png">
+	<img id="randomize golds"
+	     onclick="toggleRandomize(this, 'golds')"
+	     src="../icons/gold10.png">
+      </div>
+      <br>
+      <button onclick="tweakDone()">Done</button>
+      <button onclick="tweakCancel()">Cancel</button>
     </div>
     <script>
       start();

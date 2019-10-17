@@ -249,17 +249,23 @@
 	<li>
 	  Clicking the <em>manual play button</em>
 	  <img src="../icons/manual.png" class="inlineIcon">
-	  starts the manual play mode (described below).
+	  starts the <a href="#manualPlay">manual play mode</a>.
+	</li>
+	<li>
+	  Clicking the <em>settings button</em>
+	  <img src="../icons/tweak.png" class="inlineIcon">
+	  pops up the <a href="#tweak">settings dialog</a>
+	  in which detailed settings can be adjusted.
 	</li>
 	<li>
 	  Clicking the <em>help button</em>
 	  <img src="../icons/help.png" class="inlineIcon">
-	  opens the manual page, that is, this page, in a separate tab.
-	  If the language is set to Japanese (ja), the page in Japanese
-	  is shown; the English page, otherwise.
+	  opens the manual page, that is, this page, in a separate
+	  tab.  If the language preference of the browser is Japanese
+	  (ja), the Japanese page is shown.
       </ul>
     </p>
-    <h2>Manual Play Mode</h2>
+    <h2 id="manualPlay">Manual Play Mode</h2>
     <p>
       In the manual play mode, one of the two samurai can be
       controlled manually.
@@ -541,6 +547,55 @@
       <img src="../icons/exitEdit.png" class="inlineIcon">
       on the screen top ends the edit mode,
       and the display the initial state reflecting the editing.
+    </p>
+    <h2 id="tweak">Settings Dialog</h2>
+    <p>
+      Detailed settings can be altered with the settings dialog
+      shown by clicking the ettings button
+      <img src="../icons/tweak.png" class="inlineIcon">.
+    </p>
+    <img src="screenShots/tweakBox.png" width="35%"
+	 class="figure" style="border:1px solid black">
+    <h3>Background Music</h3>
+    <p>
+      Several music tunes are provided to be played during the
+      automatic plays.  They are different arrangements
+      of <em>Hanasaka Jijii,</em> a popular nursery song about a dog
+      barked on embedded treasure.  You can choose a tune, with the
+      selector labeled "BGM", or choose "MUTE" if you don't want
+      music.
+    </p>
+    <h3>Probability of Holes</h3>
+    <p>
+      The field to the right of the hole icon is for setting the
+      probability of holes in the game field cells on random
+      configurations.
+    </p>      
+    <h3>Embedded Treasures</h3>
+    <p>
+      Three fields to the right of the treasure icon are for
+      controlling configurations of treasures on random configurations.
+      The first one is for setting the probability of treasures in
+      game field cells.  The next, labeld "max", is for setting the
+      maximum amount of treasure in a cell.  This should be a positive
+      even number.  If an odd number or a number less than 2 is
+      specified, the value is adjusted to satisfy the constraints.
+      The rightmost one, labeled "hidden&percnt;" is the probability
+      that the treasures are hidden.
+    </p>
+    <h3>Which Features to Randomize</h3>
+    <p>
+      Three icons to the right of the label "Randomize" indicate which
+      game field features are to be configured on random
+      configurations.  Icons with red borders means that the
+      corresponding features are to be configured randomly.  Others
+      are kept without reconfiguration.  Clicking these icons can
+      toggle whether or not the features are to be configured.
+    </p>
+    <p>
+      Clicking the "Done" button will make the changes made take effect.
+      Clicking the "Cancel" button will discard all the changes.
+      Either will close the dialog.
     </p>
   </body>
 </html>

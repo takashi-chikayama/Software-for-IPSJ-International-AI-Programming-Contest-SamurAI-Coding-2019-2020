@@ -56,10 +56,11 @@ This will play a game between two simple players and output a log in the file [s
 ### Viewing the Result
 
 Open the web page [webpage/dighere.html](webpage/dighere.html) with a
-web browser.  Clicking the ![Image](icons/import.png
-"import button"), a file selection dialog will pop up.  Select the
-game log [samples/testout.dighere](samples/testout.dighere), to load
-it.  you can view the game by clicking the play button on screen top.
+web browser.  Clicking the ![Image](icons/import.png "import button"),
+a file selection dialog will pop up.  Select the game log
+[samples/testout.dighere](samples/testout.dighere), to load it.  You
+can visualize the recorded game by clicking the play button on screen
+top.
 
 The manual for using the web page can be visited by clicking the
 button with a question mark icon on top right of the page.

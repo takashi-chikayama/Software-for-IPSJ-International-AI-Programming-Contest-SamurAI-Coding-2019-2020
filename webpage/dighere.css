@@ -99,6 +99,49 @@ svg {
     width: auto;
 }
 
+.tweakBox {
+    display: none;
+    background: #D0FFC0;
+    border: 3px solid #40FF40;
+    margin: 30px;
+    padding: 20px;
+    position: absolute;
+    top: 10%;
+    left: 25%;
+    width: 50%;
+    height: max-content;
+}
+
+.tweakBox * {
+    margin: 10px 20px 10px 0px;
+    text-align: right;
+    vertical-align: middle;
+}
+
+.tweakBox input {
+    display: inline-block;
+}
+
+.tweakBox select {
+    text-align-last: center;
+}
+
+.tweakBox img {
+    width: calc(8%)
+}
+
+.toggledOn {
+    padding: 6px;
+    background: white;
+    border: 6px solid #C00
+}
+
+.toggledOff {
+    padding: 6px;
+    background: white;
+    border: 6px solid white
+}
+
 .infoBar table {
     display: inline;
     border-spacing: 0px;

@@ -16,9 +16,10 @@ let cellWidth, cellHeight, halfWidth, halfHeight;
 let cells;
 const topMarginRatio = 0.04;
 
-let holeProb = 0.07;
-let goldProb = 0.06;
-let maxGold2 = 10;
+let holeProb = 7;
+let goldProb = 6;
+let goldMax = 20;
+let hiddenProb = 50;
 
 let maxSteps;
 let playUntil;
@@ -61,8 +62,6 @@ const scoopSoundFile = '../sounds/scoop-mono.mp3';
 const plugSoundFile = '../sounds/plug-mono.mp3';
 const beepSoundFile = '../sounds/beep.mp3';
 const gongSoundFile = '../sounds/gong.mp3';
-let bgm = new Audio('../sounds/hanasaka.mp3');
-bgm.loop = true;
 
 function createSVG(tag) {
   return document.createElementNS(field.namespaceURI, tag);
@@ -232,7 +231,8 @@ function makeGoldImage(cell, known) {
   gold.setAttribute('y', cell.cy-0.55*cellHeight);
   gold.setAttribute('width', 0.5*cellWidth);
   gold.setAttribute('height', 0.5*cellWidth);
-  const figIndex = Math.min(10, Math.max(10*Math.abs(amount)/maxGold2/2, 5));
+  const figIndex =
+	Math.floor(Math.min(10, Math.max(10*Math.abs(amount)/goldMax, 5)));
   gold.setAttribute('href', goldImageFile + twoDigits[figIndex] + ".png");
   const amnt = createSVG('text');
   amnt.setAttribute('x', cell.cx);
@@ -263,52 +263,53 @@ function repositionAgent(a, init) {
       - (isDog ? 1.7 : 2.3)*cellHeight);
 }
 
-function randomConfig(onlyGolds) {
-  let config;
-  if (!onlyGolds) {
-    config = {
-      size: fieldSize || 10,
-      steps: maxSteps || 100,
-      thinkTime: thinkTime,
-      agents: [], holes: [], known: [], hidden: []
-    };
-    for (let na = 0; na != 4; ) {
-      const x = Math.floor(config.size*random.gen());
-      const y = Math.floor(config.size*random.gen());
+let randomizedFeatures = {
+  agents: true, holes: true, golds: true
+};
+
+function randomConfig(init) {
+  let config =
+      init ? { size: 10, steps: 100, thinkTime: thinkTime } : initialConfig();
+  if (init || randomizedFeatures.agents) config.agents = [];
+  if (init || randomizedFeatures.holes) config.holes = [];
+  if (init || randomizedFeatures.golds) {
+    config.known = []; config.hidden = [];
+  }
+  function randomVacancy() {
+    let x, y;
+    do {
+      x = Math.floor(config.size*random.gen());
+      y = Math.floor(config.size*random.gen());
+    } while (config.agents.some(a => a.x == x && a.y == y) ||
+	     config.holes.some(h => h.x == x && h.y == y) ||
+	     config.known.some(h => h.x == x && h.y == y) ||
+	     config.hidden.some(h => h.x == x && h.y == y))
+    return { x: x, y: y };
+  }
+  if (init || randomizedFeatures.agents) {
+    for (let a = 0; a != 4; a++) {
+      const pos = randomVacancy();
       let d = Math.floor(8*random.gen());
-      if (na < 2) d = d & 6;
-      if (config.agents.every(a => a.x != x || a.y != y)) {
-	config.agents.push({x: x, y: y, direction: d});
-	na++;
-      }
+      if (a < 2) d = d & 6;
+      config.agents.push({x: pos.x, y: pos.y, direction: d});
     }
-    const numHoles = Math.floor((config.size*config.size-4)*holeProb);
-    for (let nh = 0; nh != numHoles; ) {
-      const x = Math.floor(config.size*random.gen());
-      const y = Math.floor(config.size*random.gen());
-      if (config.agents.every(a => a.x != x || a.y != y) &&
-          config.holes.every(h => h.x != x || h.y != y)) {
-	config.holes.push({x: x, y: y});
-	nh++;
-      }
+  }
+  if (init || randomizedFeatures.holes) {
+    const numHoles = Math.floor((config.size*config.size-4)*holeProb/100);
+    for (let h = 0; h != numHoles; h++) {
+      const pos = randomVacancy();
+      config.holes.push({x: pos.x, y: pos.y});
     }
-  } else {
-    config = initialConfig();
+  }
+  if (init || randomizedFeatures.golds) {
     config.known = [];
     config.hidden = [];
-  }
-  const numGolds = Math.floor((config.size*config.size-4)*goldProb);
-  for (let ng = 0; ng != numGolds; ) {
-    const x = Math.floor(config.size*random.gen());
-    const y = Math.floor(config.size*random.gen());
-    if (config.agents.every(a => a.x != x || a.y != y) &&
-        config.holes.every(h => h.x != x || h.y != y) &&
-	config.known.every(h => h.x != x || h.y != y) &&
-        config.hidden.every(h => h.x != x || h.y != y)) {
-      const amount = 2*Math.floor(maxGold2*random.gen()+1);
-      (random.gen() > 0.5 ? config.known : config.hidden).
-	push({x: x, y: y, amount: amount});
-      ng++;
+    const numGolds = Math.floor((config.size*config.size-4)*goldProb/100);
+    for (let ng = 0; ng != numGolds; ng++) {
+      const pos = randomVacancy();
+      const amount = 2*Math.floor((goldMax*random.gen()+1)/2);
+      (random.gen() > hiddenProb/100 ? config.known : config.hidden).
+	push({x: pos.x, y: pos.y, amount: amount});
     }
   }
   return config;
@@ -750,7 +751,7 @@ function setPlaySpeed() {
   numSubsteps = Math.floor(frameRate*stepInterval/1000);
   substepInterval = stepInterval/numSubsteps;
   midStep = Math.floor((numSubsteps+1)/2);
-  bgm.playbackRate = Math.sqrt(playTempo/60);
+  bgm.setTempo(Math.sqrt(playTempo/60));
 }
 
 function speedWheel(ev) {
@@ -771,7 +772,7 @@ let showWhileEdit;
 
 const topBarButtons = [
   "rewind", "stepBackward", "playStop", "stepForward", "fastForward",
-  "speedometer", "clock", "goldImage", "manual", "edit", "help",
+  "speedometer", "clock", "goldImage", "manual", "tweak", "edit", "help",
   "randomize", "clearLog", "load", "save", "remove", "import", "export",
   "resize", "exitEdit"
 ];
@@ -1005,6 +1006,7 @@ function redrawField(config) {
   goldImageButton.onmousedown = showHiddenGold;
   goldImageButton.onmouseout = hideHiddenGold;
   goldImageButton.onmouseup = hideHiddenGold;
+  tweakButton.onclick = tweakSettings;
   manualButton.onclick = toggleManualPlay;
   randomizeButton.onclick = randomize;
   clearLogButton.onclick = clearPlayLog;
@@ -1084,7 +1086,7 @@ class Random {
 let random;
 
 function randomize(ev) {
-  initialize(randomConfig(ev.shiftKey));
+  initialize(randomConfig(false));
 }
 
 function clearPlayLog() {
@@ -1118,7 +1120,7 @@ function setSizes() {
 
 function start() {
   random = new Random();
-  initialize(randomConfig(false));
+  initialize(randomConfig(true));
 }
 
 function initialize(config) {
@@ -1274,9 +1276,12 @@ function startStopPlay() {
   if (playTimer != undefined) {
     playUntil = 0;
   } else if (stepRecords[currentStep].goldRemaining != 0 &&
-             stepRecords[currentStep].stepNumber != maxSteps) {
-    if (stepRecords[currentStep].stepNumber == 0) bgm.currentTime = 0;
-    bgm.play();
+             currentStep != maxSteps) {
+    if (currentStep == 0) {
+      bgm.start();
+    } else {
+      bgm.resume();
+    }
     playUntil = maxSteps;
     playStopButton.src = "../icons/stop.png";
     stepForward(true);
@@ -1284,7 +1289,7 @@ function startStopPlay() {
 }
 
 function stopAutoPlay() {
-  bgm.pause();
+  bgm.stop();
   if (playTimer != undefined) {
     clearInterval(playTimer);
     playStopButton.src = '../icons/play.png';
@@ -1858,4 +1863,96 @@ function openHelp(ev) {
         ( navigator.language.startsWith("ja") ?
           "help-jp.html" : "help.html" );
   window.open(url, "_blank");
+}
+
+class BGM {
+  constructor(src) {
+    this.playing = false;
+    this.playTempo = 1;
+    this.setSource(src);
+  }
+  setSource(src) {
+    if (src !== this.source) {
+      this.source = src;
+      if (this.audio && this.playing) this.audio.pause();
+      if (src == "") {
+	this.audio = null;
+      } else {
+	this.audio = new Audio("../sounds/" + this.source + ".m4a");
+	this.audio.playbackRate = this.playTempo;
+	if (this.playing) this.start();
+      }
+    }
+  }
+  start() {
+    this.playing = true;
+    if (this.audio) {
+      this.audio.currentTime = 0;
+      this.audio.loop = true;
+      this.audio.play();
+    }
+  }
+  stop() {
+    this.playing = false;
+    if (this.audio) this.audio.pause();
+  }
+  resume() {
+    this.playing = true;
+    if (this.audio) this.audio.play();
+  }
+  setTempo(tempo) {
+    this.playTempo = tempo;
+    if (this.audio) this.audio.playbackRate = tempo;
+  }
+}
+
+const bgm = new BGM('jazzy');
+
+let randomizedFeaturesTweaked;
+
+function tweakSettings() {
+  const fontSize = Math.max(14, fieldWidth/40) + "px";
+  const box = document.getElementById("tweakBox");
+  box.style.fontSize = fontSize;
+  box.childNodes.forEach(node => {
+    if (node.style) {
+      node.style.fontSize = fontSize;
+      node.style.fontFamily = "roman";
+      node.style.display = "inline";
+    }
+    node.childNodes.forEach(grandChild => {
+      if (grandChild.style) {
+	grandChild.style.fontSize = fontSize;
+	grandChild.style.fontFamily = "roman";
+	grandChild.style.display = "inline";
+      }
+    });
+  });
+  document.getElementById("bgmChoice").value = bgm.source;
+  Object.keys(randomizedFeatures).forEach(key => {
+    const icon = document.getElementById("randomize " + key);
+    icon.className = randomizedFeatures[key] ? "toggledOn" : "toggledOff";
+  });
+  randomizedFeaturesTweaked = Object.assign(randomizedFeatures);
+  box.style.display = "block";
+}
+
+function tweakDone() {
+  const box = document.getElementById("tweakBox");
+  const tune = document.getElementById("bgmChoice").value;
+  bgm.setSource(tune);
+  holeProb = document.getElementById("holeProb").value;
+  goldProb = document.getElementById("goldProb").value;
+  goldMax = document.getElementById("goldMax").value;
+  goldMax = goldMax < 0 ? 2 : 2*Math.floor(goldMax/2);
+  document.getElementById("goldMax").value = goldMax;
+  hiddenProb = document.getElementById("hiddenProb").value;
+  randomizedFeatures = randomizedFeaturesTweaked;
+  box.style.display = "none";
+}
+
+function toggleRandomize(icon, which) {
+  randomizedFeaturesTweaked[which] = !randomizedFeaturesTweaked[which];
+  icon.className = randomizedFeaturesTweaked[which] ?
+    "toggledOn" : "toggledOff";
 }
