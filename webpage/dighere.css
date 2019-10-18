@@ -45,7 +45,10 @@ svg {
 
 .infoBar img {
     margin: 2px;
-    vertical-align: bottom;
+}
+
+.infoBar * {
+    vertical-align: middle;
 }
 
 .hideOverflow {
