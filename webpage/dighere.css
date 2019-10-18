@@ -109,21 +109,23 @@ svg {
     top: 10%;
     left: 25%;
     width: 50%;
-    height: max-content;
 }
 
 .tweakBox * {
-    margin: 10px 20px 10px 0px;
+    margin: 10px 0px 10px 0px;
     text-align: right;
     vertical-align: middle;
 }
 
 .tweakBox input {
-    display: inline-block;
+    display: flex;
+    width: 12%;
 }
 
 .tweakBox select {
     text-align-last: center;
+    display: inline-block;
+    width: 25%;
 }
 
 .tweakBox img {

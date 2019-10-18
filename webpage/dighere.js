@@ -1934,6 +1934,7 @@ function tweakSettings() {
     icon.className = randomizedFeatures[key] ? "toggledOn" : "toggledOff";
   });
   randomizedFeaturesTweaked = Object.assign(randomizedFeatures);
+  box.style.height = 0.6 * fieldHeight + "px";
   box.style.display = "block";
 }
 
@@ -1949,6 +1950,10 @@ function tweakDone() {
   hiddenProb = document.getElementById("hiddenProb").value;
   randomizedFeatures = randomizedFeaturesTweaked;
   box.style.display = "none";
+}
+
+function tweakCancel() {
+  document.getElementById("tweakBox").style.display = "none";
 }
 
 function toggleRandomize(icon, which) {
