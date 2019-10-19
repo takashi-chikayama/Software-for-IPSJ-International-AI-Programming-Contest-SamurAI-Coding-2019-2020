@@ -25,8 +25,15 @@ Some potential game tactics are suggested in the following files.
 * C++ development environment (compiler and standard libraries for c++11 or later)
 * A web browser
 
-The web browser is used to view the documents, to show replays of
-games, and also to edit game field configurations.
+    A web browser is required for viewing the documents,
+    visualizing replays of games,
+    and also for editing game field configurations.
+    The web page for the game is known to work
+    on the following systems and browsers.
+    All of them are 64 bit versions.
+** Windows: Edge (44.18362.387.0), Chrome (77.0.3865.120), Firefox (69.0.3)
+** MacOS: Safari (13.0.2), Chrome (77.0.3865.120), Firefox (69.0.3)
+** Ubuntu: Chrome (77.0.3865.90), Firefox (69.0.2), Opera (64.0.3417.61)
 
 ### Installing
 
