@@ -307,7 +307,7 @@ function randomConfig(init) {
     const numGolds = Math.floor((config.size*config.size-4)*goldProb/100);
     for (let ng = 0; ng != numGolds; ng++) {
       const pos = randomVacancy();
-      const amount = 2*Math.floor((goldMax*random.gen()+1)/2);
+      const amount = 2*Math.floor(((goldMax-2)*random.gen()+1)/2) + 2;
       (random.gen() > hiddenProb/100 ? config.known : config.hidden).
 	push({x: pos.x, y: pos.y, amount: amount});
     }
@@ -1456,8 +1456,9 @@ class AgentMove {
       const newCell = cells[cellX][cellY];
       const rec = stepRecords[currentStep];
       if (!rec.holes.includes(newCell) &&
-          rec.agents.every(a => a == agent || a.at != newCell) &&
-          rec.hiddenGolds.every(g => g.at != newCell)) {
+	  !rec.knownGolds.includes(newCell) &&
+	  !rec.hiddenGolds.includes(newCell) &&
+          rec.agents.every(a => a == agent || a.at != newCell)) {
         this.nowAt = newCell;
       }
     }
