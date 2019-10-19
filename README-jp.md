@@ -28,10 +28,9 @@ The manuals for the game log visualizer web page are in the following files.
     ウェブブラウザは文書を読むため, ゲームのリプレイを見るため,
     そしてゲームの競技場の構成を編集するのに使います.
     動作確認済みの OS とブラウザの組は以下があります.
-
-** Windows: Edge (44.18362.387.0), Chrome (77.0.3865.120), Firefox (69.0.3)
-** MacOS: Safari (13.0.2), Chrome (77.0.3865.120), Firefox (69.0.3)
-** Ubuntu: Chrome (77.0.3865.90), Firefox (69.0.2), Opera (64.0.3417.61)
+    * Windows: Edge (44.18362.387.0), Chrome (77.0.3865.120), Firefox (69.0.3)
+    * MacOS: Safari (13.0.2), Chrome (77.0.3865.120), Firefox (69.0.3)
+    * Ubuntu: Chrome (77.0.3865.90), Firefox (69.0.2), Opera (64.0.3417.61)
 
 ### インストール
 
