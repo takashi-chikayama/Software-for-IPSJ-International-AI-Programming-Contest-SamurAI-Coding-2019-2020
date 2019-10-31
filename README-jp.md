@@ -22,7 +22,7 @@ The manuals for the game log visualizer web page are in the following files.
 ## はじめに
 ### 必要なもの
 
-* C++ 開発環境 (C++11 以上のコンパイラと標準ライブラリ)
+* C++ 開発環境 (C++14 以上のコンパイラと標準ライブラリ)
 * ウェブブラウザ
 
     ウェブブラウザは文書を読むため, ゲームのリプレイを見るため,
