@@ -16,11 +16,6 @@ let cellWidth, cellHeight, halfWidth, halfHeight;
 let cells;
 const topMarginRatio = 0.04;
 
-let holeProb = 7;
-let goldProb = 6;
-let goldMax = 20;
-let hiddenProb = 50;
-
 let maxSteps;
 let playUntil;
 let playTempo = 60;
@@ -31,6 +26,19 @@ let midStep;
 let substepInterval;
 let currentStep;
 let substep = 0;
+
+// Randomization Parameters
+const params = {
+  randomizeAgents: true,
+  randomizeHoles: true,
+  randomizeHidden: true,
+  randomizeKnown: true,
+  holeProb: 7,
+  knownProb: 3,
+  knownMax: 20,
+  hiddenProb: 3,
+  hiddenMax: 20
+}
 
 let backgroundColor = "rgb(120,80,40)";
 let editingBackgroundColor = "rgb(120,120,120)";
@@ -182,6 +190,7 @@ const dogSitting = [];
 const dogBarking = [];
 const holeImage = "../icons/hole.png";
 const goldImageFile = "../icons/gold";
+let goldMax;			// For deciding which gold icon to use
 
 for (let k = 0; k != 8; k++) {
   samuraiStanding[2*k] =
@@ -263,30 +272,32 @@ function repositionAgent(a, init) {
       - (isDog ? 1.7 : 2.3)*cellHeight);
 }
 
-let randomizedFeatures = {
-  agents: true, holes: true, golds: true
-};
-
 function randomConfig(init) {
   let config =
-      init ? { size: 10, steps: 100, thinkTime: thinkTime } : initialConfig();
-  if (init || randomizedFeatures.agents) config.agents = [];
-  if (init || randomizedFeatures.holes) config.holes = [];
-  if (init || randomizedFeatures.golds) {
-    config.known = []; config.hidden = [];
-  }
+      init ? {
+	size: 10, steps: 100, thinkTime: thinkTime,
+      } : initialConfig();
+  goldMax = Math.max(params.knownMax, params.hiddenMax);
+  if (init || randomize.agents) config.agents = [];
+  if (init || randomize.holes) config.holes = [];
+  if (init || randomize.known) config.known = [];
+  if (init || randomize.hidden) config.hidden = [];
   function randomVacancy() {
-    let x, y;
-    do {
-      x = Math.floor(config.size*random.gen());
-      y = Math.floor(config.size*random.gen());
-    } while (config.agents.some(a => a.x == x && a.y == y) ||
-	     config.holes.some(h => h.x == x && h.y == y) ||
-	     config.known.some(h => h.x == x && h.y == y) ||
-	     config.hidden.some(h => h.x == x && h.y == y))
-    return { x: x, y: y };
+    let vacancies = [];
+    for (let x = 0; x != config.size; x++) {
+      for (let y = 0; y != config.size; y++) {
+	if (!config.agents.some(a => a.x == x && a.y == y) &&
+	    !config.holes.some(h => h.x == x && h.y == y) &&
+	    !config.known.some(h => h.x == x && h.y == y) &&
+	    !config.hidden.some(h => h.x == x && h.y == y)) {
+	  vacancies.push({ x: x, y: y });
+	}
+      }
+    }
+    if (vacancies == []) return null;
+    return vacancies[Math.floor(vacancies.length*random.gen())];
   }
-  if (init || randomizedFeatures.agents) {
+  if (init || randomize.agents) {
     for (let a = 0; a != 4; a++) {
       const pos = randomVacancy();
       let d = Math.floor(8*random.gen());
@@ -294,22 +305,35 @@ function randomConfig(init) {
       config.agents.push({x: pos.x, y: pos.y, direction: d});
     }
   }
-  if (init || randomizedFeatures.holes) {
-    const numHoles = Math.floor((config.size*config.size-4)*holeProb/100);
+  if (init || randomize.holes) {
+    const numHoles =
+	  Math.floor((config.size*config.size-4)*params.holeProb/100);
     for (let h = 0; h != numHoles; h++) {
       const pos = randomVacancy();
+      if (pos == null) break;
       config.holes.push({x: pos.x, y: pos.y});
     }
   }
-  if (init || randomizedFeatures.golds) {
+  if (init || randomize.known) {
     config.known = [];
-    config.hidden = [];
-    const numGolds = Math.floor((config.size*config.size-4)*goldProb/100);
+    const numGolds =
+	  Math.floor((config.size*config.size-4)*params.knownProb/100);
     for (let ng = 0; ng != numGolds; ng++) {
       const pos = randomVacancy();
-      const amount = 2*Math.floor(((goldMax-2)*random.gen()+1)/2) + 2;
-      (random.gen() > hiddenProb/100 ? config.known : config.hidden).
-	push({x: pos.x, y: pos.y, amount: amount});
+      if (pos == null) break;
+      const amount = 2*Math.floor(((params.knownMax-2)*random.gen()+1)/2) + 2;
+      config.known.push({x: pos.x, y: pos.y, amount: amount});
+    }
+  }
+  if (init || randomize.hidden) {
+    config.hidden = [];
+    const numGolds =
+	  Math.floor((config.size*config.size-4)*params.hiddenProb/100);
+    for (let ng = 0; ng != numGolds; ng++) {
+      const pos = randomVacancy();
+      if (pos == null) break;
+      const amount = 2*Math.floor(((params.hiddenMax-2)*random.gen()+1)/2) + 2;
+      config.hidden.push({x: pos.x, y: pos.y, amount: amount});
     }
   }
   return config;
@@ -1534,6 +1558,11 @@ function menuChoice(message, items, store, makeHandler) {
 
 function applyGameLog(log) {
   initialize(log.field);
+  for (let key in log.params) {
+    if (log.params.hasOwnProperty(key)) {
+      params[key] = log.params[key];
+    }
+  }
   let step = 0;
   log.plays.forEach(p => {
     const state = new GameState(stepRecords[step], p.plans);
@@ -1793,6 +1822,7 @@ function doExportToFile(name) {
       filetype: GameLogFileTypeString,
       name: name,
       field: initialConfig(),
+      params: params,
       plays: playLog()
     })],
     {type: 'application/json'});
@@ -1909,8 +1939,6 @@ class BGM {
 
 const bgm = new BGM('jazzy');
 
-let randomizedFeaturesTweaked;
-
 function tweakSettings() {
   const fontSize = Math.max(14, fieldWidth/40) + "px";
   const box = document.getElementById("tweakBox");
@@ -1930,11 +1958,16 @@ function tweakSettings() {
     });
   });
   document.getElementById("bgmChoice").value = bgm.source;
-  Object.keys(randomizedFeatures).forEach(key => {
-    const icon = document.getElementById("randomize " + key);
-    icon.className = randomizedFeatures[key] ? "toggledOn" : "toggledOff";
+  ['Agents', 'Holes', 'Known', 'Hidden'].forEach(kind => {
+    const name = "randomize" + kind;
+    const icon = document.getElementById(name);
+    icon.className = params[name] ? "toggledOn" : "toggledOff";
   });
-  randomizedFeaturesTweaked = Object.assign(randomizedFeatures);
+  document.getElementById("holeProb").value = params.holeProb;
+  document.getElementById("knownProb").value = params.knownProb;
+  document.getElementById("knownMax").value = params.knownMax;
+  document.getElementById("hiddenProb").value = params.hiddenProb;
+  document.getElementById("hiddenMax").value = params.hiddenMax;
   box.style.height = 0.6 * fieldHeight + "px";
   box.style.display = "block";
 }
@@ -1943,13 +1976,23 @@ function tweakDone() {
   const box = document.getElementById("tweakBox");
   const tune = document.getElementById("bgmChoice").value;
   bgm.setSource(tune);
-  holeProb = document.getElementById("holeProb").value;
-  goldProb = document.getElementById("goldProb").value;
-  goldMax = document.getElementById("goldMax").value;
-  goldMax = goldMax < 0 ? 2 : 2*Math.floor(goldMax/2);
-  document.getElementById("goldMax").value = goldMax;
-  hiddenProb = document.getElementById("hiddenProb").value;
-  randomizedFeatures = randomizedFeaturesTweaked;
+  ['Agents', 'Holes', 'Hidden', 'Known'].forEach(kind => {
+    const name = "randomize" + kind;
+    const icon = document.getElementById(name);
+    params[name] = (icon.className == "toggledOn");
+  });
+  params.holeProb = document.getElementById("holeProb").value;
+  params.knownProb = document.getElementById("knownProb").value;
+  params.knownMax = document.getElementById("knownMax").value;
+  params.knownMax = params.knownMax < 0 ? 2 : 2*Math.floor(params.knownMax/2);
+  document.getElementById("knownMax").value = params.knownMax;
+  params.hiddenProb = document.getElementById("hiddenProb").value;
+  params.hiddenMax = document.getElementById("hiddenMax").value;
+  params.hiddenMax =
+    params.hiddenMax < 0 ? 2 : 2*Math.floor(params.hiddenMax/2);
+  document.getElementById("hiddenMax").value = params.hiddenMax;
+  goldMax = Math.max(params.knownMax, params.hiddenMax);
+  console.log(params);
   box.style.display = "none";
 }
 
@@ -1957,8 +2000,7 @@ function tweakCancel() {
   document.getElementById("tweakBox").style.display = "none";
 }
 
-function toggleRandomize(icon, which) {
-  randomizedFeaturesTweaked[which] = !randomizedFeaturesTweaked[which];
-  icon.className = randomizedFeaturesTweaked[which] ?
-    "toggledOn" : "toggledOff";
+function toggleRandomize(icon) {
+  icon.className =
+    icon.className == "toggledOn" ? "toggledOff" : "toggledOn";
 }

@@ -106,28 +106,33 @@
 	<option value="waltz">Waltz</option>
       </select>
       <br>
-      <img src="../icons/hole.png">&percnt;
-      <input id="holeProb" type="number" min="0" max="30" value="7">
+      Randomization Settings:
       <br>
-      <img src="../icons/gold10.png">&percnt;
-      <input id="goldProb" type="number" min="0" max="30" value="6">
-      max:
-      <input id="goldMax" type="number" value="20" min="2" max="100" step="2">
-      hidden&percnt;
-      <input id="hiddenProb" type="number" value="50" min="0" max="100">
+      <img id="randomizeAgents"
+	   onclick="toggleRandomize(this)"
+	   src="../icons/samurai-figure-1.png">
+      &nbsp;&nbsp;
+      <img id="randomizeHoles"
+	   onclick="toggleRandomize(this)"
+	   src="../icons/hole.png">
+      <input id="holeProb" type="number" min="0" max="100">
+      &percnt;
       <br>
-      Randomize:
-      <div style="display: inline">
-	<img id="randomize agents"
-	     onclick="toggleRandomize(this, 'agents')"
-	     src="../icons/samurai-figure-1.png">
-	<img id="randomize holes"
-	     onclick="toggleRandomize(this, 'holes')"
-	     src="../icons/hole.png">
-	<img id="randomize golds"
-	     onclick="toggleRandomize(this, 'golds')"
-	     src="../icons/gold10.png">
-      </div>
+      <img id="randomizeKnown"
+	   onclick="toggleRandomize(this)"
+	   src="../icons/knownGold.png">
+      &nbsp;
+      <input id="knownProb" type="number" min="0" max="100">
+      &percnt;&nbsp;max:
+      <input id="knownMax" type="number" min="2" step="2">
+      <br>
+      <img id="randomizeHidden"
+	   onclick="toggleRandomize(this)"
+	   src="../icons/hiddenGold.png">
+      &nbsp;
+      <input id="hiddenProb" type="number" min="0" max="100">
+      &percnt;&nbsp;max:
+      <input id="hiddenMax" type="number" min="2" step="2">
       <br>
       <button onclick="tweakDone()">Done</button>
       <button onclick="tweakCancel()">Cancel</button>

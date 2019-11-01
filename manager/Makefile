@@ -1,4 +1,4 @@
-CXXFLAGS= -g -Wall
+CXXFLAGS= -g -Wall -std=c++14
 CXX= c++
 LDFLAGS= -lm -lpthread
 OBJECTS= main.o field.o gamelog.o playgame.o

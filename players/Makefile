@@ -1,4 +1,4 @@
-CXXFLAGS= -g -Wall
+CXXFLAGS= -g -Wall -std=c++14
 CXX= c++
 LDFLAGS= -lm
 BASICOBJECTS= playerMain.o gameInfo.o fieldMap.o

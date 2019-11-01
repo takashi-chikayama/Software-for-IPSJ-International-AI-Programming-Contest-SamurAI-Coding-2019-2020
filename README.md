@@ -22,7 +22,7 @@ Some potential game tactics are suggested in the following files.
 ## Getting Started
 ### Prerequisites
 
-* C++ development environment (compiler and standard libraries for c++11 or later)
+* C++ development environment (compiler and standard libraries for c++14 or later)
 * A web browser
 
     A web browser is required for viewing the documents,

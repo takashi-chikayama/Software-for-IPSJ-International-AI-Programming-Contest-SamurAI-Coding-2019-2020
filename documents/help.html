@@ -14,7 +14,7 @@
     <center>
       <p>
 	IPSJ Programming Contest Committee<br>
-	2019/10/17
+	2019/11/01
       </p>
       <p>
 	The <em>SamurAI Dig Here</em> page is a tool to enjoy the
@@ -554,7 +554,7 @@
       shown by clicking the ettings button
       <img src="../icons/tweak.png" class="inlineIcon">.
     </p>
-    <img src="screenShots/tweakBox.png" width="35%"
+    <img src="screenShots/tweakBox.png" width="25%"
 	 class="figure" style="border:1px solid black">
     <h3>Background Music</h3>
     <p>
@@ -565,33 +565,46 @@
       selector labeled "BGM", or choose "MUTE" if you don't want
       music.
     </p>
+    <h3>Which Features to Randomize</h3>
+    <p>
+      Clicking the <em>random configurations button</em>
+      <img src="../icons/randomize.png" class="inlineIcon">
+      randomly reconfigure the game field setting.
+      Which game features to be randomized can be chosen can be chosen.
+      There are four icons for agents
+      <img src="../icons/samurai-figure-1.png" class="inlineIcon">,
+      holes <img src="../icons/hole.png" class="inlineIcon">,
+      known treasures <img src="../icons/knownGold.png" class="inlineIcon">,
+      and hidden treasures
+      <img src="../icons/hiddenGold.png" class="inlineIcon">.
+      Icons with red borders means that the corresponding features are
+      to be configured randomly.
+      Others are kept without reconfiguration.
+      Clicking these icons can toggle whether or not
+      the features are to be configured.
+    </p>
     <h3>Probability of Holes</h3>
     <p>
       The field to the right of the hole icon is for setting the
       probability of holes in the game field cells on random
       configurations.
     </p>      
-    <h3>Embedded Treasures</h3>
+    <h3>Treasures</h3>
     <p>
-      Three fields to the right of the treasure icon are for
-      controlling configurations of treasures on random configurations.
+      The two fields to the right of the known treasure icon are for
+      setting parameters used in random reconfigurations of known treasures.
       The first one is for setting the probability of treasures in
       game field cells.  The next, labeld "max", is for setting the
-      maximum amount of treasure in a cell.  This should be a positive
+      maximum amount of treasure in one cell.  This should be a positive
       even number.  If an odd number or a number less than 2 is
       specified, the value is adjusted to satisfy the constraints.
-      The rightmost one, labeled "hidden&percnt;" is the probability
-      that the treasures are hidden.
     </p>
-    <h3>Which Features to Randomize</h3>
     <p>
-      Three icons to the right of the label "Randomize" indicate which
-      game field features are to be configured on random
-      configurations.  Icons with red borders means that the
-      corresponding features are to be configured randomly.  Others
-      are kept without reconfiguration.  Clicking these icons can
-      toggle whether or not the features are to be configured.
+      The two fields to the right of the hidden treasure icon
+      are for setting parameters used in random reconfigurations of
+      hidden treasures in the same manner.
     </p>
+    <h3>Finishing the Setting</h3>
     <p>
       Clicking the "Done" button will make the changes made take effect.
       Clicking the "Cancel" button will discard all the changes.
