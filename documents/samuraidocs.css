@@ -13,6 +13,11 @@ h3:before {
     counter-increment: subsection;
     content: counter(section) "." counter(subsection) " ";
 }
+
+.centered {
+    text-align: center;
+}
+
 ul, ol, dl {
     padding-left: 30px;
 }
