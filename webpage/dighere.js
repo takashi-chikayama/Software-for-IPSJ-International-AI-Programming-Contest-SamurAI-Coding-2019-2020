@@ -278,10 +278,10 @@ function randomConfig(init) {
 	size: 10, steps: 100, thinkTime: thinkTime,
       } : initialConfig();
   goldMax = Math.max(params.knownMax, params.hiddenMax);
-  if (init || randomize.agents) config.agents = [];
-  if (init || randomize.holes) config.holes = [];
-  if (init || randomize.known) config.known = [];
-  if (init || randomize.hidden) config.hidden = [];
+  if (init || params.randomizeAgents) config.agents = [];
+  if (init || params.randomizeHoles) config.holes = [];
+  if (init || params.randomizeKnown) config.known = [];
+  if (init || params.randomizeHidden) config.hidden = [];
   function randomVacancy() {
     let vacancies = [];
     for (let x = 0; x != config.size; x++) {
@@ -297,7 +297,7 @@ function randomConfig(init) {
     if (vacancies == []) return null;
     return vacancies[Math.floor(vacancies.length*random.gen())];
   }
-  if (init || randomize.agents) {
+  if (init || params.randomizeAgents) {
     for (let a = 0; a != 4; a++) {
       const pos = randomVacancy();
       let d = Math.floor(8*random.gen());
@@ -305,7 +305,7 @@ function randomConfig(init) {
       config.agents.push({x: pos.x, y: pos.y, direction: d});
     }
   }
-  if (init || randomize.holes) {
+  if (init || params.randomizeHoles) {
     const numHoles =
 	  Math.floor((config.size*config.size-4)*params.holeProb/100);
     for (let h = 0; h != numHoles; h++) {
@@ -314,7 +314,7 @@ function randomConfig(init) {
       config.holes.push({x: pos.x, y: pos.y});
     }
   }
-  if (init || randomize.known) {
+  if (init || params.randomizeKnown) {
     config.known = [];
     const numGolds =
 	  Math.floor((config.size*config.size-4)*params.knownProb/100);
@@ -325,7 +325,7 @@ function randomConfig(init) {
       config.known.push({x: pos.x, y: pos.y, amount: amount});
     }
   }
-  if (init || randomize.hidden) {
+  if (init || params.randomizeHidden) {
     config.hidden = [];
     const numGolds =
 	  Math.floor((config.size*config.size-4)*params.hiddenProb/100);
@@ -1992,7 +1992,6 @@ function tweakDone() {
     params.hiddenMax < 0 ? 2 : 2*Math.floor(params.hiddenMax/2);
   document.getElementById("hiddenMax").value = params.hiddenMax;
   goldMax = Math.max(params.knownMax, params.hiddenMax);
-  console.log(params);
   box.style.display = "none";
 }
 
