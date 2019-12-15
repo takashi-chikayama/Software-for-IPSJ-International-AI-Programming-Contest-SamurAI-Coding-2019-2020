@@ -22,4 +22,3 @@ distclean: clean
 	cd icons; make distclean
 	cd logos; make distclean
 	cd sounds; make distclean
-	cd svg; make distclean
