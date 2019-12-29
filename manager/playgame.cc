@@ -116,7 +116,7 @@ vector <StepLog> playGame
     } else if (pid == 0) {
       close(pipeOut[1]); dup2(pipeOut[0], 0);
       close(pipeIn[0]); dup2(pipeIn[1], 1);
-      execl(playerNames[p%2], playerNames[p%2], (char *)NULL);
+      execl("/bin/sh", "sh", "-c", playerNames[p%2], (char *)NULL);
       perror("Failed to exec a player");
       exit(1);
     }
