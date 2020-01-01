@@ -409,7 +409,7 @@ class GameState {
 	  return "Dig by a dog";
 	if (plan >= 0) {
 	  for (let b = 0; b != 4; b++) {
-	    if (b.at == targetPos) {
+	    if (prevGameState.agents[b].at == targetPos) {
 	      return (plan < 8 ? "Moving to" : "Digging") +
 	      " (" + targetPos.x + "," + targetPos.y +
 	      ") occupied by agent " + b;

@@ -181,8 +181,10 @@ Field::Field(const Field &prev, const int plans[],
 	} else {
 	  // Plug a hole
 	  auto h = find(holes.begin(), holes.end(), target);
-	  if (holes.size() != 1) *h = *holes.rbegin();
-	  holes.pop_back();
+	  if (h != holes.end()) {
+	    if (holes.size() != 1) *h = *holes.rbegin();
+	    holes.pop_back();
+	  }
 	}
       NODIGPLUG:;
       }
