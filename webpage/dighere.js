@@ -478,7 +478,10 @@ class GameState {
         newAgent.planned = plan;
         newAgent.action = -1;
         if (plan >= 0) {
-          newAgent.direction = plan % 8;
+          // samurai's new direction can not be diagonal
+          if (a >= 2 || plan % 2 === 0) {
+            newAgent.direction = plan % 8;
+          }
 	  const invalid = invalidAction(a, plan, targetPos, prevGameState);
           if (!invalid) {
             if (plan < 8 && !prevGameState.holes.includes(targetPos)) {
