@@ -1168,7 +1168,7 @@ function initialize(config) {
 }
 
 function substepPosition(a, init) {
-  if (init || a.planned < 0) return a.at;
+  if (init || a.action < 0) return a.at;
   let from;
   let to;
   if (a.planned < 8) {
