@@ -1154,6 +1154,7 @@ function initialize(config) {
   prepareFenceLogos();
   // Initialize a game
   redrawField(config);
+  thinkTime = config.thinkTime;
   stepRecords = [new GameState(null, null, config)];
   currentStep = 0;
   stepRecords[0].redraw(true);
