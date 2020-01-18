@@ -14,11 +14,11 @@
     <center>
       <p>
 	情報処理学会プログラミングコンテスト委員会<br>
-	2019/10/01
+	2020/01/18
       </p>
       <p>
 	SamurAI Dig Here ゲームマネージャは,
-	ふたつのプレイヤエージェントプログラム同士で
+	プレイヤエージェントプログラム同士で
 	SamurAI Dig Here ゲームを競わせ,
 	そのゲームのログを生成するツールである.
       </p>
@@ -50,7 +50,7 @@
     <p>
       コマンドラインは以下のフォーマットである.
       <pre>
-./manager [<em>options</em>] &lt;<em>log</em>&gt; [&lt;<em>player1</em>&gt; &lt;<em>player2</em>&gt;]
+./manager [<em>options</em>] &lt;<em>log</em>&gt; [&lt;<em>script1</em>&gt; &lt;<em>script2</em>&gt; [&lt;<em>script3</em>&gt; &lt;<em>script4</em>&gt;]]
       </pre>
     </p>
     <h3>競技場</h3>
@@ -63,17 +63,22 @@
     </p>
     <h3>プレイヤプログラム</h3>
     <p>
-      引数 &lt;<em>player1</em>&gt; と
-      &lt;<em>player2</em>&gt; を与えなければ,
+      引数 &lt;<em>script1</em>&gt; から
+      &lt;<em>script4</em>&gt; をまったく与えなければ,
       マネージャはログファイルに記された内容の整合性をチェックする.
     </p>
     <p>
-      引数 &lt;<em>player1</em>&gt;
-      と &lt;<em>player2</em>&gt; を与えれば,
-      これらはプレイヤプログラムへのパスと解釈される.
-      マネージャは引数 &lt;<em>log</em>&gt; に与えられた競技場を用いて,
-      これらふたつのプレイヤにゲームを競わせる.
-      詳細は後述する.
+      引数 &lt;<em>script1</em>&gt; から &lt;<em>script4</em>&gt;
+      までのすべてを与えると,
+      これらをプレイヤエージェントプロセスを起動するシェルスクリプトとして用いる.
+      &lt;<em>script1</em>&gt; と &lt;<em>script2</em>&gt; は侍,
+      &lt;<em>script3</em>&gt; と &lt;<em>script4</em>&gt;
+      は犬のプロセスの起動に用いる.
+    <p>
+      引数 &lt;<em>script1</em>&gt; と &lt;<em>script2</em>&gt; のみを与えれば,
+      侍と犬のプレイヤエージェントプロセスの起動には同じスクリプトを用いる.
+      侍と犬のプロセスは同じスクリプトで起動する別のプロセスになる.
+      プロセスがどちらのエージェントの担当かはマネージャから送られるデータでわかる.
     </p>
     <h3>オプション</h3>
     <p>

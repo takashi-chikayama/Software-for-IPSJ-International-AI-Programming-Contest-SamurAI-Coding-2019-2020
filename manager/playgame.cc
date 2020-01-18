@@ -9,6 +9,9 @@
 #include <chrono>
 #include <future>
 #include <thread>
+#include <sys/types.h>
+#include <signal.h>
+#include <sys/wait.h>
 #include "playgame.hh"
 
 using namespace chrono;
@@ -21,6 +24,15 @@ bool stepSummary = false;
 
 static const int dx[] = { 0, 0,-1,-1,-1, 0, 1, 1, 1 };
 static const int dy[] = { 0, 1, 1, 0,-1,-1,-1, 0, 1 };
+
+static void killPlayerProcess(int p) {
+  int status;
+  kill(playerIds[p], SIGKILL);
+  // fclose(toPlayers[p]);
+  // fclose(fromPlayers[p]);
+  waitpid(playerIds[p], &status, 0);
+  playerIds[p] = 0;
+}
 
 static void sendGameInfo
 (FILE *out, int id, int step,
@@ -78,8 +90,7 @@ static void sendGameInfo
 
 vector <StepLog> playGame
 (const Configuration &initialConf,
- char *playerNames[],
- char *dumpPath) {
+ char *scripts[], char *dumpPath, int numScripts) {
   const Configuration *config = &initialConf;
   int coordWidth = config->size > 10 ? 2 : 1;
   int totalGolds = 0;
@@ -116,13 +127,15 @@ vector <StepLog> playGame
     } else if (pid == 0) {
       close(pipeOut[1]); dup2(pipeOut[0], 0);
       close(pipeIn[0]); dup2(pipeIn[1], 1);
-      execl("/bin/sh", "sh", "-c", playerNames[p%2], (char *)NULL);
+      const char *scrpt = numScripts == 2 ? scripts[p%2] : scripts[p];
+      execl("/bin/sh", "sh", "-c", scrpt, (char *)NULL);
       perror("Failed to exec a player");
       exit(1);
     }
     playerIds[p] = pid;
     close(pipeOut[0]); toPlayers[p] = fdopen(pipeOut[1], "w");
     close(pipeIn[1]); fromPlayers[p] = fdopen(pipeIn[0], "r");
+    kill(playerIds[p], SIGSTOP);
   }
   vector <StepLog> stepLogs;
   int scores[] = { 0, 0 };
@@ -156,8 +169,16 @@ vector <StepLog> playGame
       }
       sendGameInfo(toPlayers[p], p, step, *config,
 		   plans, actions, scores, timeLeft[p]);
-      fflush(toPlayers[p]);
+      if (fflush(toPlayers[p]) != 0) {
+	cerr << "Agent " << p << " error in flushing pipe" << endl;
+	killPlayerProcess(p);
+	if (dumpPath != nullptr) fclose(dump[p]);
+	timeLeft[p] = 0;
+	newPlans[p] = -1;
+	continue;
+      }
       bool done = false;
+      kill(playerIds[p], SIGCONT);
       steady_clock::time_point sentAt = steady_clock::now();
       steady_clock::time_point receivedAt;
       thread receiver
@@ -177,15 +198,16 @@ vector <StepLog> playGame
       }
       if (done) {
 	receiver.join();
+	kill(playerIds[p], SIGSTOP);
 	steady_clock::time_point current = steady_clock::now();
 	int used = duration_cast<milliseconds>(current - sentAt).count();
 	timeLeft[p] = max(0, timeLeft[p] - used);
       } else {
 	cerr << "Agent " << p << " timed out" << endl;
 	receiver.detach();
-	kill(playerIds[p], SIGKILL);
+	killPlayerProcess(p);
+	if (dumpPath != nullptr) fclose(dump[p]);
 	timeLeft[p] = 0;
-	fclose(toPlayers[p]);
 	newPlans[p] = -1;
       }
     }
@@ -214,9 +236,10 @@ vector <StepLog> playGame
     config = next;
   }
   for (int p = 0; p != 4; p++) {
-    fclose(toPlayers[p]);
-    fclose(fromPlayers[p]);
-    if (dumpPath != nullptr) fclose(dump[p]);
+    if (playerIds[p] != 0) {
+      killPlayerProcess(p);
+      if (dumpPath != nullptr) fclose(dump[p]);
+    }
   }
   return stepLogs;
 }

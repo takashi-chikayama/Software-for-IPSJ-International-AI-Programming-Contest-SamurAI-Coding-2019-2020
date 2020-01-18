@@ -14,11 +14,11 @@
     <center>
       <p>
 	IPSJ Programming Contest Committee<br>
-	2019/10/03
+	2020/01/18
       </p>
       <p>
 	The <em>SamurAI Dig Here</em> game manager is a tool to play
-	games of <em>SamurAI Dig Here</em> between two player agent
+	games of <em>SamurAI Dig Here</em> between player agent
 	programs and generates log of the games.
       </p>
     </center>
@@ -51,7 +51,7 @@
     <p>
       The command line should be in the following format.
       <pre>
-./manager [<em>options</em>] &lt;<em>log</em>&gt; [&lt;<em>player1</em>&gt; &lt;<em>player2</em>&gt;]
+./manager [<em>options</em>] &lt;<em>log</em>&gt; [&lt;<em>script1</em>&gt; &lt;<em>script2</em>&gt; [&lt;<em>script3</em>&gt; &lt;<em>script4</em>&gt;]]
       </pre>
     </p>
     <h3>Game Field</h3>
@@ -64,16 +64,25 @@
     </p>
     <h3>Player Programs</h3>
     <p>
-      When the arguments &lt;<em>player1</em>&gt; and
-      &lt;<em>player2</em>&gt; are omitted, the manager checks the
+      When all of the arguments &lt;<em>script1</em>&gt; through
+      &lt;<em>script4</em>&gt; are omitted, the manager checks the
       consistency of the log file.
     </p>
     <p>
-      When &lt;<em>player1</em>&gt; and &lt;<em>player2</em>&gt; are
-      given, they are interpreted as paths to the player agent
-      programs.  The manager make these two players play a game on the
-      game field specified by the given path &lt;<em>log</em>&gt;.
-      See below for more details.
+      When all of &lt;<em>script1</em>&gt; through &lt;<em>script4</em>&gt; are
+      given, they are interpreted as paths to the shell script to launch
+      player agent processes.
+      &lt;<em>script1</em>&gt; and &lt;<em>script2</em>&gt; are for samurai
+      while &lt;<em>script3</em>&gt; and &lt;<em>script4</em>&gt; are for dogs.
+    </p>
+    <p>
+      When only &lt;<em>script1</em>&gt; and &lt;<em>script2</em>&gt;
+      are given, they are used also for launching processes for dogs.
+      In this case, two distinct player agent processes of a team, one
+      for samurai and another for a dog, are launched with the same
+      script.  Whether a process controls a samurai or a dog can be
+      known by the information the manager sends to the player
+      processes.
     </p>
     <h3>Options</h3>
     <p>
@@ -143,9 +152,9 @@ Scores are 0:8</pre>
     <p>
       Player programs are run as children processes of the manager.
       Two processes each for both teams, one controlling the samurai
-      and the other controlling the dog, are run with the same
-      program.  Which agent is to controlled can be known by the data
-      sent from the manager.
+      and the other controlling the dog.  In the tournament, they run
+      the same program.  Which agent is to controlled can be known by
+      the data sent from the manager.
     </p>
     <p>
       Each of the processes is given game status data from the
