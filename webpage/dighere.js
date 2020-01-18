@@ -562,7 +562,7 @@ class GameState {
       // Process plugging
       for (let a = 0; a != 2; a++) {
         const plugged = plannedPlug[a];
-        if (plugged != null) {
+        if (plugged != null && this.holes.indexOf(plugged) != -1) {
           this.holes.splice(this.holes.indexOf(plugged), 1);
           this.plugged.push(plugged);
         }
