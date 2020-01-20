@@ -116,7 +116,7 @@ char *dumpPath = nullptr;
 int playerNumber = 0;
 
 int main(int argc, char *argv[]) {
-#if defined(__unix__) || defined(__linux__)
+#if defined(__unix__) || defined(__linux__) || (defined(__APPLE__) && defined(__MACH__))
   signal(SIGPIPE, SIG_IGN);
 #endif
   for (int opt = getopt(argc, argv, OPTIONS);
