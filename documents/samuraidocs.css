@@ -18,6 +18,11 @@ h3:before {
     text-align: center;
 }
 
+.abstract {
+    margin: auto;
+    width: 80%;
+}
+
 ul, ol, dl {
     padding-left: 30px;
 }
