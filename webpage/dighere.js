@@ -75,6 +75,10 @@ function createSVG(tag) {
   return document.createElementNS(field.namespaceURI, tag);
 }
 
+function removeAllChildren(node) {
+  while (node.lastChild) node.removeChild(node.lastChild);
+}
+
 // AgentAttributes: Describes the permanent attribute of an agent
 //   seq: Agent's sequence number
 //     0, 1: samurai, 2, 3: dog,
@@ -581,9 +585,7 @@ class GameState {
     }
     if (init || substep == midStep) {
       // Remove manual play targets, if any
-      while (arrowsLayer.hasChildNodes()) {
-	arrowsLayer.removeChild(arrowsLayer.firstChild);
-      }
+      removeAllChildren(holeLayer);
       // Draw or remove holes
       for (let x = 0; x != fieldSize; x++) {
         for (let y = 0; y != fieldSize; y++) {
@@ -601,16 +603,12 @@ class GameState {
         }
       }
       // Draw or remove golds
-      while (hiddenGoldLayer.hasChildNodes()) {
-        hiddenGoldLayer.removeChild(hiddenGoldLayer.firstChild)
-      }
+      removeAllChildren(hiddenGoldLayer);
       this.hiddenGolds.forEach(g => {
 	makeGoldImage(g, false);
         hiddenGoldLayer.appendChild(g.goldImage);
       });
-      while (knownGoldLayer.hasChildNodes()) {
-        knownGoldLayer.removeChild(knownGoldLayer.firstChild);
-      }
+      removeAllChildren(knownGoldLayer);
       this.knownGolds.forEach(g => {
 	makeGoldImage(g, true);
         knownGoldLayer.appendChild(g.goldImage);
@@ -886,7 +884,7 @@ function drawFence() {
 
 function resizeField() {
   // Remove everything in the field
-  while (field.hasChildNodes()) field.removeChild(field.firstChild);
+  removeAllChildren(field);
   arrowsLayer = createSVG('g');
   diamondLayer = createSVG('g');
   for (let x = 0; x != fieldSize; x++) {
@@ -987,18 +985,31 @@ function resizeField() {
   }
   document.getElementById("topBar").style.top = "0px";
   document.getElementById("bottomBar").style.top = 0.73*fieldHeight + "px";
-  // Sponsor logos
-  const logoAreaSize = 0.007*fieldWidth*fieldWidth;
-  if (goldLogos.length == 2) {
-    for (let s = 0; s != 2; s++) {
-      const logo = document.getElementById("sponsorLogo" + s);
-      logo.src = "../logos/" + goldLogos[s];
+  // Sponsor logos at the bottom of the top bar
+  // Shuffle the order of logos first
+  for (let k = goldLogos.length; k != 1; k--) {
+    const r = Math.floor(k*Math.random());
+    const tmp = goldLogos[k-1];
+    goldLogos[k-1] = goldLogos[r];
+    goldLogos[r] = tmp;
+  }
+  const logoAreaSize = 0.006*fieldWidth*fieldWidth;
+  const logoAreas = ["logoAreaLeft", "logoAreaRight"].
+	map(id => document.getElementById(id));
+  logoAreas.forEach(a => removeAllChildren(a));
+  for (let s = 0; s != goldLogos.length; s++) {
+    const logo = document.createElement('img');
+    logoAreas[s%2].appendChild(logo);
+    logo.src = "../logos/" + goldLogos[s];
+    logo.onload = () => {
       logo.style.background = "white";
-      logo.onload = () => {
-	const area = logo.naturalWidth*logo.naturalHeight;
-	const mag = Math.sqrt(logoAreaSize/area);
-	logo.width = mag*logo.naturalWidth;
-      }
+      logo.style.margin = "10px";
+      logo.style.display = "block";
+      if (s%2 != 0) logo.align = "right";
+      const area = logo.naturalWidth*logo.naturalHeight;
+      const mag = Math.sqrt(logoAreaSize/area);
+      logo.width = mag*logo.naturalWidth;
+      const br = document.createElement('br');
     }
   }
   // Arrow and diamond layers
