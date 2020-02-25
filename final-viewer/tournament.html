@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>SamurAI Dig Here 2019-2020 World Finals</title>
+    <script src="tournament.js"></script>
+    <script src="teamNames.js"></script>
+    <script src="matchResults.js"></script>
+    <link rel="icon" href="../icons/samurai-icon.png" >
+  </head>
+  <body style="background: #484; user-select: none; margin: 0px">
+    <div id="title area"
+	 style="text-align: center; background: #FF8; color: #44C;
+		font-weight: bold; vertical-align: middle;">
+      SamurAI Dig Here 2019-2020 World Finals
+      <br>
+      <span style="color: #FDD">
+	<i>Click pink circles to watch recorded games</i>
+      </span>
+    </div>
+    <div id="movie div"
+	 style="position: absolute; display: none; background: lightgray;">
+      <video id="movie screen"></video>
+      <div id="movie control" width="100%" height="10%"
+	   style="text-align: center; vertical-align: middle;">
+	<span id="left team"
+	      style="float: left; margin-left: 10px; color: red;
+		     text-shadow: 1px 1px 1px"></span>
+	<img id="rewind button" src="icons/rewind.png">
+	<img id="play/pause">
+	<img id="stop button" src="icons/stop.png">
+	<span id="right team"
+	      style="float: right; margin-right: 10px; color: blue;
+		     text-shadow: 1px 1px 1px"></span>
+      </div>
+    </div>
+
+    <div id="svg area">
+      <svg id="svg" height="100%" width="100%"> </svg>
+    </div>
+    <div id="logo area" style="height: 40px; text-align: center">
+    </div>
+    <script>
+      start();
+    </script>
+  </body>
+</html>
